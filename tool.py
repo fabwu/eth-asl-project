@@ -8,9 +8,11 @@ GRAY_DELIM = ";"
 def __replace_file_extension(file, new_extension):
     return os.path.splitext(file)[0] + new_extension
 
-
+"""
+Uses PAL/NTSC conversion
+"""
 def __rgb2gray(rgb):
-    return np.dot(rgb[...,:3], [0.2126, 0.7152, 0.0722])
+    return np.dot(rgb[...,:3], [299, 587, 114]) / 1000
 
 
 def __read_gray(file):
@@ -33,9 +35,14 @@ def __read_gray(file):
 def img_to_gray(file):
     rgb = mpimg.imread(file)
 
-    gray = __rgb2gray(rgb)
-    height = gray.shape[0]
-    width = gray.shape[1]
+    if rgb.ndim == 2:
+        gray = rgb
+        height = len(gray)
+        width = len(gray[0])
+    else:
+        gray = __rgb2gray(rgb)
+        height = gray.shape[0]
+        width = gray.shape[1]
 
     out_file = __replace_file_extension(file, ".gray")
     f = open(out_file, "w+")
@@ -66,7 +73,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="FIC tool")
     parser.add_argument("command", help="The command to use", choices=[METHOD_CREATE_GRAYSCALE_IMAGE, METHOD_TO_PNG, METHOD_SHOW_GRAY])
-    parser.add_argument("--file", type=str, required=True)
+    parser.add_argument("file", type=str)
     args = parser.parse_args(sys.argv[1:])
 
     if args.command == METHOD_CREATE_GRAYSCALE_IMAGE:
