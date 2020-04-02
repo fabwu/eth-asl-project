@@ -6,6 +6,17 @@
 
 using namespace std;
 
+pair<double, double> solve_2x2_eq_system(double a11, double a12, double a21, double a22, double b1, double b2) {
+    /// requires det(A) != 0
+    double f1 = a22 == 0 ? 0.0 : a12 / a22;
+    double f2 = a11 == 0 ? 0.0 : a21 / a11;
+
+    double x = (b1 - f1 * b2) / (a11 - f1 * a21);
+    double y = (b2 - f2 * b1) / (a22 - f2 * a11);
+    return make_pair(x, y);
+}
+
+
 class block_t {
 public:
     const int rel_x, rel_y;
@@ -27,6 +38,7 @@ public:
     int get_index_in_image(int y_rel_block, int x_rel_block, int full_image_size) const {
         return (rel_y + y_rel_block) * full_image_size + rel_x + x_rel_block;
     }
+
 };
 
 /**
@@ -52,68 +64,18 @@ create_squared_blocks(const int image_size, const int block_size, int x_offset =
     return blocks;
 }
 
-
-class transformation_t {
-public:
-    const block_t source_block;
-    const double scaling;
-    const int target_block_x, target_block_y;
-
-    transformation_t(block_t source_block, double scaling, int target_block_x, int target_block_y) :
-            source_block(source_block),
-            scaling(scaling),
-            target_block_x(target_block_x),
-            target_block_y(target_block_y) {}
-
-    void apply(double *image, int image_size) const {
-        assert(source_block.width == source_block.height);
-
-        const int source_block_size = source_block.width;
-        const int downsampled_block_size = ((double) source_block_size) * scaling;
-
-        double *downsampled_source_block = (double *) malloc(
-                downsampled_block_size * downsampled_block_size * sizeof(double));
-
-        const auto compression_blocks = create_squared_blocks(source_block.width, downsampled_block_size,
-                                                              source_block.rel_x, source_block.rel_y);
-        int scaled_index = 0;
-        for (const auto b: compression_blocks) {
-            double val = 0.0;
-            for (int i = 0; i < downsampled_block_size; ++i) {
-                for (int j = 0; j < downsampled_block_size; ++j) {
-                    val += image[b.get_index_in_image(i, j, image_size)];
-                }
-            }
-            val /= downsampled_block_size * downsampled_block_size;
-
-            downsampled_source_block[scaled_index] = val;
-            scaled_index++;
-        }
-
-        for (int i = 0; i < downsampled_block_size; ++i) {
-            for (int j = 0; j < downsampled_block_size; ++j) {
-                image[target_block_y * image_size + target_block_x] = downsampled_source_block[
-                        i * downsampled_block_size + j];
-            }
-        }
-
-        free(downsampled_source_block);
-    }
-};
-
-inline double diff_block(const double *grayscale, const int image_size, block_t source_block, block_t target_block) {
-    assert(source_block.width >= target_block.width);
-    assert(source_block.height >= target_block.height);
+double *compress_block(const double *grayscale, const int image_size, block_t source_block, int width, int height) {
+    assert(source_block.width >= width);
+    assert(source_block.height >= height);
     assert(source_block.width == source_block.height); // just for simplicity
-    assert(source_block.width % target_block.width == 0); // just for simplicity
-    assert(source_block.height % target_block.height == 0); // just for simplicity
+    assert(source_block.width % width == 0); // just for simplicity
+    assert(source_block.height % height == 0); // just for simplicity
     assert(source_block.width % 2 == 0); // just for simplicity
     assert(source_block.height % 2 == 0); // just for simplicity
+    assert(width == height); // just for simplicity
 
-    // Need to compress source_block, such that size(source_block) == size(target_block) in order to compare difference!
-    // That means that a square of n pixels need to be compressed to one pixel
-    const int n = source_block.width / target_block.width;
-    const auto scaled_source_block = (double *) malloc(target_block.width * target_block.width * sizeof(double));
+    const int n = source_block.width / width;
+    const auto scaled_source_block = (double *) malloc(height * width * sizeof(double));
     const auto compression_blocks = create_squared_blocks(source_block.width, n, source_block.rel_x,
                                                           source_block.rel_y);
     int scaled_index = 0;
@@ -130,11 +92,92 @@ inline double diff_block(const double *grayscale, const int image_size, block_t 
         scaled_index++;
     }
 
+    return scaled_source_block;
+}
+
+class transformation_t {
+public:
+    const block_t source_block;
+    const double scaling;
+    const double contrast, brightness;
+    const int target_block_x, target_block_y;
+
+    transformation_t(block_t source_block, double scaling, int target_block_x, int target_block_y, double contrast,
+                     double brightness) :
+            source_block(source_block),
+            scaling(scaling),
+            target_block_x(target_block_x),
+            target_block_y(target_block_y), contrast(contrast), brightness(brightness) {}
+
+    void apply(double *image, int image_size) const {
+        assert(source_block.width == source_block.height);
+
+        const int source_block_size = source_block.width;
+        const int downsampled_block_size = ((double) source_block_size) * scaling;
+
+        double *downsampled_source_block = compress_block(image, image_size, source_block, downsampled_block_size,
+                                                          downsampled_block_size);
+        for (int i = 0; i < downsampled_block_size; ++i) {
+            for (int j = 0; j < downsampled_block_size; ++j) {
+                image[(target_block_y + i) * image_size + target_block_x + j] = downsampled_source_block[
+                                                                                        i * downsampled_block_size +
+                                                                                        j] * contrast + brightness;
+            }
+        }
+
+        free(downsampled_source_block);
+    }
+};
+
+pair<double, double> compute_brightness_and_contrast(const double *image, const int image_size, double *domain,
+                                                     block_t target_block) {
+    //assert(source_block.width == target_block.width);
+    //assert(source_block.height == target_block.height);
+    //assert(source_block.height == source_block.width);
+    // todo asserts
+    assert(target_block.height == target_block.width);
+
+    // build equation system
+    int n = target_block.width;
+    double a11 = target_block.width * target_block.height;
+    double a12 = 0.0;
+    double a21 = 0.0;
+    double a22 = 0.0;
+    double b1 = 0.0;
+    double b2 = 0.0;
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            double di = domain[i * n + j];
+            double ri = image[target_block.get_index_in_image(i, j, image_size)];
+            a12 += di;
+            a21 += di;
+            a22 += di * di;
+            b1 += ri;
+            b2 += di * ri;
+        }
+    }
+
+    return solve_2x2_eq_system(a11, a12, a21, a22, b1, b2);
+}
+
+inline double diff_block(const double *grayscale, const int image_size, block_t source_block, block_t target_block) {
+    // Need to compress source_block, such that size(source_block) == size(target_block) in order to compare difference!
+    // That means that a square of n pixels need to be compressed to one pixel
+    const int n = source_block.width / target_block.width;
+    const auto scaled_source_block = compress_block(grayscale, image_size, source_block, target_block.width,
+                                                    target_block.height);
+
+    double brightness, contrast;
+    std::tie(brightness, contrast) = compute_brightness_and_contrast(grayscale, image_size, scaled_source_block,
+                                                                     target_block);
+
     double squared_error = 0.0;
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             double target_val = grayscale[target_block.get_index_in_image(i, j, image_size)];
-            double diff = scaled_source_block[i * n + j] - target_val;
+            double source_val = scaled_source_block[i * n + j] * contrast + brightness;
+            double diff = source_val - target_val;
             squared_error += diff * diff;
         }
     }
@@ -145,8 +188,8 @@ inline double diff_block(const double *grayscale, const int image_size, block_t 
 
 vector<transformation_t> compress(double *grayscale, int image_size) {
     // Goal: Try to map blocks of size block_size_source to blocks of size block_size_target
-    const int block_size_target = 16;
-    const int block_size_source = 32;
+    const int block_size_target = 4;
+    const int block_size_source = 8;
     static_assert(block_size_source >= block_size_target);
 
     const auto target_blocks = create_squared_blocks(image_size, block_size_target);
@@ -185,13 +228,19 @@ vector<transformation_t> compress(double *grayscale, int image_size) {
         std::tie(target_block_index, source_block_index) = mapping;
         auto source_block = source_blocks[source_block_index];
         auto target_block = target_blocks[target_block_index];
+        double contrast, brightness;
+        
+        const auto scaled_source_block = compress_block(grayscale, image_size, source_block, target_block.width,
+                                                        target_block.height);
+        std::tie(brightness, contrast) = compute_brightness_and_contrast(grayscale, image_size, scaled_source_block,
+                                                                         target_block);
 
         int target_block_x = target_block.rel_x;
         int target_block_y = target_block.rel_y;
         double scaling = (double) block_size_target /
                          (double) block_size_source; // we have squared matrices, so nothing special here
 
-        transformation_t t(source_block, scaling, target_block_x, target_block_y);
+        transformation_t t(source_block, scaling, target_block_x, target_block_y, contrast, brightness);
         transformations.push_back(t);
     }
 
@@ -200,23 +249,14 @@ vector<transformation_t> compress(double *grayscale, int image_size) {
 
 double *decompress(int image_size,
                    vector<transformation_t> &transformations,
-                   const int num_iterations = 10) {
+                   const int num_iterations) {
     // Generate random starting image
     double *decompressed_image = (double *) calloc(image_size * image_size, sizeof(double));
-    for (int i = 0; i < image_size; ++i) {
-        for (int j = 0; j < image_size; ++j) {
-            decompressed_image[i * image_size + j] = (double) (rand() % 256);
-        }
-    }
 
     for (int iter = 0; iter < num_iterations; ++iter) {
-//        for (int i = 0; i < image_size; ++i) {
-//            for (int j = 0; j < image_size; ++j) {
         for (const auto t: transformations) {
             t.apply(decompressed_image, image_size);
         }
-//            }
-//        }
     }
 
     return decompressed_image;
@@ -225,8 +265,11 @@ double *decompress(int image_size,
 int main(int argc, char const *argv[]) {
     ios_base::sync_with_stdio(false);
 
+// todo remove
+//    auto res = solve_2x2_eq_system(1.0, 3.0, 0.0, 2.0, 2.0, 3.0);
+//    printf("x: %f, y: %f", res.first, res.second);
     /*
-     // todo remove
+
 for(int i=1;i<=16;++i){
     for(int j=1;j<=16;++j){
         printf("%d.%d;", i, j);
@@ -235,7 +278,8 @@ for(int i=1;i<=16;++i){
 }*/
 
     // image settings
-    string filename = "/home/vl0w/Documents/team002/lena.gray";
+
+    string filename = "/home/vl0w/Documents/team002/lenasmall.gray";
 
     // read image
     int width;
