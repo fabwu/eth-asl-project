@@ -134,21 +134,21 @@ public:
 pair<double, double> compute_brightness_and_contrast_naive(const double *image,
                                                            const int image_size, double *domain,
                                                            block_t target_block) {
-  double contrast = 0.75;
-  int n = target_block.width;
+    double contrast = 0.75;
+    int n = target_block.width;
 
-  // find average brightness for given contrast
-  double brightness = 0.0;
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-      double di = domain[i * n + j];
-      double ri = image[target_block.get_index_in_image(i, j, image_size)];
-      brightness += ri - contrast*di;
+    // find average brightness for given contrast
+    double brightness = 0.0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            double di = domain[i * n + j];
+            double ri = image[target_block.get_index_in_image(i, j, image_size)];
+            brightness += ri - contrast*di;
+        }
     }
-  }
-  brightness /= n*n;
+    brightness /= n*n;
 
-  return make_pair(brightness, contrast);
+    return make_pair(brightness, contrast);
 }
     // contrast = 0.75
     // brightness = (np.sum(D - contrast*S)) / D.size
