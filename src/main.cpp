@@ -129,6 +129,30 @@ public:
     }
 };
 
+
+pair<double, double> compute_brightness_and_contrast_naive(const double *image,
+                                                           const int image_size, double *domain,
+                                                           block_t target_block) {
+  double contrast = 0.75;
+  int n = target_block.width;
+
+  // find average brightness for given contrast
+  double brightness = 0.0;
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      double di = domain[i * n + j];
+      double ri = image[target_block.get_index_in_image(i, j, image_size)];
+      brightness += ri - contrast*di;
+    }
+  }
+  brightness /= n*n;
+
+  return make_pair(brightness, contrast);
+}
+    // contrast = 0.75
+    // brightness = (np.sum(D - contrast*S)) / D.size
+    // return contrast, brightness
+
 pair<double, double> compute_brightness_and_contrast(const double *image, const int image_size, double *domain,
                                                      block_t target_block) {
     //assert(source_block.width == target_block.width);
@@ -169,7 +193,7 @@ inline double diff_block(const double *grayscale, const int image_size, block_t 
                                                     target_block.height);
 
     double brightness, contrast;
-    std::tie(brightness, contrast) = compute_brightness_and_contrast(grayscale, image_size, scaled_source_block,
+    std::tie(brightness, contrast) = compute_brightness_and_contrast_naive(grayscale, image_size, scaled_source_block,
                                                                      target_block);
 
     double squared_error = 0.0;
@@ -188,8 +212,8 @@ inline double diff_block(const double *grayscale, const int image_size, block_t 
 
 vector<transformation_t> compress(double *grayscale, int image_size) {
     // Goal: Try to map blocks of size block_size_source to blocks of size block_size_target
-    const int block_size_target = 4;
-    const int block_size_source = 8;
+    const int block_size_target = 8;
+    const int block_size_source = 16;
     static_assert(block_size_source >= block_size_target);
 
     const auto target_blocks = create_squared_blocks(image_size, block_size_target);
@@ -229,10 +253,10 @@ vector<transformation_t> compress(double *grayscale, int image_size) {
         auto source_block = source_blocks[source_block_index];
         auto target_block = target_blocks[target_block_index];
         double contrast, brightness;
-        
+
         const auto scaled_source_block = compress_block(grayscale, image_size, source_block, target_block.width,
                                                         target_block.height);
-        std::tie(brightness, contrast) = compute_brightness_and_contrast(grayscale, image_size, scaled_source_block,
+        std::tie(brightness, contrast) = compute_brightness_and_contrast_naive(grayscale, image_size, scaled_source_block,
                                                                          target_block);
 
         int target_block_x = target_block.rel_x;
@@ -279,7 +303,7 @@ for(int i=1;i<=16;++i){
 
     // image settings
 
-    string filename = "/home/vl0w/Documents/team002/lenasmall.gray";
+    string filename = "./lena.gray";
 
     // read image
     int width;
@@ -288,7 +312,7 @@ for(int i=1;i<=16;++i){
 
     assert(width == height);
     auto transformations = compress(grayscale_image, width);
-    double *converted_grayscale_image = decompress(width, transformations, 100);
+    double *converted_grayscale_image = decompress(width, transformations, 1);
     // write image again
     print_grayscale_file(converted_grayscale_image, height, width);
 }
