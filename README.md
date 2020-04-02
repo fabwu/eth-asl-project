@@ -5,6 +5,6 @@ Usage example:
 ```
 cmake src
 make
-./main > x.gray
+./main images/lena.gray > x.gray
 python tool.py showgray x.gray
 ```

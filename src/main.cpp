@@ -290,21 +290,24 @@ double *decompress(int image_size,
 int main(int argc, char const *argv[]) {
     ios_base::sync_with_stdio(false);
 
-// todo remove
-//    auto res = solve_2x2_eq_system(1.0, 3.0, 0.0, 2.0, 2.0, 3.0);
-//    printf("x: %f, y: %f", res.first, res.second);
-    /*
+    // TODO: remove
+    // auto res = solve_2x2_eq_system(1.0, 3.0, 0.0, 2.0, 2.0, 3.0);
+    // printf("x: %f, y: %f", res.first, res.second);
 
-for(int i=1;i<=16;++i){
-    for(int j=1;j<=16;++j){
-        printf("%d.%d;", i, j);
+    // TODO: remove
+    // for(int i=1;i<=16;++i){
+    //     for(int j=1;j<=16;++j){
+    //         printf("%d.%d;", i, j);
+    //     }
+    //     printf("\n");
+    // }
+
+    // argument processing
+    if(argc != 2){
+        printf("\nSpecify an image and nothing else\n");
+        return 1;
     }
-    printf("\n");
-}*/
-
-    // image settings
-
-    string filename = "./images/lena.gray";
+    string filename = argv[1];
 
     // read image
     int width;
@@ -313,7 +316,7 @@ for(int i=1;i<=16;++i){
 
     assert(width == height);
     auto transformations = compress(grayscale_image, width);
-    double *converted_grayscale_image = decompress(width, transformations, 1);
+    double *converted_grayscale_image = decompress(width, transformations, 3);
     // write image again
     print_grayscale_file(converted_grayscale_image, height, width);
 }
