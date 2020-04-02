@@ -304,7 +304,7 @@ for(int i=1;i<=16;++i){
 
     // image settings
 
-    string filename = "./lena.gray";
+    string filename = "./images/lena.gray";
 
     // read image
     int width;
