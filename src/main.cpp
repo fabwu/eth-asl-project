@@ -12,7 +12,8 @@ pair<double, double> solve_2x2_eq_system(double a11, double a12, double a21, dou
     double f2 = a11 == 0 ? 0.0 : a21 / a11;
 
     double x = (b1 - f1 * b2) / (a11 - f1 * a21);
-    double y = (b2 - f2 * b1) / (a22 - f2 * a11);
+    double y = (b2-a21*x)/a22; //(b2 - f2 * b1) / (a22 - f2 * a11);
+
     return make_pair(x, y);
 }
 
@@ -193,7 +194,7 @@ inline double diff_block(const double *grayscale, const int image_size, block_t 
                                                     target_block.height);
 
     double brightness, contrast;
-    std::tie(brightness, contrast) = compute_brightness_and_contrast_naive(grayscale, image_size, scaled_source_block,
+    std::tie(brightness, contrast) = compute_brightness_and_contrast(grayscale, image_size, scaled_source_block,
                                                                      target_block);
 
     double squared_error = 0.0;
@@ -256,7 +257,7 @@ vector<transformation_t> compress(double *grayscale, int image_size) {
 
         const auto scaled_source_block = compress_block(grayscale, image_size, source_block, target_block.width,
                                                         target_block.height);
-        std::tie(brightness, contrast) = compute_brightness_and_contrast_naive(grayscale, image_size, scaled_source_block,
+        std::tie(brightness, contrast) = compute_brightness_and_contrast(grayscale, image_size, scaled_source_block,
                                                                          target_block);
 
         int target_block_x = target_block.rel_x;
