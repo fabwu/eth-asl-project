@@ -1,8 +1,10 @@
 #include <string>
-#include "filehandler.cpp"
 #include <cassert>
 #include <vector>
 #include <limits>
+
+#include "filehandler.cpp"
+#include "rotate.h"
 
 using namespace std;
 

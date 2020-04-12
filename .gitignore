@@ -1,9 +1,11 @@
 # IDEs
 .idea/
 .vimrc
+tags
 
 # Binary
-./main
+main
+test_rotate
 build/
 
 # Cmake
