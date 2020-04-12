@@ -1,5 +1,6 @@
 # IDEs
 .idea/
+.vimrc
 
 # Binary
 ./main
@@ -50,3 +51,6 @@ _deps
 *.exe
 *.out
 *.app
+
+# Python
+.venv/
