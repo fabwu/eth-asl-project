@@ -4,5 +4,16 @@ project(FIC VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 
+add_library(lib_commons
+        common.h
+        filehandler.h
+        filehandler.cpp
+        tsc_x86.h)
+
+add_library(lib_naive naive.cpp)
+
 add_executable(main main.cpp)
-target_link_libraries(main)
+add_executable(benchmark benchmark.cpp )
+
+target_link_libraries(main PUBLIC lib_commons lib_naive)
+target_link_libraries(benchmark PUBLIC lib_commons lib_naive)
