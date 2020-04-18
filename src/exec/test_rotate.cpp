@@ -3,15 +3,13 @@
 #include <cmath>
 #include "../rotate.h"
 
-static void compare(struct image *a, struct image *b) {
-  assert(a->width == b->width);
-  assert(a->height == b->height);
+static void compare(struct image_t *a, struct image_t *b) {
   bool is_equal = true;
 
-  for(int i = 0; i < a->height; ++i) {
-    for(int j = 0; j < a->width; ++j) {
-      double val_a = a->data[i*a->width + j];
-      double val_b = b->data[i*b->width + j];
+  for(int i = 0; i < a->size; ++i) {
+    for(int j = 0; j < a->size; ++j) {
+      double val_a = a->data[i*a->size + j];
+      double val_b = b->data[i*b->size + j];
       if(fabs(val_a - val_b) > 0.001) {
         printf("images different at pos (%d/%d) values %.2f/%.2f\n", i,j,val_a,val_b);
         is_equal = false;
@@ -24,43 +22,6 @@ static void compare(struct image *a, struct image *b) {
     assert(0);
   } else {
     printf("images are equal\n");
-  }
-}
-
-void rotate(struct image *in, struct image *out, enum angle angle) {
-  assert(in->height == in->width); // only square images supported
-  out->height = in->height;
-  out->width = in->width;
-
-  int m = in->height;
-  int n = in->width;
-
-  if(angle == deg90) {
-    for(int i = 0; i < m; ++i) {
-      for(int j = 0; j < n; ++j) {
-        // first row has to be last column 
-        // (too be honest it was trial and error)
-        out->data[j*n + (m - i - 1)] = in->data[i*n + j]; 
-      }
-    } 
-  }
-  
-  if(angle == deg180) {
-    for(int i = 0; i < m; ++i) {
-      for(int j = 0; j < n; ++j) {
-        // first row has to be last row reversed 
-        out->data[(m - i - 1)*n + (n - j - 1)] = in->data[i*n + j]; 
-      }
-    } 
-  }
-  
-  if(angle == deg270) {
-    for(int i = 0; i < m; ++i) {
-      for(int j = 0; j < n; ++j) {
-        // first row has to be first column reversed 
-        out->data[(m - j - 1)*n + i] = in->data[i*n + j]; 
-      }
-    } 
   }
 }
 
@@ -79,23 +40,15 @@ int main(int argc, char const *argv[]) {
     7, 8, 9,
   };
 
-  struct image in = {
-    .height = 3,
-    .width = 3,
-    .data = in_data
-  }; 
+  struct image_t in = image_t(in_data, 3); 
+  
+  struct image_t out(empty, -1);
 
-  struct image out;
-
-  struct image comp = {
-    .height = in.height,
-    .width = in.width,
-  };
+  struct image_t comp(empty, -1);
 
   printf("BEGIN rotate image by 90 degree\n");
   // reset out img
-  out.height = -1;
-  out.width = -1;
+  out.size= -1;
   out.data = empty;
 
   rotate(&in, &out, deg90);
@@ -113,8 +66,7 @@ int main(int argc, char const *argv[]) {
 
   printf("BEGIN rotate image by 180 degree\n");
   // reset out img
-  out.height = -1;
-  out.width = -1;
+  out.size = -1;
   out.data = empty;
 
   rotate(&in, &out, deg180);
@@ -132,8 +84,7 @@ int main(int argc, char const *argv[]) {
 
   printf("BEGIN rotate image by 270 degree\n");
   // reset out img
-  out.height = -1;
-  out.width = -1;
+  out.size = -1;
   out.data = empty;
 
   rotate(&in, &out, deg270);

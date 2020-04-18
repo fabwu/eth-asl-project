@@ -1,10 +1,6 @@
-enum angle { deg90, deg180, deg270 };
+#include "common.h"
 
-struct image {
-  int height;
-  int width;
-  double* data;
-};
+enum angle { deg90, deg180, deg270 };
 
 /**
  * Rotates an image by the given angle.
@@ -12,4 +8,4 @@ struct image {
  * The data array of out needs to be initialized to zero otw. 
  * you get a seg fault.
  */
-void rotate(struct image *in, struct image *out, enum angle angle);
+void rotate(struct image_t *in, struct image_t *out, enum angle angle);
