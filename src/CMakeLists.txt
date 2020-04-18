@@ -12,9 +12,10 @@ add_library(lib_commons
         tsc_x86.h)
 add_library(lib_naive naive.cpp)
 
-add_executable(exec exec/compress_decompress.cpp)
+add_executable(compress_decompress exec/compress_decompress.cpp)
 add_executable(benchmark exec/benchmark.cpp)
 add_executable(test_rotate exec/rotate.cpp)
 
-target_link_libraries(exec PUBLIC lib_commons lib_naive)
+target_link_libraries(compress_decompress PUBLIC lib_commons lib_naive)
 target_link_libraries(benchmark PUBLIC lib_commons lib_naive)
+target_link_libraries(test_rotate PUBLIC lib_commons lib_naive)
