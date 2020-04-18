@@ -210,8 +210,8 @@ inline bool verify_suite(const func_suite_t &suite, const image_t &image) {
     double verification_error = verify_compress_decompress_error(image, suite);
     double verification_error_per_pixel = verification_error / image.size / image.size;
     bool verification_failed = verification_error_per_pixel > VERIFY_ALLOWED_SQUARED_ERROR_PER_PIXEL;
-    std::cout << "\t" << "error² (Ø p.p): " << verification_error_per_pixel << std::endl;
-    std::cout << "\t" << "max error² (Ø p.p): " << VERIFY_ALLOWED_SQUARED_ERROR_PER_PIXEL << std::endl;
+    std::cout << "\t" << "error² (Ø p.p): " << verification_error_per_pixel << " (allowed is up to "
+              << VERIFY_ALLOWED_SQUARED_ERROR_PER_PIXEL << ")" << std::endl;
     if (verification_failed) {
         std::cout << "\t" << "\033[1;31m" << "✗ verification failed" << "\033[0m" << std::endl;
     } else {
@@ -226,7 +226,7 @@ inline void benchmark_compress(const std::string &image_path) {
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if(!verify_suite(suite, original_image)) return;
+    if (!verify_suite(suite, original_image)) return;
 
     const benchmark_compress_t benchmark(original_image, suite);
 
@@ -239,7 +239,7 @@ inline void benchmark_decompress(const std::string &image_path, const int decomp
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if(!verify_suite(suite, original_image)) return;
+    if (!verify_suite(suite, original_image)) return;
 
     auto transformations = suite.compress_func(original_image);
     const benchmark_decompress_t benchmark(original_image, transformations, decompression_iterations, suite);
