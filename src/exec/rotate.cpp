@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <cassert>
 #include <cmath>
-#include "rotate.h"
+#include "../rotate.h"
 
 static void compare(struct image *a, struct image *b) {
   assert(a->width == b->width);

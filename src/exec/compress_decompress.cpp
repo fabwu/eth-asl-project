@@ -1,5 +1,5 @@
 #include <string>
-#include "common.h"
+#include "../common.h"
 #include <cassert>
 
 using namespace std;

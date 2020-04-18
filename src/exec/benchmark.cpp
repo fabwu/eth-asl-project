@@ -1,5 +1,5 @@
 #include <string>
-#include "common.h"
+#include "../common.h"
 
 using namespace std;
 
