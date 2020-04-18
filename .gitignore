@@ -1,7 +1,7 @@
 # IDEs
 .idea/
-.vimrc
-tags
+cmake-build-debug/
+cmake-build-release/
 
 # Binary
 main
