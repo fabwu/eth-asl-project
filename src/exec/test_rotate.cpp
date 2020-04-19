@@ -46,12 +46,23 @@ int main(int argc, char const *argv[]) {
 
   struct image_t comp(empty, -1);
 
+  printf("BEGIN rotate image by 0 degree\n");
+  // reset out img
+  out.size= -1;
+  out.data = empty;
+
+  rotate(&in, &out, 0);
+
+  compare(&in, &out);
+
+  printf("END rotate image by 0 degree\n");
+
   printf("BEGIN rotate image by 90 degree\n");
   // reset out img
   out.size= -1;
   out.data = empty;
 
-  rotate(&in, &out, deg90);
+  rotate(&in, &out, 90);
 
   double data90[] = {
     7, 4, 1,
@@ -69,7 +80,7 @@ int main(int argc, char const *argv[]) {
   out.size = -1;
   out.data = empty;
 
-  rotate(&in, &out, deg180);
+  rotate(&in, &out, 180);
 
   double data180[] = {
     9, 8, 7,
@@ -87,7 +98,7 @@ int main(int argc, char const *argv[]) {
   out.size = -1;
   out.data = empty;
 
-  rotate(&in, &out, deg270);
+  rotate(&in, &out, 270);
 
   double data270[] = {
     3, 6, 9,

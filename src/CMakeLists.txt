@@ -17,6 +17,7 @@ add_executable(compress_decompress exec/compress_decompress.cpp)
 add_executable(benchmark exec/benchmark.cpp)
 add_executable(test_rotate exec/test_rotate.cpp)
 
+target_link_libraries(lib_naive PRIVATE lib_rotate)
 target_link_libraries(compress_decompress PUBLIC lib_commons lib_naive)
 target_link_libraries(benchmark PUBLIC lib_commons lib_naive)
 target_link_libraries(test_rotate PUBLIC lib_rotate)

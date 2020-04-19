@@ -28,8 +28,10 @@ struct image_t {
 
 class block_t {
 public:
-    const int rel_x, rel_y;
-    const int width, height;
+    int rel_x, rel_y;
+    int width, height;
+
+    block_t() {}
 
     block_t(int x, int y, int width, int height) : rel_x(x), rel_y(y), width(width), height(height) {}
 
@@ -50,17 +52,11 @@ public:
 };
 
 struct transformation_t {
-    const block_t source_block;
-    const double scaling;
-    const double contrast, brightness;
-    const int target_block_x, target_block_y;
-
-    transformation_t(block_t source_block, double scaling, int target_block_x, int target_block_y, double contrast,
-                     double brightness) :
-            source_block(source_block),
-            scaling(scaling),
-            target_block_x(target_block_x),
-            target_block_y(target_block_y), contrast(contrast), brightness(brightness) {}
+    block_t source_block;
+    double scaling;
+    double contrast, brightness;
+    int angle;
+    int target_block_x, target_block_y;
 };
 
 typedef std::vector<transformation_t>(*compress_func_type)(const image_t &image);
