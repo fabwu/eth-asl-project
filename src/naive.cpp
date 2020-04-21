@@ -204,8 +204,6 @@ void decompress(image_t &decompressed_image,
 }
 
 func_suite_t register_suite() {
-    func_suite_t suite;
-    suite.compress_func = &compress;
-    suite.decompress_func = &decompress;
+    func_suite_t suite = {.compress_func = &compress, .decompress_func = &decompress};
     return suite;
 }

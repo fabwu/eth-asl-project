@@ -144,7 +144,7 @@ public:
 
     void perform() const override {
         image_t decompressed_image(
-                original_image.size, true);  // TODO: Always create this new?
+                original_image.size, true);
         suite.decompress_func(decompressed_image, transformations, iterations);
     }
 };
