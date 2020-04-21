@@ -115,7 +115,7 @@ public:
 
 class benchmark_compress_t : public virtual benchmark_t {
 private:
-    const image_t image;
+    const image_t &image;
     const func_suite_t suite;
 
 public:
