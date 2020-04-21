@@ -3,8 +3,12 @@
 Usage example:
 
 ```
-cmake src
-make
-./main images/lena.gray > x.gray
-python tool.py showgray x.gray
+# configure build type and specify optimazations
+cmake -DCMAKE_BUILD_TYPE=Release -DOPT_ARCH=YES -B build/
+
+# build e.g. benchmark binary
+cmake --build build --target benchmark
+
+# run benchmark
+./build/benchmark images/lenasmall.gray
 ```
