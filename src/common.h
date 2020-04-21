@@ -127,13 +127,13 @@ public:
 
 class benchmark_decompress_t : public virtual benchmark_t {
 private:
-    const image_t original_image;
+    const image_t &original_image;
     const func_suite_t suite;
     const std::vector<transformation_t> transformations;
     const size_t iterations;
 
 public:
-    benchmark_decompress_t(const image_t original_image,
+    benchmark_decompress_t(const image_t &original_image,
                            std::vector<transformation_t> transformations,
                            const int decompression_iterations,
                            const func_suite_t &suite)

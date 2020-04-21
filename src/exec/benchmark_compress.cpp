@@ -15,5 +15,4 @@ int main(int argc, char const *argv[]) {
   string filename = argv[1];
 
   benchmark_compress(filename);
-  // benchmark_decompress(filename, 10);
 }
