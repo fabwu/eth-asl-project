@@ -27,7 +27,7 @@ inline vector<block_t> create_squared_blocks(const int image_size,
     return blocks;
 }
 
-double *compress_block(const image_t &image, block_t source_block, int width,
+image_t compress_block(const image_t &image, block_t source_block, int width,
                        int height) {
     assert(source_block.width >= width);
     assert(source_block.height >= height);
@@ -55,7 +55,7 @@ double *compress_block(const image_t &image, block_t source_block, int width,
         scaled_index++;
     }
 
-    return scaled_source_block;
+    return image_t(scaled_source_block, width);
 }
 
 /**
@@ -69,7 +69,7 @@ double *compress_block(const image_t &image, block_t source_block, int width,
  *
  */
 tuple<double, double, double> compute_brightness_and_contrast_with_error(const image_t &image,
-                                                                         image_t domain_block_image,
+                                                                         const image_t &domain_block_image,
                                                                          block_t target_block) {
     assert(domain_block_image.size == target_block.height);
     assert(domain_block_image.size == target_block.width);
@@ -115,38 +115,38 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
 vector<transformation_t> compress(const image_t &image) {
     // Goal: Try to map blocks of size block_size_source to blocks of size
     // block_size_target
-    const int block_size_target = 4;
-    const int block_size_source = 8;
-    static_assert(block_size_source >= block_size_target);
+    constexpr int block_size_target = 4;
+    constexpr int block_size_source = 8;
+    static_assert(block_size_source >= block_size_target,
+                  "The domain block size must be bigger than the range block size");
+    constexpr double scaling = (double) block_size_target /
+                               (double) block_size_source;
 
     const auto target_blocks =
             create_squared_blocks(image.size, block_size_target);
     const auto source_blocks =
             create_squared_blocks(image.size, block_size_source);
 
-    vector<transformation_t> transformations;
 
     // Learn mappings from source to target blocks
     // That is, find a target block for every source block, such that their
     // difference is minimal
-    for (const block_t target_block : target_blocks) {
+    vector<transformation_t> transformations;
+    for (const auto &target_block : target_blocks) {
         double best_error = numeric_limits<double>::max();
-        struct transformation_t best_trans;
+        transformation_t best_transformation;
 
-        for (int source_block_index = 0; source_block_index < source_blocks.size();
-             ++source_block_index) {
-            const auto source_block = source_blocks[source_block_index];
+        for (const auto &source_block: source_blocks) {
             // Need to compress source_block, such that size(source_block) ==
             // size(target_block) in order to compare difference! That means that a
             // square of n pixels need to be compressed to one pixel
-            double *scaled_data = compress_block(
+            const auto scaled_source_block = compress_block(
                     image, source_block, target_block.width, target_block.height);
-            struct image_t scaled_source_block = image_t(scaled_data, target_block.width);
 
-            std::initializer_list<int> all_angles = {0, 90, 180, 270};
+            const std::initializer_list<int> all_angles = {0, 90, 180, 270};
             for (auto angle : all_angles) {
-                struct image_t rotated_source_block = image_t(scaled_source_block.size);
-                rotate(&scaled_source_block, &rotated_source_block, angle);
+                image_t rotated_source_block(scaled_source_block.size, false);
+                rotate(scaled_source_block, rotated_source_block, angle);
 
                 double brightness, contrast, error;
                 std::tie(brightness, contrast, error) = compute_brightness_and_contrast_with_error(
@@ -155,25 +155,18 @@ vector<transformation_t> compress(const image_t &image) {
 
                 if (error < best_error) {
                     best_error = error;
-                    best_trans = {.source_block = source_block,
+                    best_transformation = {.source_block = source_block,
                             .contrast = contrast,
                             .brightness = brightness,
                             .angle = angle};
                 }
-
-                free(rotated_source_block.data);
             }
-
-            free(scaled_data);
         }
-        double scaling = (double) block_size_target /
-                         (double) block_size_source;  // we have squared matrices, so
-        // nothing special here
 
-        best_trans.target_block_x = target_block.rel_x;
-        best_trans.target_block_y = target_block.rel_y;
-        best_trans.scaling = scaling;
-        transformations.push_back(best_trans);
+        best_transformation.target_block_x = target_block.rel_x;
+        best_transformation.target_block_y = target_block.rel_y;
+        best_transformation.scaling = scaling;
+        transformations.push_back(best_transformation);
     }
 
     return transformations;
@@ -185,12 +178,10 @@ void apply_transformation(image_t &image, const transformation_t &t) {
     const int source_block_size = t.source_block.width;
     const int downsampled_block_size = ((double) source_block_size) * t.scaling;
 
-    double *downsampled_data = compress_block(
+    image_t downsampled_source_block = compress_block(
             image, t.source_block, downsampled_block_size, downsampled_block_size);
-    struct image_t downsampled_source_block =
-            image_t(downsampled_data, downsampled_block_size);
-    struct image_t rotated_source_block = image_t(downsampled_block_size);
-    rotate(&downsampled_source_block, &rotated_source_block, t.angle);
+    image_t rotated_source_block = image_t(downsampled_block_size, false);
+    rotate(downsampled_source_block, rotated_source_block, t.angle);
 
     for (int i = 0; i < downsampled_block_size; ++i) {
         for (int j = 0; j < downsampled_block_size; ++j) {
@@ -200,9 +191,6 @@ void apply_transformation(image_t &image, const transformation_t &t) {
             image.data[idx] = value * t.contrast + t.brightness;
         }
     }
-
-    free(downsampled_source_block.data);
-    free(rotated_source_block.data);
 }
 
 void decompress(image_t &decompressed_image,

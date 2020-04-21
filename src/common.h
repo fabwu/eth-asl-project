@@ -21,9 +21,15 @@ struct image_t {
 
     image_t(double *data, int size) : data(data), size(size) {}
 
-    explicit image_t(int size) : size(size) {
-        data = (double *) calloc(size * size, sizeof(double));
-        for (int i = 0; i < size * size; ++i) data[i] = rand() % 256;
+    image_t(int size, bool randomize_data) : size(size) {
+        data = (double *) malloc(size * size * sizeof(double));
+        if (randomize_data) {
+            for (int i = 0; i < size * size; ++i) data[i] = rand() % 256;
+        }
+    }
+
+    ~image_t() {
+        free(data);
     }
 };
 
@@ -92,7 +98,7 @@ inline double squared_error(const image_t &original, const image_t &converted) {
 inline double verify_compress_decompress_error(const image_t &image,
                                                const func_suite_t &suite) {
     auto transformations = suite.compress_func(image);
-    image_t decompressed_image(image.size);
+    image_t decompressed_image(image.size, true);
     suite.decompress_func(decompressed_image, transformations,
                           VERIFY_DECOMPRESS_ITERATIONS);
 
@@ -138,7 +144,7 @@ public:
 
     void perform() const override {
         image_t decompressed_image(
-                original_image.size);  // TODO: Always create this new?
+                original_image.size, true);  // TODO: Always create this new?
         suite.decompress_func(decompressed_image, transformations, iterations);
     }
 };
