@@ -15,7 +15,8 @@
 #define WARMUP_CYCLES_REQUIRED 1e8
 #define BENCHMARK_REPETITIONS 50
 
-struct image_t {
+class image_t {
+public:
     double *data;
     int size;
 
@@ -31,6 +32,10 @@ struct image_t {
     ~image_t() {
         free(data);
     }
+
+    double &operator[](int index) const {
+        return data[index];
+    }
 };
 
 class block_t {
@@ -43,30 +48,28 @@ public:
     block_t(int x, int y, int width, int height)
             : rel_x(x), rel_y(y), width(width), height(height) {}
 
-    void print_block(const double *image, const int image_size) const {
+    void print_block(const image_t &image, const int image_size) const {
         printf("Block rel_x: %d, rel_y: %d, width: %d, height: %d\n", rel_x, rel_y,
                width, height);
         for (int i = 0; i < height; ++i) {
             for (int j = 0; j < width; ++j) {
-                int index = get_index_in_image(i, j, image_size);
+                int index = get_index_in_image(i, j, image);
                 printf("%.1f, ", image[index]);
             }
             printf("\n");
         }
     }
 
-    int get_index_in_image(int y_rel_block, int x_rel_block,
-                           int full_image_size) const {
-        return (rel_y + y_rel_block) * full_image_size + rel_x + x_rel_block;
+    int get_index_in_image(const int y_rel_block, const int x_rel_block,
+                           const image_t &full_image) const {
+        return (rel_y + y_rel_block) * full_image.size + rel_x + x_rel_block;
     }
 };
 
 struct transformation_t {
-    block_t source_block;
-    double scaling;
+    block_t domain_block, range_block;
     double contrast, brightness;
     int angle;
-    int target_block_x, target_block_y;
 };
 
 typedef std::vector<transformation_t> (*compress_func_type)(
@@ -88,7 +91,7 @@ inline double squared_error(const image_t &original, const image_t &converted) {
 
     double squared_error = 0.0;
     for (int i = 0; i < original.size; ++i) {
-        double diff = original.data[i] - converted.data[i];
+        double diff = original[i] - converted[i];
         squared_error += diff * diff;
     }
 

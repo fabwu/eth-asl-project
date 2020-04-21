@@ -14,7 +14,7 @@ void rotate(const struct image_t &in, struct image_t &out, int angle) {
     if (angle == 0) {
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < n; ++j) {
-                out.data[i * n + j] = in.data[i * n + j];
+                out[i * n + j] = in[i * n + j];
             }
         }
         return;
@@ -25,7 +25,7 @@ void rotate(const struct image_t &in, struct image_t &out, int angle) {
             for (int j = 0; j < n; ++j) {
                 // first row has to be last column
                 // (too be honest it was trial and error)
-                out.data[j * n + (m - i - 1)] = in.data[i * n + j];
+                out[j * n + (m - i - 1)] = in[i * n + j];
             }
         }
         return;
@@ -35,7 +35,7 @@ void rotate(const struct image_t &in, struct image_t &out, int angle) {
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < n; ++j) {
                 // first row has to be last row reversed
-                out.data[(m - i - 1) * n + (n - j - 1)] = in.data[i * n + j];
+                out[(m - i - 1) * n + (n - j - 1)] = in[i * n + j];
             }
         }
         return;
@@ -45,7 +45,7 @@ void rotate(const struct image_t &in, struct image_t &out, int angle) {
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < n; ++j) {
                 // first row has to be first column reversed
-                out.data[(m - j - 1) * n + i] = in.data[i * n + j];
+                out[(m - j - 1) * n + i] = in[i * n + j];
             }
         }
         return;

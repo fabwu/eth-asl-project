@@ -27,7 +27,7 @@ int main(int argc, char const *argv[]) {
 
     auto transformations = suite.compress_func(image);
     image_t decompressed_image(width, true);
-    suite.decompress_func(decompressed_image, transformations, 3);
+    suite.decompress_func(decompressed_image, transformations, 10);
 
     print_grayscale_file(decompressed_image.data, height, width);
 }

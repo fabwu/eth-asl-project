@@ -27,39 +27,39 @@ inline vector<block_t> create_squared_blocks(const int image_size,
     return blocks;
 }
 
-image_t compress_block(const image_t &image, block_t source_block, int width,
-                       int height) {
-    assert(source_block.width >= width);
-    assert(source_block.height >= height);
-    assert(source_block.width == source_block.height);  // just for simplicity
-    assert(source_block.width % width == 0);            // just for simplicity
-    assert(source_block.height % height == 0);          // just for simplicity
+image_t scale_block(const image_t &image, const block_t &block, int width,
+                    int height) {
+    assert(block.width >= width);
+    assert(block.height >= height);
+    assert(block.width == block.height);  // just for simplicity
+    assert(block.width % width == 0);            // just for simplicity
+    assert(block.height % height == 0);          // just for simplicity
     assert(width == height);                            // just for simplicity
 
-    const int n = source_block.width / width;
-    const auto scaled_source_block =
+    const int n = block.width / width;
+    const auto scaled_data =
             (double *) malloc(height * width * sizeof(double));
     const auto compression_blocks = create_squared_blocks(
-            source_block.width, n, source_block.rel_x, source_block.rel_y);
+            block.width, n, block.rel_x, block.rel_y);
     int scaled_index = 0;
     for (auto b : compression_blocks) {
         double val = 0.0;
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
-                val += image.data[b.get_index_in_image(i, j, image.size)];
+                val += image[b.get_index_in_image(i, j, image)];
             }
         }
         val /= n * n;
 
-        scaled_source_block[scaled_index] = val;
+        scaled_data[scaled_index] = val;
         scaled_index++;
     }
 
-    return image_t(scaled_source_block, width);
+    return image_t(scaled_data, width);
 }
 
 /**
- * Returns brightness (o) and contrast (s), such that the RMS between the domain image block and the target block is minmal.
+ * Returns brightness (o) and contrast (s), such that the RMS between the domain image block and the range block is minmal.
  * Mathematically, this is a least squares problem. The Python implementation we based this naive code on uses such an approach.
  *
  * The Fractal Image Compression book uses a bit a different, more analytical approach. It formulates the error as formula
@@ -70,12 +70,12 @@ image_t compress_block(const image_t &image, block_t source_block, int width,
  */
 tuple<double, double, double> compute_brightness_and_contrast_with_error(const image_t &image,
                                                                          const image_t &domain_block_image,
-                                                                         block_t target_block) {
-    assert(domain_block_image.size == target_block.height);
-    assert(domain_block_image.size == target_block.width);
-    assert(target_block.height == target_block.width);
+                                                                         block_t range_block) {
+    assert(domain_block_image.size == range_block.height);
+    assert(domain_block_image.size == range_block.width);
+    assert(range_block.height == range_block.width);
 
-    int n = target_block.width;
+    int n = range_block.width;
     double sum_domain = 0.0;
     double sum_range = 0.0;
     double sum_range_times_domain = 0.0;
@@ -84,8 +84,8 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
 
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            double di = domain_block_image.data[i * n + j];
-            double ri = image.data[target_block.get_index_in_image(i, j, image.size)];
+            double di = domain_block_image[i * n + j];
+            double ri = image[range_block.get_index_in_image(i, j, image)];
             sum_domain += di;
             sum_range += ri;
             sum_range_times_domain += ri * di;
@@ -113,49 +113,46 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
 }
 
 vector<transformation_t> compress(const image_t &image) {
-    // Goal: Try to map blocks of size block_size_source to blocks of size
-    // block_size_target
-    constexpr int block_size_target = 4;
-    constexpr int block_size_source = 8;
-    static_assert(block_size_source >= block_size_target,
+    // Goal: Try to map blocks of size block_size_domain to blocks of size block_size_range
+    constexpr int block_size_range = 4;
+    constexpr int block_size_domain = 8;
+    static_assert(block_size_domain >= block_size_range,
                   "The domain block size must be bigger than the range block size");
-    constexpr double scaling = (double) block_size_target /
-                               (double) block_size_source;
 
-    const auto target_blocks =
-            create_squared_blocks(image.size, block_size_target);
-    const auto source_blocks =
-            create_squared_blocks(image.size, block_size_source);
+    const auto range_blocks =
+            create_squared_blocks(image.size, block_size_range);
+    const auto domain_blocks =
+            create_squared_blocks(image.size, block_size_domain);
 
-
-    // Learn mappings from source to target blocks
-    // That is, find a target block for every source block, such that their
+    // Learn mappings from domain blocks to range blocks
+    // That is, find a domain block for every range block, such that their
     // difference is minimal
     vector<transformation_t> transformations;
-    for (const auto &target_block : target_blocks) {
+    for (const auto &range_block : range_blocks) {
         double best_error = numeric_limits<double>::max();
         transformation_t best_transformation;
 
-        for (const auto &source_block: source_blocks) {
-            // Need to compress source_block, such that size(source_block) ==
-            // size(target_block) in order to compare difference! That means that a
+        for (const auto &domain_block: domain_blocks) {
+            // Need to compress domain_block, such that size(domain_block) ==
+            // size(range_block) in order to compare difference! That means that a
             // square of n pixels need to be compressed to one pixel
-            const auto scaled_source_block = compress_block(
-                    image, source_block, target_block.width, target_block.height);
+            const auto scaled_domain_block = scale_block(
+                    image, domain_block, range_block.width, range_block.height);
 
             const std::initializer_list<int> all_angles = {0, 90, 180, 270};
             for (auto angle : all_angles) {
-                image_t rotated_source_block(scaled_source_block.size, false);
-                rotate(scaled_source_block, rotated_source_block, angle);
+                image_t rotated_domain_block(scaled_domain_block.size, false);
+                rotate(scaled_domain_block, rotated_domain_block, angle);
 
                 double brightness, contrast, error;
                 std::tie(brightness, contrast, error) = compute_brightness_and_contrast_with_error(
-                        image, rotated_source_block,
-                        target_block);
+                        image, rotated_domain_block,
+                        range_block);
 
                 if (error < best_error) {
                     best_error = error;
-                    best_transformation = {.source_block = source_block,
+                    best_transformation = {.domain_block = domain_block,
+                            .range_block = range_block,
                             .contrast = contrast,
                             .brightness = brightness,
                             .angle = angle};
@@ -163,9 +160,6 @@ vector<transformation_t> compress(const image_t &image) {
             }
         }
 
-        best_transformation.target_block_x = target_block.rel_x;
-        best_transformation.target_block_y = target_block.rel_y;
-        best_transformation.scaling = scaling;
         transformations.push_back(best_transformation);
     }
 
@@ -173,22 +167,20 @@ vector<transformation_t> compress(const image_t &image) {
 }
 
 void apply_transformation(image_t &image, const transformation_t &t) {
-    assert(t.source_block.width == t.source_block.height);
+    assert(t.domain_block.width == t.domain_block.height);
+    assert(t.range_block.width == t.range_block.height);
 
-    const int source_block_size = t.source_block.width;
-    const int downsampled_block_size = ((double) source_block_size) * t.scaling;
+    const image_t scaled_domain_block = scale_block(
+            image, t.domain_block, t.range_block.width, t.range_block.height);
+    image_t rotated_domain_block = image_t(t.range_block.height, false);
+    rotate(scaled_domain_block, rotated_domain_block, t.angle);
 
-    image_t downsampled_source_block = compress_block(
-            image, t.source_block, downsampled_block_size, downsampled_block_size);
-    image_t rotated_source_block = image_t(downsampled_block_size, false);
-    rotate(downsampled_source_block, rotated_source_block, t.angle);
-
-    for (int i = 0; i < downsampled_block_size; ++i) {
-        for (int j = 0; j < downsampled_block_size; ++j) {
+    for (int i = 0; i < t.range_block.height; ++i) {
+        for (int j = 0; j < t.range_block.width; ++j) {
             double value =
-                    rotated_source_block.data[i * rotated_source_block.size + j];
-            int idx = (t.target_block_y + i) * image.size + t.target_block_x + j;
-            image.data[idx] = value * t.contrast + t.brightness;
+                    rotated_domain_block[i * rotated_domain_block.size + j];
+            int idx = t.range_block.get_index_in_image(i, j, image);
+            image[idx] = value * t.contrast + t.brightness;
         }
     }
 }
