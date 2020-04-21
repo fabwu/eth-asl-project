@@ -10,5 +10,5 @@ cmake -DCMAKE_BUILD_TYPE=Release -DOPT_ARCH=YES -B build/
 cmake --build build --target benchmark
 
 # run benchmark
-./build/benchmark images/lenasmall.gray
+./build/benchmark_compress images/lenasmall.gray
 ```

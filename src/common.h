@@ -132,8 +132,8 @@ class benchmark_decompress_t : public virtual benchmark_t {
 private:
     const image_t &original_image;
     const func_suite_t suite;
-    const std::vector<transformation_t> transformations;
     const size_t iterations;
+    const std::vector<transformation_t> transformations;
 
 public:
     benchmark_decompress_t(const image_t &original_image,
@@ -168,7 +168,7 @@ inline long warmup(const benchmark_t &benchmark) {
     do {
         num_runs = (long) ((double) num_runs * multiplier);
         start = start_tsc();
-        for (size_t i = 0; i < num_runs; i++) {
+        for (long i = 0; i < num_runs; i++) {
             benchmark.perform();
         }
         end = stop_tsc(start);
@@ -209,7 +209,7 @@ inline void benchmark_generic(const benchmark_t &benchmark) {
     myInt64 start, end;
     for (size_t rep = 0; rep < BENCHMARK_REPETITIONS; ++rep) {
         start = start_tsc();
-        for (size_t run = 0; run < needed_runs; ++run) {
+        for (long run = 0; run < needed_runs; ++run) {
             benchmark.perform();
         }
         end = stop_tsc(start);
