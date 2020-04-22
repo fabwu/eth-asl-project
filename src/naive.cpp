@@ -108,7 +108,7 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
     // Directly compute the error
     double error = (sum_range_squared + contrast * (contrast * sum_domain_squared - 2 * sum_range_times_domain +
                                                     2 * brightness * sum_domain) +
-                    brightness * (n * brightness - 2 * sum_range)) / num_pixels;
+                    brightness * (num_pixels * brightness - 2 * sum_range)) / num_pixels;
 
 
     return make_tuple(brightness, contrast, error);
