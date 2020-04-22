@@ -75,7 +75,9 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
     assert(domain_block_image.size == range_block.width);
     assert(range_block.height == range_block.width);
 
-    int n = range_block.width;
+    const int n = range_block.width;
+    const int num_pixels = n * n;
+
     double sum_domain = 0.0;
     double sum_range = 0.0;
     double sum_range_times_domain = 0.0;
@@ -94,19 +96,19 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
         }
     }
 
-    double denominator = (n * sum_domain_squared - (sum_domain * sum_domain));
+    double denominator = (num_pixels * sum_domain_squared - (sum_domain * sum_domain));
     double contrast;
     if (denominator == 0) {
         contrast = 0.0;
     } else {
-        contrast = (n * sum_range_times_domain - sum_domain * sum_range) / denominator;
+        contrast = (num_pixels * sum_range_times_domain - sum_domain * sum_range) / denominator;
     }
-    double brightness = (sum_range - contrast * sum_domain) / n;
+    double brightness = (sum_range - contrast * sum_domain) / num_pixels;
 
     // Directly compute the error
     double error = (sum_range_squared + contrast * (contrast * sum_domain_squared - 2 * sum_range_times_domain +
                                                     2 * brightness * sum_domain) +
-                    brightness * (n * brightness - 2 * sum_range)) / n;
+                    brightness * (n * brightness - 2 * sum_range)) / num_pixels;
 
 
     return make_tuple(brightness, contrast, error);
