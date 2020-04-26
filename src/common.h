@@ -6,12 +6,13 @@
 #include <functional>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 #include "filehandler.h"
 #include "tsc_x86.h"
 #include "performance.h"
 
-#define VERIFY_ALLOWED_SQUARED_ERROR_PER_PIXEL 6.0
+#define VERIFY_MIN_PSNR 30.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
 #define WARMUP_CYCLES_REQUIRED 1e8
 #define BENCHMARK_REPETITIONS 50
@@ -89,7 +90,7 @@ struct func_suite_t {
 
 func_suite_t register_suite();
 
-inline double squared_error(const image_t &original, const image_t &converted) {
+inline double mean_squared_error(const image_t &original, const image_t &converted) {
     assert(original.size == converted.size);
 
     double squared_error = 0.0;
@@ -98,7 +99,15 @@ inline double squared_error(const image_t &original, const image_t &converted) {
         squared_error += diff * diff;
     }
 
-    return squared_error;
+    return squared_error / (original.size * original.size);
+}
+
+inline double psnr(const double mse) {
+    // see https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio
+    //
+    // for 8 bits a typical value is between 30 and 50 dB (higher is better)
+    double maxPixelValue = 255;
+    return 20*std::log10(maxPixelValue) - 10*std::log10(mse);
 }
 
 inline double verify_compress_decompress_error(const image_t &image,
@@ -112,7 +121,9 @@ inline double verify_compress_decompress_error(const image_t &image,
     suite.decompress_func(decompressed_image, transformations,
                           VERIFY_DECOMPRESS_ITERATIONS);
 
-    return squared_error(image, decompressed_image);
+    double mse = mean_squared_error(image, decompressed_image);
+
+    return psnr(mse);
 }
 
 /**
@@ -254,18 +265,11 @@ inline bool verify_suite(const func_suite_t &suite,
     std::cout << "\033[1m"
               << "VERIFICATION phase"
               << "\033[0m" << std::endl;
-    double verification_error = verify_compress_decompress_error(image,
-                                                                 block_size_range,
-                                                                 block_size_domain,
-                                                                 suite);
-    double verification_error_per_pixel =
-            verification_error / image.size / image.size;
-    bool verification_failed =
-            verification_error_per_pixel > VERIFY_ALLOWED_SQUARED_ERROR_PER_PIXEL;
+    double psnr = verify_compress_decompress_error(image, block_size_range, block_size_domain, suite);
+    bool verification_failed = psnr < VERIFY_MIN_PSNR;
     std::cout << "\t"
-              << "error² (Ø p.p): " << verification_error_per_pixel
-              << " (allowed is up to " << VERIFY_ALLOWED_SQUARED_ERROR_PER_PIXEL
-              << ")" << std::endl;
+              << "PSNR (dB): " << psnr << " (at least " << VERIFY_MIN_PSNR
+              << " dB / higher is better)" << std::endl;
     if (verification_failed) {
         std::cout << "\t"
                   << "\033[1;31m"
