@@ -229,7 +229,8 @@ inline double median(std::vector<double> &vec) {
     }
 }
 
-inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output, const std::string &csv_output_path) {
+inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
+                              const std::string &csv_output_path) {
     std::cout << "\033[1m"
               << "WARMUP phase"
               << "\033[0m" << std::endl;
@@ -243,28 +244,38 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output, con
               << "BENCHMARK phase"
               << "\033[0m" << std::endl;
     std::vector<double> cycles;
+    std::vector<long long> flops;
     myInt64 start, end;
     for (size_t rep = 0; rep < BENCHMARK_REPETITIONS; ++rep) {
-      __reset_flop_counter();
+        __reset_flop_counter();
         start = start_tsc();
         for (long run = 0; run < needed_runs; ++run) {
             benchmark.perform();
         }
         end = stop_tsc(start);
-        double cycles_run = ((double) end) / needed_runs;
+        double cycles_run = ((double)end) / needed_runs;
         cycles.push_back(cycles_run);
+        flops.push_back(nbr_double_flops);
+    }
+
+    // CSV output has to be generated here before cycles gets sorted in median
+    if (csv_output) {
+        output_csv(cycles, flops, csv_output_path);
+        std::cout << "\t"
+                  << "Created csv file '" << csv_output_path << "'" << std::endl;
     }
 
     auto median_cycles = median(cycles);
     std::cout << "\t"
               << "cycles (median): " << median_cycles << std::endl;
 
-    #if ENABLE_PERF_COUNTER
+#if ENABLE_PERF_COUNTER
     std::cout << "\t"
               << "flops: " << nbr_double_flops << std::endl;
     std::cout << "\t"
-              << "perf [flops/cycle(median)]: " << (double)nbr_double_flops/median_cycles << std::endl;
-    #endif
+              << "perf [flops/cycle(median)]: "
+              << (double)nbr_double_flops / median_cycles << std::endl;
+#endif
 }
 
 inline bool verify_suite(const func_suite_t &suite,
