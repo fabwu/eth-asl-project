@@ -144,7 +144,7 @@ vector<transformation_t> compress(const image_t &image) {
             const std::initializer_list<int> all_angles = {0, 90, 180, 270};
             for (auto angle : all_angles) {
                 image_t rotated_domain_block(scaled_domain_block.size, false);
-                rotate(scaled_domain_block, rotated_domain_block, angle);
+                rotate(rotated_domain_block, *scaled_domain_block, angle);
 
                 double brightness, contrast, error;
                 std::tie(brightness, contrast, error) = compute_brightness_and_contrast_with_error(
@@ -175,7 +175,7 @@ void apply_transformation(image_t &image, const transformation_t &t) {
     const image_t scaled_domain_block = scale_block(
             image, t.domain_block, t.range_block.width, t.range_block.height);
     image_t rotated_domain_block = image_t(t.range_block.height, false);
-    rotate(scaled_domain_block, rotated_domain_block, t.angle);
+    rotate(rotated_domain_block, *scaled_domain_block, t.angle);
 
     for (int i = 0; i < t.range_block.height; ++i) {
         for (int j = 0; j < t.range_block.width; ++j) {

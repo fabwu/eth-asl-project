@@ -50,7 +50,7 @@ int main(int argc, char const *argv[]) {
     out.size = -1;
     out.data = empty;
 
-    rotate(in, out, 0);
+    rotate(out, in, 0);
 
     compare(in, out);
 
@@ -61,7 +61,7 @@ int main(int argc, char const *argv[]) {
     out.size = -1;
     out.data = empty;
 
-    rotate(in, out, 90);
+    rotate(out, in, 90);
 
     double data90[] = {
             7, 4, 1, 8, 5, 2, 9, 6, 3,
@@ -77,7 +77,7 @@ int main(int argc, char const *argv[]) {
     out.size = -1;
     out.data = empty;
 
-    rotate(in, out, 180);
+    rotate(out, in, 180);
 
     double data180[] = {
             9, 8, 7, 6, 5, 4, 3, 2, 1,
@@ -93,7 +93,7 @@ int main(int argc, char const *argv[]) {
     out.size = -1;
     out.data = empty;
 
-    rotate(in, out, 270);
+    rotate(out, in, 270);
 
     double data270[] = {
             3, 6, 9, 2, 5, 8, 1, 4, 7,
