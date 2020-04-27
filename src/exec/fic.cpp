@@ -42,6 +42,7 @@ int main(int argc, char const *argv[]) {
     // benchmark compress
     if(vm.count("benchmark") &&
        vm.count("compress") &&
+       vm.count("filename") &&
        vm.count("iterations")){
         benchmark_compress(vm["filename"].as<string>(),
                            vm["sizes"].as<vector<int> >()[0],
@@ -52,6 +53,7 @@ int main(int argc, char const *argv[]) {
     // benchmark decompress
     if(vm.count("benchmark") &&
        vm.count("decompress") &&
+       vm.count("filename") &&
        vm.count("iterations")){
         benchmark_decompress(vm["filename"].as<string>(),
                              vm["sizes"].as<vector<int> >()[0],
