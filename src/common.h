@@ -16,6 +16,26 @@
 #define WARMUP_CYCLES_REQUIRED 1e8
 #define BENCHMARK_REPETITIONS 50
 
+class params_t {
+   public:
+    std::string image_path;
+    int block_size_range;
+    int block_size_domain;
+    int decompression_iterations;
+    bool csv_output;
+    std::string csv_output_path;
+
+    params_t(std::string image_path, int block_size_range, int block_size_domain,
+             int decompression_iterations, bool csv_output = false,
+             std::string csv_output_path = std::string())
+        : image_path(image_path),
+          block_size_range(block_size_range),
+          block_size_domain(block_size_domain),
+          decompression_iterations(decompression_iterations),
+          csv_output(csv_output),
+          csv_output_path(csv_output_path) {}
+};
+
 class image_t {
 public:
     double *data;
@@ -209,7 +229,7 @@ inline double median(std::vector<double> &vec) {
     }
 }
 
-inline void benchmark_generic(const benchmark_t &benchmark) {
+inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output, const std::string &csv_output_path) {
     std::cout << "\033[1m"
               << "WARMUP phase"
               << "\033[0m" << std::endl;
@@ -280,71 +300,58 @@ inline bool verify_suite(const func_suite_t &suite,
     return !verification_failed;
 }
 
-inline void benchmark_compress(const std::string &image_path,
-                               const int block_size_range,
-                               const int block_size_domain) {
+inline void benchmark_compress(const params_t &params) {
     int width, height;
     double *original_image_data =
-            read_grayscale_file(image_path, &height, &width);
+        read_grayscale_file(params.image_path, &height, &width);
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if (!verify_suite(suite,
-                      block_size_range,
-                      block_size_domain,
-                      original_image)) return;
+    if (!verify_suite(suite, params.block_size_range, params.block_size_domain,
+                      original_image))
+        return;
 
     const benchmark_compress_t benchmark(original_image,
-                                         block_size_range,
-                                         block_size_domain,
-                                         suite);
+                                         params.block_size_range,
+                                         params.block_size_domain, suite);
 
-    benchmark_generic(benchmark);
+    benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
 }
 
-inline void benchmark_decompress(const std::string &image_path,
-                                 const int block_size_range,
-                                 const int block_size_domain,
-                                 const int decompression_iterations) {
+inline void benchmark_decompress(const params_t &params) {
     int width, height;
     double *original_image_data =
-            read_grayscale_file(image_path, &height, &width);
+        read_grayscale_file(params.image_path, &height, &width);
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if (!verify_suite(suite,
-                      block_size_range,
-                      block_size_domain,
-                      original_image)) return;
+    if (!verify_suite(suite, params.block_size_range, params.block_size_domain,
+                      original_image))
+        return;
 
-    auto transformations = suite.compress_func(original_image,
-                                               block_size_range,
-                                               block_size_domain);
+    auto transformations = suite.compress_func(
+        original_image, params.block_size_range, params.block_size_domain);
     const benchmark_decompress_t benchmark(original_image, transformations,
-                                           decompression_iterations, suite);
+                                           params.decompression_iterations,
+                                           suite);
 
-    benchmark_generic(benchmark);
+    benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
 }
 
-
-inline void compress_decompress(const std::string &image_path,
-                                const int block_size_range,
-                                const int block_size_domain,
-                                const int decompression_iterations) {
+inline void compress_decompress(const params_t &params) {
     int width, height;
     double *original_image_data =
-            read_grayscale_file(image_path, &height, &width);
+        read_grayscale_file(params.image_path, &height, &width);
     const image_t image(original_image_data, width);
 
     const auto suite = register_suite();
     // if (!verify_suite(suite, image)) return;
 
-    auto transformations = suite.compress_func(image,
-                                               block_size_range,
-                                               block_size_domain);
+    auto transformations = suite.compress_func(image, params.block_size_range,
+                                               params.block_size_domain);
     image_t decompressed_image(width, true);
     suite.decompress_func(decompressed_image, transformations,
-                          decompression_iterations);
+                          params.decompression_iterations);
     print_grayscale_file(decompressed_image.data, height, width);
 }
 

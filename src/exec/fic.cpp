@@ -27,6 +27,7 @@ int main(int argc, char const *argv[]) {
         ("sizes,s",
          value<vector<int> >()->multitoken()->default_value(vector<int>{8,16}, "8 16"),
          "size of range and domain blocks")
+        ("csv,o", value<string>(), "report output csv file")
         ;
 
 
@@ -34,44 +35,38 @@ int main(int argc, char const *argv[]) {
     store(parse_command_line(argc, argv, desc), vm);
 
     // show help
-    if(vm.count("help")) {
+    if (vm.count("help")) {
         cout << desc << "\n";
         return 0;
     };
 
-    // benchmark compress
-    if(vm.count("benchmark") &&
-       vm.count("compress") &&
-       vm.count("filename") &&
-       vm.count("iterations")){
-        benchmark_compress(vm["filename"].as<string>(),
-                           vm["sizes"].as<vector<int> >()[0],
-                           vm["sizes"].as<vector<int> >()[1]);
-        return 0;
-    }
+    if (vm.count("filename") && vm["sizes"].as<vector<int> >().size() == 2) {
+        params_t params(
+            vm["filename"].as<string>(), vm["sizes"].as<vector<int> >()[0],
+            vm["sizes"].as<vector<int> >()[1], vm["iterations"].as<int>());
 
-    // benchmark decompress
-    if(vm.count("benchmark") &&
-       vm.count("decompress") &&
-       vm.count("filename") &&
-       vm.count("iterations")){
-        benchmark_decompress(vm["filename"].as<string>(),
-                             vm["sizes"].as<vector<int> >()[0],
-                             vm["sizes"].as<vector<int> >()[1],
-                             vm["iterations"].as<int>());
-        return 0;
-    }
+        if (vm.count("csv")) {
+            params.csv_output = true;
+            params.csv_output_path = vm["csv"].as<string>();
+        }
 
-    // compress and decompress
-    if(vm.count("compress") &&
-       vm.count("decompress") &&
-       vm.count("filename") &&
-       vm.count("iterations")){
-        compress_decompress(vm["filename"].as<string>(),
-                            vm["sizes"].as<vector<int> >()[0],
-                            vm["sizes"].as<vector<int> >()[1],
-                            vm["iterations"].as<int>());
-        return 0;
+        // benchmark compress
+        if (vm.count("benchmark") && vm.count("compress")) {
+            benchmark_compress(params);
+            return 0;
+        }
+
+        // benchmark decompress
+        if (vm.count("benchmark") && vm.count("decompress")) {
+            benchmark_decompress(params);
+            return 0;
+        }
+
+        // compress and decompress
+        if (vm.count("compress") && vm.count("decompress")) {
+            compress_decompress(params);
+            return 0;
+        }
     }
 
     // show help if not yet done
