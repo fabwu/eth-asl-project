@@ -72,8 +72,10 @@ struct transformation_t {
     int angle;
 };
 
-typedef std::vector<transformation_t> (*compress_func_type)(
-        const image_t &image);
+typedef std::vector<transformation_t>
+(*compress_func_type)(const image_t &image,
+                      const int block_size_range,
+                      const int block_size_domain);
 
 typedef void (*decompress_func_type)(
         image_t &image, const std::vector<transformation_t> &transformations,
@@ -99,8 +101,12 @@ inline double squared_error(const image_t &original, const image_t &converted) {
 }
 
 inline double verify_compress_decompress_error(const image_t &image,
+                                               const int block_size_range,
+                                               const int block_size_domain,
                                                const func_suite_t &suite) {
-    auto transformations = suite.compress_func(image);
+    auto transformations = suite.compress_func(image,
+                                               block_size_range,
+                                               block_size_domain);
     image_t decompressed_image(image.size, true);
     suite.decompress_func(decompressed_image, transformations,
                           VERIFY_DECOMPRESS_ITERATIONS);
@@ -119,13 +125,23 @@ public:
 class benchmark_compress_t : public virtual benchmark_t {
 private:
     const image_t &image;
+    const int block_size_range;
+    const int block_size_domain;
     const func_suite_t suite;
 
 public:
-    benchmark_compress_t(const image_t &image, const func_suite_t &suite)
-            : image(image), suite(suite) {}
+    benchmark_compress_t(const image_t &image,
+                         const int block_size_range,
+                         const int block_size_domain,
+                         const func_suite_t &suite)
+            : image(image),
+              block_size_range(block_size_range),
+              block_size_domain(block_size_domain),
+              suite(suite) {}
 
-    void perform() const override { suite.compress_func(image); }
+  void perform() const override { suite.compress_func(image,
+                                                      block_size_range,
+                                                      block_size_domain); }
 };
 
 class benchmark_decompress_t : public virtual benchmark_t {
@@ -222,11 +238,17 @@ inline void benchmark_generic(const benchmark_t &benchmark) {
               << "cycles (median): " << median_cycles << std::endl;
 }
 
-inline bool verify_suite(const func_suite_t &suite, const image_t &image) {
+inline bool verify_suite(const func_suite_t &suite,
+                         const int block_size_range,
+                         const int block_size_domain,
+                         const image_t &image) {
     std::cout << "\033[1m"
               << "VERIFICATION phase"
               << "\033[0m" << std::endl;
-    double verification_error = verify_compress_decompress_error(image, suite);
+    double verification_error = verify_compress_decompress_error(image,
+                                                                 block_size_range,
+                                                                 block_size_domain,
+                                                                 suite);
     double verification_error_per_pixel =
             verification_error / image.size / image.size;
     bool verification_failed =
@@ -249,21 +271,31 @@ inline bool verify_suite(const func_suite_t &suite, const image_t &image) {
     return !verification_failed;
 }
 
-inline void benchmark_compress(const std::string &image_path) {
+inline void benchmark_compress(const std::string &image_path,
+                               const int block_size_range,
+                               const int block_size_domain) {
     int width, height;
     double *original_image_data =
             read_grayscale_file(image_path, &height, &width);
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if (!verify_suite(suite, original_image)) return;
+    if (!verify_suite(suite,
+                      block_size_range,
+                      block_size_domain,
+                      original_image)) return;
 
-    const benchmark_compress_t benchmark(original_image, suite);
+    const benchmark_compress_t benchmark(original_image,
+                                         block_size_range,
+                                         block_size_domain,
+                                         suite);
 
     benchmark_generic(benchmark);
 }
 
 inline void benchmark_decompress(const std::string &image_path,
+                                 const int block_size_range,
+                                 const int block_size_domain,
                                  const int decompression_iterations) {
     int width, height;
     double *original_image_data =
@@ -271,13 +303,40 @@ inline void benchmark_decompress(const std::string &image_path,
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if (!verify_suite(suite, original_image)) return;
+    if (!verify_suite(suite,
+                      block_size_range,
+                      block_size_domain,
+                      original_image)) return;
 
-    auto transformations = suite.compress_func(original_image);
+    auto transformations = suite.compress_func(original_image,
+                                               block_size_range,
+                                               block_size_domain);
     const benchmark_decompress_t benchmark(original_image, transformations,
                                            decompression_iterations, suite);
 
     benchmark_generic(benchmark);
+}
+
+
+inline void compress_decompress(const std::string &image_path,
+                                const int block_size_range,
+                                const int block_size_domain,
+                                const int decompression_iterations) {
+    int width, height;
+    double *original_image_data =
+            read_grayscale_file(image_path, &height, &width);
+    const image_t image(original_image_data, width);
+
+    const auto suite = register_suite();
+    // if (!verify_suite(suite, image)) return;
+
+    auto transformations = suite.compress_func(image,
+                                               block_size_range,
+                                               block_size_domain);
+    image_t decompressed_image(width, true);
+    suite.decompress_func(decompressed_image, transformations,
+                          decompression_iterations);
+    print_grayscale_file(decompressed_image.data, height, width);
 }
 
 #endif  // COMMON_H

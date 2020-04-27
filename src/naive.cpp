@@ -114,13 +114,10 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
     return make_tuple(brightness, contrast, error);
 }
 
-vector<transformation_t> compress(const image_t &image) {
+vector<transformation_t> compress(const image_t &image,
+                                  const int block_size_range,
+                                  const int block_size_domain) {
     // Goal: Try to map blocks of size block_size_domain to blocks of size block_size_range
-    constexpr int block_size_range = 4;
-    constexpr int block_size_domain = 8;
-    static_assert(block_size_domain >= block_size_range,
-                  "The domain block size must be bigger than the range block size");
-    const std::vector<int> all_angles = {0, 90, 180, 270};
 
     const auto range_blocks =
             create_squared_blocks(image.size, block_size_range);
