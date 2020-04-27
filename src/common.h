@@ -280,4 +280,22 @@ inline void benchmark_decompress(const std::string &image_path,
     benchmark_generic(benchmark);
 }
 
+
+inline void compress_decompress(const std::string &image_path,
+                                const int decompression_iterations) {
+    int width, height;
+    double *original_image_data =
+            read_grayscale_file(image_path, &height, &width);
+    const image_t image(original_image_data, width);
+
+    const auto suite = register_suite();
+    // if (!verify_suite(suite, image)) return;
+
+    auto transformations = suite.compress_func(image);
+    image_t decompressed_image(width, true);
+    suite.decompress_func(decompressed_image, transformations,
+                          decompression_iterations);
+    print_grayscale_file(decompressed_image.data, height, width);
+}
+
 #endif  // COMMON_H

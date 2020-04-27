@@ -7,8 +7,8 @@ Usage example:
 cmake -DCMAKE_BUILD_TYPE=Release -DOPT_ARCH=YES -B build/
 
 # build e.g. benchmark binary
-cmake --build build --target benchmark_compress
+cmake --build build --target fic
 
 # run benchmark
-./build/benchmark_compress images/lenasmall.gray
+./build/fic -b -c -f images/lenasmall.gray
 ```
