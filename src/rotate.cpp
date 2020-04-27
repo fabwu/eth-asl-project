@@ -5,7 +5,7 @@
 #include <cassert>
 #include <cmath>
 
-void rotate(const struct image_t &in, struct image_t &out, int angle) {
+void rotate(struct image_t &out, const struct image_t &in, int angle) {
     out.size = in.size;
 
     int m = in.size;

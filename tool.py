@@ -62,6 +62,7 @@ def gray_to_png(file):
 
 def show_gray(file):
     img = __read_gray(file)
+    plt.figure(num=file)
     plt.imshow(img, cmap="gray")
     plt.show()
 
