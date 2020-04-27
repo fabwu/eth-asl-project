@@ -119,6 +119,8 @@ vector<transformation_t> compress(const image_t &image,
                                   const int block_size_domain) {
     // Goal: Try to map blocks of size block_size_domain to blocks of size block_size_range
 
+    const std::vector<int> all_angles = {0, 90, 180, 270};
+
     const auto range_blocks =
             create_squared_blocks(image.size, block_size_range);
     const auto domain_blocks =
