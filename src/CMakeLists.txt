@@ -7,13 +7,9 @@ add_library(lib_commons
 add_library(lib_naive naive.cpp)
 add_library(lib_rotate rotate.h rotate.cpp)
 
-add_executable(compress_decompress exec/compress_decompress.cpp)
-add_executable(benchmark_compress exec/benchmark_compress.cpp)
-add_executable(benchmark_decompress exec/benchmark_decompress.cpp)
+add_executable(fic exec/fic.cpp)
 add_executable(test_rotate exec/test_rotate.cpp)
 
 target_link_libraries(lib_naive PRIVATE lib_rotate)
-target_link_libraries(compress_decompress PUBLIC lib_commons lib_naive)
-target_link_libraries(benchmark_compress PUBLIC lib_commons lib_naive)
-target_link_libraries(benchmark_decompress PUBLIC lib_commons lib_naive)
+target_link_libraries(fic PUBLIC lib_commons lib_naive)
 target_link_libraries(test_rotate PUBLIC lib_rotate)
