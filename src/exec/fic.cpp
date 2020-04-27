@@ -8,13 +8,10 @@ using namespace boost::program_options;
 #include <iostream>
 using namespace std;
 
-
-using namespace std;
-
 int main(int argc, char const *argv[]) {
     ios_base::sync_with_stdio(false);
 
-    options_description desc("Allowed options");
+    options_description desc("Options");
 
     desc.add_options()
         ("help,h", "produce help message")
@@ -27,6 +24,9 @@ int main(int argc, char const *argv[]) {
         ("filename,f",
          value<string>(),
          "gray image file")
+        ("sizes,s",
+         value<vector<int> >()->multitoken()->default_value(vector<int>{8,16}, "8 16"),
+         "size of range and domain blocks")
         ;
 
 
@@ -43,19 +43,21 @@ int main(int argc, char const *argv[]) {
     if(vm.count("benchmark") &&
        vm.count("compress") &&
        vm.count("iterations")){
-        benchmark_compress(
-            vm["filename"].as<string>()
-        );
+        benchmark_compress(vm["filename"].as<string>(),
+                           vm["sizes"].as<vector<int> >()[0],
+                           vm["sizes"].as<vector<int> >()[1]);
+        return 0;
     }
 
     // benchmark decompress
     if(vm.count("benchmark") &&
        vm.count("decompress") &&
        vm.count("iterations")){
-        benchmark_decompress(
-            vm["filename"].as<string>(),
-            vm["iterations"].as<int>()
-        );
+        benchmark_decompress(vm["filename"].as<string>(),
+                             vm["sizes"].as<vector<int> >()[0],
+                             vm["sizes"].as<vector<int> >()[1],
+                             vm["iterations"].as<int>());
+        return 0;
     }
 
     // compress and decompress
@@ -63,12 +65,14 @@ int main(int argc, char const *argv[]) {
        vm.count("decompress") &&
        vm.count("filename") &&
        vm.count("iterations")){
-        compress_decompress(
-            vm["filename"].as<string>(),
-            // vm["sizes"].as<vector<int> >()[0],
-            // vm["sizes"].as<vector<int> >()[1],
-            vm["iterations"].as<int>()
-        );
+        compress_decompress(vm["filename"].as<string>(),
+                            vm["sizes"].as<vector<int> >()[0],
+                            vm["sizes"].as<vector<int> >()[1],
+                            vm["iterations"].as<int>());
+        return 0;
     }
+
+    // show help if not yet done
+    cout << desc << "\n";
 
 }
