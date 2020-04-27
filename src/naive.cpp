@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "rotate.h"
+#include "performance.h"
 
 using namespace std;
 
@@ -47,9 +48,11 @@ image_t scale_block(const image_t &image, const block_t &block, int width,
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
                 val += image[b.get_index_in_image(i, j, image)];
+                __record_double_flops(1);
             }
         }
         val /= n * n;
+        __record_double_flops(2);
 
         scaled_data[scaled_index] = val;
         scaled_index++;
@@ -96,20 +99,25 @@ tuple<double, double, double> compute_brightness_and_contrast_with_error(const i
         }
     }
 
+    __record_double_flops(n * n * 8);
+
     double denominator = (num_pixels * sum_domain_squared - (sum_domain * sum_domain));
+    __record_double_flops(3);
     double contrast;
     if (denominator == 0) {
         contrast = 0.0;
     } else {
         contrast = (num_pixels * sum_range_times_domain - sum_domain * sum_range) / denominator;
+        __record_double_flops(4);
     }
     double brightness = (sum_range - contrast * sum_domain) / num_pixels;
+    __record_double_flops(3);
 
     // Directly compute the error
     double error = (sum_range_squared + contrast * (contrast * sum_domain_squared - 2 * sum_range_times_domain +
                                                     2 * brightness * sum_domain) +
                     brightness * (num_pixels * brightness - 2 * sum_range)) / num_pixels;
-
+    __record_double_flops(14);
 
     return make_tuple(brightness, contrast, error);
 }
@@ -183,6 +191,7 @@ void apply_transformation(image_t &image, const transformation_t &t) {
                     rotated_domain_block[i * rotated_domain_block.size + j];
             int idx = t.range_block.get_index_in_image(i, j, image);
             image[idx] = value * t.contrast + t.brightness;
+            __record_double_flops(2);
         }
     }
 }

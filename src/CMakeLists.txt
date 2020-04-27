@@ -2,7 +2,8 @@ add_library(lib_commons
         common.h
         filehandler.h
         filehandler.cpp
-        tsc_x86.h)
+        tsc_x86.h
+        performance.h)
 add_library(lib_naive naive.cpp)
 add_library(lib_rotate rotate.h rotate.cpp)
 

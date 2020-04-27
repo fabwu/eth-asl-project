@@ -9,6 +9,7 @@
 
 #include "filehandler.h"
 #include "tsc_x86.h"
+#include "performance.h"
 
 #define VERIFY_ALLOWED_SQUARED_ERROR_PER_PIXEL 6.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
@@ -208,6 +209,7 @@ inline void benchmark_generic(const benchmark_t &benchmark) {
     std::vector<double> cycles;
     myInt64 start, end;
     for (size_t rep = 0; rep < BENCHMARK_REPETITIONS; ++rep) {
+      __reset_flop_counter();
         start = start_tsc();
         for (long run = 0; run < needed_runs; ++run) {
             benchmark.perform();
@@ -220,6 +222,13 @@ inline void benchmark_generic(const benchmark_t &benchmark) {
     auto median_cycles = median(cycles);
     std::cout << "\t"
               << "cycles (median): " << median_cycles << std::endl;
+
+    #if ENABLE_PERF_COUNTER
+    std::cout << "\t"
+              << "flops: " << nbr_double_flops << std::endl;
+    std::cout << "\t"
+              << "perf [flops/cycle(median)]: " << (double)nbr_double_flops/median_cycles << std::endl;
+    #endif
 }
 
 inline bool verify_suite(const func_suite_t &suite, const image_t &image) {
