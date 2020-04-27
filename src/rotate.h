@@ -6,4 +6,4 @@
  * The data array of out needs to be initialized to zero otw.
  * you get a seg fault.
  */
-void rotate(const image_t &in, image_t &out, int angle);
+void rotate(image_t &out, const image_t &in, int angle);
