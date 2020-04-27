@@ -104,9 +104,9 @@ inline double verify_compress_decompress_error(const image_t &image,
                                                const int block_size_range,
                                                const int block_size_domain,
                                                const func_suite_t &suite) {
-  auto transformations = suite.compress_func(image,
-                                             block_size_range,
-                                             block_size_domain);
+    auto transformations = suite.compress_func(image,
+                                               block_size_range,
+                                               block_size_domain);
     image_t decompressed_image(image.size, true);
     suite.decompress_func(decompressed_image, transformations,
                           VERIFY_DECOMPRESS_ITERATIONS);
