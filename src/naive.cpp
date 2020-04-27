@@ -27,14 +27,14 @@ inline vector<block_t> create_squared_blocks(const int image_size,
     return blocks;
 }
 
-image_t scale_block(const image_t &image, const block_t &block, int width,
+image_t * scale_block(const image_t &image, const block_t &block, int width,
                     int height) {
     assert(block.width >= width);
     assert(block.height >= height);
     assert(block.width == block.height);  // just for simplicity
-    assert(block.width % width == 0);            // just for simplicity
-    assert(block.height % height == 0);          // just for simplicity
-    assert(width == height);                            // just for simplicity
+    assert(block.width % width == 0);     // just for simplicity
+    assert(block.height % height == 0);   // just for simplicity
+    assert(width == height);              // just for simplicity
 
     const int n = block.width / width;
     const auto scaled_data =
@@ -55,7 +55,7 @@ image_t scale_block(const image_t &image, const block_t &block, int width,
         scaled_index++;
     }
 
-    return image_t(scaled_data, width);
+    return new image_t(scaled_data, width);
 }
 
 /**
@@ -126,6 +126,15 @@ vector<transformation_t> compress(const image_t &image) {
     const auto domain_blocks =
             create_squared_blocks(image.size, block_size_domain);
 
+    // Need to compress domain_block, such that size(domain_block) ==
+    // size(range_block) in order to compare difference! That means that a
+    // square of n pixels need to be compressed to one pixel
+    std::vector<std::tuple<block_t, const image_t *>> scaled_domain_blocks;
+    scaled_domain_blocks.reserve(domain_blocks.size());
+    for (const auto &domain_block : domain_blocks) {
+        scaled_domain_blocks.emplace_back(domain_block, scale_block(image, domain_block, block_size_range, block_size_range));
+    }
+
     // Learn mappings from domain blocks to range blocks
     // That is, find a domain block for every range block, such that their
     // difference is minimal
@@ -134,16 +143,13 @@ vector<transformation_t> compress(const image_t &image) {
         double best_error = numeric_limits<double>::max();
         transformation_t best_transformation;
 
-        for (const auto &domain_block: domain_blocks) {
-            // Need to compress domain_block, such that size(domain_block) ==
-            // size(range_block) in order to compare difference! That means that a
-            // square of n pixels need to be compressed to one pixel
-            const auto scaled_domain_block = scale_block(
-                    image, domain_block, range_block.width, range_block.height);
+        for (const auto &domain : scaled_domain_blocks) {
+            const block_t &domain_block = get<0>(domain);
+            const image_t * scaled_domain_block = get<1>(domain);
 
             const std::initializer_list<int> all_angles = {0, 90, 180, 270};
             for (auto angle : all_angles) {
-                image_t rotated_domain_block(scaled_domain_block.size, false);
+                image_t rotated_domain_block(scaled_domain_block->size, false);
                 rotate(rotated_domain_block, *scaled_domain_block, angle);
 
                 double brightness, contrast, error;
@@ -172,7 +178,7 @@ void apply_transformation(image_t &image, const transformation_t &t) {
     assert(t.domain_block.width == t.domain_block.height);
     assert(t.range_block.width == t.range_block.height);
 
-    const image_t scaled_domain_block = scale_block(
+    const image_t * scaled_domain_block = scale_block(
             image, t.domain_block, t.range_block.width, t.range_block.height);
     image_t rotated_domain_block = image_t(t.range_block.height, false);
     rotate(rotated_domain_block, *scaled_domain_block, t.angle);
