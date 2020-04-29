@@ -114,7 +114,7 @@ inline double mean_squared_error(const image_t &original, const image_t &convert
     assert(original.size == converted.size);
 
     double squared_error = 0.0;
-    for (int i = 0; i < original.size; ++i) {
+    for (int i = 0; i < original.size * original.size; ++i) {
         double diff = original[i] - converted[i];
         squared_error += diff * diff;
     }
