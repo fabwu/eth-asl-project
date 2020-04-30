@@ -28,6 +28,11 @@ void print_grayscale_file(double *grayscale_image, int height, int width) {
 double *read_grayscale_file(const string &filename, int *height, int *width) {
     ifstream fin;
     fin.open(filename);
+
+    if (!fin.is_open()) {
+        throw std::runtime_error("Couldn't read grayscale file");
+    }
+
     std::string line, word;
     int ctr = 0;
 
