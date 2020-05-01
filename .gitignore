@@ -9,6 +9,7 @@ tags
 main
 test_rotate
 build/
+fic.ini
 
 # Cmake
 CMakeLists.txt.user
