@@ -38,10 +38,5 @@ image = ggplot(data=df, aes(x=size)) +
         legend.position = "none",
         legend.title = element_blank())
 
-
-## display plot
-image
-
-
 ## save plot
 ggsave(file="performance.pdf", plot=image, width=16, height=10)
