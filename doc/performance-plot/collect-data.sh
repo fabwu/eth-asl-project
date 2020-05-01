@@ -1,12 +1,15 @@
 #!/bin/bash
 
-./build/fic -b -c -i 10 -s 8 16 -f images/lena_64.gray \
-            -o doc/performance-plot/data/lena_64.csv
-./build/fic -b -c -i 10 -s 8 16 -f images/monkey_128.gray \
-            -o doc/performance-plot/data/monkey_128.csv
-./build/fic -b -c -i 10 -s 8 16 -f images/lena_256.gray \
-            -o doc/performance-plot/data/lena_256.csv
-./build/fic -b -c -i 10 -s 8 16 -f images/lena_512.gray \
-            -o doc/performance-plot/data/lena_512.csv
-./build/fic -b -c -i 10 -s 8 16 -f images/grey-parrot_1024.gray \
-            -o doc/performance-plot/data/grey-parrot_1024.csv
+dir=$(dirname "$(readlink -f "$0")")
+cd "$dir"
+echo "$dir"
+
+for img in lena_64 monkey_128 lena_256 lena_512
+do
+  echo "$img start (`date +"%Y-%m-%dT %H:%M:%S"`)"
+  ./../../build/fic -b -c -i 10 -s 8 16 \
+                    -f "${dir}/../../images/${img}.gray" \
+                    -o "${dir}/data/${img}.csv"
+  echo "$img end (`date +"%Y-%m-%dT %H:%M:%S"`)"
+  echo "--------------------------------"
+done
