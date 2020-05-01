@@ -13,15 +13,25 @@ int main(int argc, char const *argv[]) {
 
     options_description desc("Options");
 
-    desc.add_options()("help,h", "produce help message")(
-        "benchmark,b", "benchmark")("decompress,d", "decrompress image")(
-        "compress,c", "crompress image")("iterations,i",
-                                         value<int>()->default_value(10),
-                                         "number of decompression iterations")(
-        "filename,f", value<string>(), "gray image file")(
-        "error,e", value<int>()->default_value(100),
-        "the error threshold, which may not be exceeded by any transformation")(
-        "csv,o", value<string>(), "report output csv file");
+    desc.add_options()
+        ("benchmark,b", "benchmark")
+        ("compress,c", "crompress image")
+        ("csv,o", value<string>(), "report output csv file")
+        ("decompress,d", "decrompress image")
+        ("filename,f",
+         value<string>(),
+         "gray image file")
+        ("help,h", "produce help message")
+        ("iterations,i",
+         value<int>()->default_value(10),
+         "number of decompression iterations")
+        ("repetitions,r",
+         value<int>()->default_value(2),
+         "number of benchmark repetitions")
+        ("sizes,s",
+         value<vector<int> >()->multitoken()->default_value(vector<int>{8,16}, "8 16"),
+         "size of range and domain blocks")
+        ;
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -32,9 +42,11 @@ int main(int argc, char const *argv[]) {
         return 0;
     };
 
-    if (vm.count("filename") && vm.count("error")) {
-        params_t params(vm["filename"].as<string>(), vm["error"].as<int>(),
-                        vm["iterations"].as<int>());
+    if (vm.count("filename") && vm["sizes"].as<vector<int> >().size() == 2) {
+        params_t params(
+            vm["filename"].as<string>(), vm["sizes"].as<vector<int> >()[0],
+            vm["sizes"].as<vector<int> >()[1], vm["iterations"].as<int>(),
+            vm["repetitions"].as<int>());
 
         if (vm.count("csv")) {
             params.csv_output = true;
