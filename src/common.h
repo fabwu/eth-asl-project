@@ -15,7 +15,7 @@
 #define VERIFY_MIN_PSNR 30.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
 #define WARMUP_CYCLES_REQUIRED 1e8
-#define BENCHMARK_REPETITIONS 50
+#define BENCHMARK_REPETITIONS 2
 
 class params_t {
    public:
@@ -228,15 +228,16 @@ inline long warmup(const benchmark_t &benchmark) {
     return num_runs;
 }
 
-inline double median(std::vector<double> &vec) {
+template <typename T>
+inline double median(std::vector<T> &vec) {
     sort(vec.begin(), vec.end());
     auto size = vec.size();
     if (size % 2 == 0) {
         size_t i = size / 2 - 1;
         size_t j = i + 1;
-        return (vec[i] + vec[j]) / 2;
+        return (double)(vec[i] + vec[j]) / 2;
     } else {
-        return vec[size / 2];
+        return (double)vec[size / 2];
     }
 }
 
@@ -266,7 +267,7 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
         end = stop_tsc(start);
         double cycles_run = ((double)end) / needed_runs;
         cycles.push_back(cycles_run);
-        flops.push_back(nbr_double_flops);
+        flops.push_back(nbr_double_flops / needed_runs);
     }
 
     // CSV output has to be generated here before cycles gets sorted in median
@@ -281,11 +282,12 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
               << "cycles (median): " << median_cycles << std::endl;
 
 #if ENABLE_PERF_COUNTER
+    auto median_flops = median(flops);
     std::cout << "\t"
-              << "flops: " << nbr_double_flops << std::endl;
+              << "flops: " << median_flops << std::endl;
     std::cout << "\t"
               << "perf [flops/cycle(median)]: "
-              << (double)nbr_double_flops / median_cycles << std::endl;
+              << (double)median_flops / median_cycles << std::endl;
 #endif
 }
 
@@ -322,9 +324,8 @@ inline void benchmark_compress(const params_t &params) {
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if (!verify_suite(suite, params.block_size_range, params.block_size_domain,
-                      original_image))
-        return;
+    verify_suite(suite, params.block_size_range, params.block_size_domain,
+                 original_image);
 
     const benchmark_compress_t benchmark(original_image,
                                          params.block_size_range,
