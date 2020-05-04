@@ -314,7 +314,7 @@ inline bool verify_suite(const func_suite_t &suite,
                   << "✔ verification succeeded"
                   << "\033[0m" << std::endl;
     }
-    return true;
+    return !verification_failed;
 }
 
 inline void benchmark_compress(const params_t &params) {
@@ -324,9 +324,8 @@ inline void benchmark_compress(const params_t &params) {
     const image_t original_image(original_image_data, width);
 
     const auto suite = register_suite();
-    if (!verify_suite(suite, params.block_size_range, params.block_size_domain,
-                      original_image))
-        return;
+    verify_suite(suite, params.block_size_range, params.block_size_domain,
+                 original_image);
 
     const benchmark_compress_t benchmark(original_image,
                                          params.block_size_range,
