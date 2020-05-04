@@ -29,10 +29,10 @@ image = ggplot(data=df, aes(x=size)) +
     geom_line(aes(y=performance), lwd=1) +
     geom_point(aes(y=performance), lwd=2) +
     scale_x_continuous(
-        name="Input Size",
+        name="Image Size (n x n)",
         expand = c(0, 20),
         ) +
-    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,1)) +
+    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,10)) +
     theme(
         axis.title.y = element_text(angle=0),
         legend.position = "none",
