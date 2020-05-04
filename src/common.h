@@ -86,6 +86,25 @@ public:
                            const image_t &full_image) const {
         return (rel_y + y_rel_block) * full_image.size + rel_x + x_rel_block;
     }
+
+    std::vector<block_t> quad() const {
+        assert(width % 2 == 0);
+        assert(height % 2 == 0);
+        assert(width >= 2);
+        assert(height >= 2);
+
+        const int quad_width = width / 2;
+        const int quad_height = height / 2;
+
+        std::vector<block_t> quad_blocks;
+        quad_blocks.push_back(block_t(rel_x, rel_y, quad_width, quad_height));
+        quad_blocks.push_back(block_t(rel_x + quad_width, rel_y, quad_width, quad_height));
+        quad_blocks.push_back(block_t(rel_x, rel_y + quad_height, quad_width, quad_height));
+        quad_blocks.push_back(block_t(rel_x + quad_width, rel_y + quad_height, quad_width, quad_height));
+
+        return quad_blocks;
+    }
+
 };
 
 struct transformation_t {
