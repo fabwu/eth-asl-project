@@ -25,7 +25,7 @@ colnames(df) = c("size", "performance")
 ## Create plot
 theme_set(theme_light(base_size = 24))
 image = ggplot(data=df, aes(x=size)) +
-    ggtitle("Performance") +
+    ## ggtitle("Performance") +
     geom_line(aes(y=performance), lwd=1) +
     geom_point(aes(y=performance), lwd=2) +
     scale_x_continuous(
@@ -39,4 +39,8 @@ image = ggplot(data=df, aes(x=size)) +
         legend.title = element_blank())
 
 ## save plot
-ggsave(file="performance.pdf", plot=image, width=16, height=10)
+ggsave(file="performance.png",
+       dpi = 300,
+       plot=image,
+       width=15,
+       height=8)
