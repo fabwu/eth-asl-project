@@ -6,6 +6,7 @@
 
 struct image_t make_image(int size, int randomize_data) {
     struct image_t image;
+    image.size = size;
     image.data = (double *)malloc(size * size * sizeof(double));
     if (randomize_data) {
         for (int i = 0; i < size * size; ++i) image.data[i] = rand() % 256;

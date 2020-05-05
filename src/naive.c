@@ -23,9 +23,11 @@ static struct block_t *create_squared_blocks(const int image_size,
         (image_size / block_size) * (image_size / block_size);
     struct block_t *blocks =
         (struct block_t *)malloc(num_blocks * sizeof(struct block_t));
+    int index = 0;
     for (int i = 0; i < image_size; i += block_size) {
         for (int j = 0; j < image_size; j += block_size) {
-            blocks[i * image_size + j] = make_block(j + x_offset, i + y_offset, block_size, block_size);
+            blocks[index] = make_block(j + x_offset, i + y_offset, block_size, block_size);
+            ++index;
         }
     }
 
@@ -209,7 +211,7 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
                                 range_block->width, range_block->height);
 
                 // Free old space before allocating new
-                for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) free_image_data(prepared_domain_block->angles + i);
+                for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) free_image_data(prepared_domain_block->angles + j);
 
                 rotate_domain_blocks(scaled_domain_block, prepared_domain_block->angles);
 
@@ -226,7 +228,7 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
 
             for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
                 const struct image_t *rotated_domain_block =
-                    prepared_domain_block->angles + i;
+                    prepared_domain_block->angles + j;
                 const int angle = ALL_ANGLES[j];
 
                 double brightness, contrast, error;
@@ -266,7 +268,7 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
     // Free all intermediate values
     free(initial_range_blocks);
     free(domain_blocks);
-    for (size_t i = 0; domain_blocks_length; ++i) {
+    for (size_t i = 0; i < domain_blocks_length; ++i) {
         for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
             free_image_data(prepared_domain_blocks[i].angles + j);
         }
