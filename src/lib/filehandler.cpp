@@ -1,5 +1,7 @@
-#include "filehandler.h"
+#include "filehandler.hpp"
+extern "C" {
 #include "performance.h"
+}
 
 #include <fstream>
 #include <iomanip>

@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <cmath>
 
+extern "C" {
 #include "../lib/rotate.h"
+}
 
 static void compare(const struct image_t &a, const struct image_t &b) {
     bool is_equal = true;

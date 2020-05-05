@@ -12,15 +12,19 @@
 #include <iostream>
 #include <vector>
 
-#include "filehandler.h"
-#include "performance.h"
+#include "filehandler.hpp"
 #include "tsc_x86.h"
+extern "C" {
+#include "performance.h"
 #include "types.h"
+}
 
 #define VERIFY_MIN_PSNR 30.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
 #define WARMUP_CYCLES_REQUIRED 1e8
 #define BENCHMARK_REPETITIONS 2
+
+extern "C" struct func_suite_t register_suite();
 
 class params_t {
    public:
@@ -196,7 +200,7 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
         end = stop_tsc(start);
         double cycles_run = ((double)end) / needed_runs;
         cycles.push_back(cycles_run);
-        flops.push_back(nbr_double_flops / needed_runs);
+        flops.push_back(__nbr_double_flops() / needed_runs);
     }
 
     // CSV output has to be generated here before cycles gets sorted in median
