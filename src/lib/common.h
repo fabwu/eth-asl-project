@@ -1,16 +1,21 @@
+/**
+ * \file Common C++ types and functions.
+ */
+
 #ifndef COMMON_H
 #define COMMON_H
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <functional>
 #include <iostream>
 #include <vector>
-#include <cmath>
 
 #include "filehandler.h"
-#include "tsc_x86.h"
 #include "performance.h"
+#include "tsc_x86.h"
+#include "types.h"
 
 #define VERIFY_MIN_PSNR 30.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
@@ -26,8 +31,9 @@ class params_t {
     bool csv_output;
     std::string csv_output_path;
 
-    params_t(std::string image_path, int block_size_range, int block_size_domain,
-             int decompression_iterations, bool csv_output = false,
+    params_t(std::string image_path, int block_size_range,
+             int block_size_domain, int decompression_iterations,
+             bool csv_output = false,
              std::string csv_output_path = std::string())
         : image_path(image_path),
           block_size_range(block_size_range),
@@ -37,89 +43,12 @@ class params_t {
           csv_output_path(csv_output_path) {}
 };
 
-class image_t {
-public:
-    double *data;
-    int size;
-
-    image_t(double *data, int size) : data(data), size(size) {}
-
-    image_t(int size, bool randomize_data) : size(size) {
-        data = (double *) malloc(size * size * sizeof(double));
-        if (randomize_data) {
-            for (int i = 0; i < size * size; ++i) data[i] = rand() % 256;
-        }
-    }
-
-    ~image_t() {
-        free(data);
-    }
-
-    double &operator[](int index) const {
-        return data[index];
-    }
-};
-
-class block_t {
-public:
-    int rel_x, rel_y;
-    int width, height;
-
-    block_t() {}
-
-    block_t(int x, int y, int width, int height)
-            : rel_x(x), rel_y(y), width(width), height(height) {}
-
-    void print_block(const image_t &image, const int image_size) const {
-        printf("Block rel_x: %d, rel_y: %d, width: %d, height: %d\n", rel_x, rel_y,
-               width, height);
-        for (int i = 0; i < height; ++i) {
-            for (int j = 0; j < width; ++j) {
-                int index = get_index_in_image(i, j, image);
-                printf("%.1f, ", image[index]);
-            }
-            printf("\n");
-        }
-    }
-
-    int get_index_in_image(const int y_rel_block, const int x_rel_block,
-                           const image_t &full_image) const {
-        return (rel_y + y_rel_block) * full_image.size + rel_x + x_rel_block;
-    }
-
-    std::vector<block_t> quad() const {
-        assert(width % 2 == 0);
-        assert(height % 2 == 0);
-        assert(width >= 2);
-        assert(height >= 2);
-
-        const int quad_width = width / 2;
-        const int quad_height = height / 2;
-
-        std::vector<block_t> quad_blocks;
-        quad_blocks.push_back(block_t(rel_x, rel_y, quad_width, quad_height));
-        quad_blocks.push_back(block_t(rel_x + quad_width, rel_y, quad_width, quad_height));
-        quad_blocks.push_back(block_t(rel_x, rel_y + quad_height, quad_width, quad_height));
-        quad_blocks.push_back(block_t(rel_x + quad_width, rel_y + quad_height, quad_width, quad_height));
-
-        return quad_blocks;
-    }
-
-};
-
-struct transformation_t {
-    block_t domain_block, range_block;
-    double contrast, brightness;
-    int angle;
-};
-
-typedef std::vector<transformation_t>
-(*compress_func_type)(const image_t &image,
-                      const int block_size_domain);
+typedef std::vector<struct transformation_t> (*compress_func_type)(
+    const image_t &image, const int block_size_domain);
 
 typedef void (*decompress_func_type)(
-        image_t &image, const std::vector<transformation_t> &transformations,
-        const int iterations);
+    image_t &image, const std::vector<transformation_t> &transformations,
+    const int iterations);
 
 struct func_suite_t {
     compress_func_type compress_func;
@@ -128,12 +57,13 @@ struct func_suite_t {
 
 func_suite_t register_suite();
 
-inline double mean_squared_error(const image_t &original, const image_t &converted) {
+inline double mean_squared_error(const struct image_t &original,
+                                 const struct image_t &converted) {
     assert(original.size == converted.size);
 
     double squared_error = 0.0;
     for (int i = 0; i < original.size * original.size; ++i) {
-        double diff = original[i] - converted[i];
+        double diff = original.data[i] - converted.data[i];
         squared_error += diff * diff;
     }
 
@@ -145,14 +75,14 @@ inline double psnr(const double mse) {
     //
     // for 8 bits a typical value is between 30 and 50 dB (higher is better)
     double maxPixelValue = 255;
-    return 20*std::log10(maxPixelValue) - 10*std::log10(mse);
+    return 20 * std::log10(maxPixelValue) - 10 * std::log10(mse);
 }
 
-inline double verify_compress_decompress_error(const image_t &image,
+inline double verify_compress_decompress_error(const struct image_t &image,
                                                const int block_size_domain,
                                                const func_suite_t &suite) {
     auto transformations = suite.compress_func(image, block_size_domain);
-    image_t decompressed_image(image.size, true);
+    struct image_t decompressed_image = make_image(image.size, true);
     suite.decompress_func(decompressed_image, transformations,
                           VERIFY_DECOMPRESS_ITERATIONS);
 
@@ -165,23 +95,20 @@ inline double verify_compress_decompress_error(const image_t &image,
  * A function to be timed by some benchmark
  */
 class benchmark_t {
-public:
+   public:
     virtual void perform() const = 0;
 };
 
 class benchmark_compress_t : public virtual benchmark_t {
-private:
-    const image_t &image;
+   private:
+    const struct image_t &image;
     const int block_size_domain;
     const func_suite_t suite;
 
-public:
-    benchmark_compress_t(const image_t &image,
-                         const int block_size_domain,
-                         const func_suite_t &suite)
-            : image(image),
-              block_size_domain(block_size_domain),
-              suite(suite) {}
+   public:
+    benchmark_compress_t(const struct image_t &image,
+                         const int block_size_domain, const func_suite_t &suite)
+        : image(image), block_size_domain(block_size_domain), suite(suite) {}
 
     void perform() const override {
         suite.compress_func(image, block_size_domain);
@@ -189,25 +116,25 @@ public:
 };
 
 class benchmark_decompress_t : public virtual benchmark_t {
-private:
-    const image_t &original_image;
+   private:
+    const struct image_t &original_image;
     const func_suite_t suite;
     const size_t iterations;
-    const std::vector<transformation_t> transformations;
+    const std::vector<struct transformation_t> transformations;
 
-public:
-    benchmark_decompress_t(const image_t &original_image,
-                           std::vector<transformation_t> transformations,
+   public:
+    benchmark_decompress_t(const struct image_t &original_image,
+                           std::vector<struct transformation_t> transformations,
                            const int decompression_iterations,
                            const func_suite_t &suite)
-            : original_image(original_image),
-              suite(suite),
-              iterations(decompression_iterations),
-              transformations(std::move(transformations)) {}
+        : original_image(original_image),
+          suite(suite),
+          iterations(decompression_iterations),
+          transformations(std::move(transformations)) {}
 
     void perform() const override {
-        image_t decompressed_image(
-                original_image.size, true);
+        struct image_t decompressed_image =
+            make_image(original_image.size, true);
         suite.decompress_func(decompressed_image, transformations, iterations);
     }
 };
@@ -226,14 +153,14 @@ inline long warmup(const benchmark_t &benchmark) {
     // the code to be executed for at least CYCLES_REQUIRED cycles.
     // This helps excluding timing overhead when measuring small runtimes.
     do {
-        num_runs = (long) ((double) num_runs * multiplier);
+        num_runs = (long)((double)num_runs * multiplier);
         start = start_tsc();
         for (long i = 0; i < num_runs; i++) {
             benchmark.perform();
         }
         end = stop_tsc(start);
 
-        auto cycles = (double) end;
+        auto cycles = (double)end;
         multiplier = (WARMUP_CYCLES_REQUIRED) / (cycles);
 
     } while (multiplier > 2);
@@ -286,7 +213,8 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
     if (csv_output) {
         output_csv(cycles, flops, csv_output_path);
         std::cout << "\t"
-                  << "Created csv file '" << csv_output_path << "'" << std::endl;
+                  << "Created csv file '" << csv_output_path << "'"
+                  << std::endl;
     }
 
     auto median_cycles = median(cycles);
@@ -303,8 +231,7 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
 #endif
 }
 
-inline bool verify_suite(const func_suite_t &suite,
-                         const int block_size_domain,
+inline bool verify_suite(const func_suite_t &suite, const int block_size_domain,
                          const image_t &image) {
     std::cout << "\033[1m"
               << "VERIFICATION phase"
@@ -333,7 +260,9 @@ inline void benchmark_compress(const params_t &params) {
     int width, height;
     double *original_image_data =
         read_grayscale_file(params.image_path, &height, &width);
-    const image_t original_image(original_image_data, width);
+    struct image_t original_image;
+    original_image.data = original_image_data;
+    original_image.size = width;
 
     const auto suite = register_suite();
     verify_suite(suite, params.block_size_domain, original_image);
@@ -348,7 +277,9 @@ inline void benchmark_decompress(const params_t &params) {
     int width, height;
     double *original_image_data =
         read_grayscale_file(params.image_path, &height, &width);
-    const image_t original_image(original_image_data, width);
+    struct image_t original_image;
+    original_image.data = original_image_data;
+    original_image.size = width;
 
     const auto suite = register_suite();
     if (!verify_suite(suite, params.block_size_domain, original_image)) return;
@@ -366,13 +297,15 @@ inline void compress_decompress(const params_t &params) {
     int width, height;
     double *original_image_data =
         read_grayscale_file(params.image_path, &height, &width);
-    const image_t image(original_image_data, width);
+    struct image_t image;
+    image.data = original_image_data;
+    image.size = width;
 
     const auto suite = register_suite();
     // if (!verify_suite(suite, image)) return;
 
     auto transformations = suite.compress_func(image, params.block_size_domain);
-    image_t decompressed_image(width, true);
+    struct image_t decompressed_image = make_image(width, true);
     suite.decompress_func(decompressed_image, transformations,
                           params.decompression_iterations);
     print_grayscale_file(decompressed_image.data, height, width);

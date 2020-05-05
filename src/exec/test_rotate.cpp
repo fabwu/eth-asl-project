@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "../rotate.h"
+#include "../lib/rotate.h"
 
 static void compare(struct image_t &a, struct image_t &b) {
     bool is_equal = true;

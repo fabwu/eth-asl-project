@@ -2,13 +2,17 @@ FIND_PACKAGE(Boost COMPONENTS program_options REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 add_library(lib_commons
-        common.h
-        filehandler.h
-        filehandler.cpp
-        tsc_x86.h
-        performance.h)
-add_library(lib_naive naive.cpp)
-add_library(lib_rotate rotate.h rotate.cpp)
+        lib/types.h
+        lib/common.h
+        lib/filehandler.h
+        lib/filehandler.cpp
+        lib/tsc_x86.h
+        lib/performance.h
+        lib/queue.h
+        lib/queue.c
+)
+add_library(lib_naive naive.c)
+add_library(lib_rotate lib/rotate.h lib/rotate.c)
 
 add_executable(fic exec/fic.cpp)
 add_executable(test_rotate exec/test_rotate.cpp)
