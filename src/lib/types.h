@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "queue.h"
 
 struct image_t {
@@ -14,7 +15,7 @@ struct image_t {
     int size;
 };
 
-struct image_t make_image(int size, bool randomize_data) {
+struct image_t make_image(int size, int randomize_data) {
     struct image_t image;
     image.data = (double *)malloc(size * size * sizeof(double));
     if (randomize_data) {
@@ -23,7 +24,7 @@ struct image_t make_image(int size, bool randomize_data) {
     return image;
 }
 
-void free_image(const image_t *image) { free(image->data); }
+void free_image_data(const struct image_t *image) { free(image->data); }
 
 struct block_t {
     int rel_x, rel_y;
@@ -67,23 +68,30 @@ void quad(const struct block_t *block, struct queue *q) {
     const int quad_width = block->width / 2;
     const int quad_height = block->height / 2;
 
-    struct block_t *blocks =
-        (struct block_t *)malloc(4 * sizeof(struct block_t));
-    blocks[0] = make_block(block->rel_x, block->rel_y, quad_width, quad_height);
-    blocks[1] = make_block(block->rel_x + quad_width, block->rel_y, quad_width,
-                           quad_height);
-    blocks[2] = make_block(block->rel_x, block->rel_y + quad_height, quad_width,
-                           quad_height);
-    blocks[3] = make_block(block->rel_x + quad_width,
-                           block->rel_y + quad_height, quad_width, quad_height);
+    // Has to be 4 different malloc calls, because we want to free them
+    // independently later on
+    struct block_t *block_0 = (struct block_t *)malloc(sizeof(struct block_t));
+    *block_0 = make_block(block->rel_x, block->rel_y, quad_width, quad_height);
+    enqueue(q, block_0);
 
-    for (int i = 0; i < 4; ++i) {
-        enqueue(q, blocks + i);
-    }
+    struct block_t *block_1 = (struct block_t *)malloc(sizeof(struct block_t));
+    *block_1 = make_block(block->rel_x + quad_width, block->rel_y, quad_width,
+                          quad_height);
+    enqueue(q, block_1);
+
+    struct block_t *block_2 = (struct block_t *)malloc(sizeof(struct block_t));
+    *block_2 = make_block(block->rel_x, block->rel_y + quad_height, quad_width,
+                          quad_height);
+    enqueue(q, block_2);
+
+    struct block_t *block_3 = (struct block_t *)malloc(sizeof(struct block_t));
+    *block_3 = make_block(block->rel_x + quad_width, block->rel_y + quad_height,
+                          quad_width, quad_height);
+    enqueue(q, block_3);
 }
 
 struct transformation_t {
-    block_t domain_block, range_block;
+    struct block_t domain_block, range_block;
     double contrast, brightness;
     int angle;
 };

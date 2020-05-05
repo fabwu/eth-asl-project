@@ -70,14 +70,14 @@ void write_fic_file(string &filename, double *fic_image) {
 void output_csv(const vector<double> &cycles,
                        const vector<long long> &flops,
                        const string &csv_output_path) {
-#if ENABLE_PERF_COUNTER
+#ifdef ENABLE_PERF_COUNTER
     assert(cycles.size() == flops.size());
 #endif
     ofstream fout;
     fout.open(csv_output_path);
 
     fout << "cycles";
-#if ENABLE_PERF_COUNTER
+#ifdef ENABLE_PERF_COUNTER
     fout << ";flops;flops/cycle";
 #endif
     fout << endl;
@@ -85,7 +85,7 @@ void output_csv(const vector<double> &cycles,
     fout << std::fixed;
     for (size_t i = 0; i < cycles.size(); ++i) {
         fout << cycles[i];
-#if ENABLE_PERF_COUNTER
+#ifdef ENABLE_PERF_COUNTER
         fout << ';' << flops[i] << ';' << (double)flops[i] / cycles[i];
 #endif
         fout << endl;

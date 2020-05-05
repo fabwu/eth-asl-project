@@ -16,7 +16,9 @@ struct queue {
 
 struct queue make_queue(void);
 
-bool queue_empty(const struct queue *q);
+void free_queue(struct queue *q);
+
+int queue_empty(const struct queue *q);
 
 void enqueue(struct queue *q, void *entry);
 

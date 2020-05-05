@@ -1,20 +1,23 @@
 #ifndef PERFORMANCE_H
 #define PERFORMANCE_H
 
-#define ENABLE_PERF_COUNTER true
+#define ENABLE_PERF_COUNTER
 
-inline long long int nbr_double_flops = 0;
+// TODO: Test if this works
+static long long int nbr_double_flops = 0;
 
-inline void __reset_flop_counter() {
-#if ENABLE_PERF_COUNTER
-  nbr_double_flops = 0;
+void __reset_flop_counter() {
+#ifdef ENABLE_PERF_COUNTER
+    nbr_double_flops = 0;
 #endif
 }
 
-inline void __record_double_flops(const int amount) {
-#if ENABLE_PERF_COUNTER
-  nbr_double_flops += amount;
+void __record_double_flops(const int amount) {
+#ifdef ENABLE_PERF_COUNTER
+    nbr_double_flops += amount;
 #endif
 }
+
+long long int __nbr_double_flops(void) { return nbr_double_flops; }
 
 #endif  // PERFORMANCE_H

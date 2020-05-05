@@ -14,6 +14,15 @@ struct queue make_queue(void) {
     return q;
 }
 
+void free_queue(struct queue *q) {
+    while (!queue_empty(q)) {
+        dequeue(q);
+    }
+    free(q->front);
+    q->front = NULL;
+    q->back = NULL;
+}
+
 int queue_empty(const struct queue *q) { return q->front == q->back; }
 
 void enqueue(struct queue *q, void *entry) {
