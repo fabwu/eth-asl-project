@@ -28,6 +28,7 @@ int queue_empty(const struct queue *q) { return q->front == q->back; }
 void enqueue(struct queue *q, void *entry) {
     q->back->data = entry;
     q->back->next = (struct queue_node *)malloc(sizeof(struct queue_node));
+    q->back = q->back->next;
 }
 
 void *dequeue(struct queue *q) {

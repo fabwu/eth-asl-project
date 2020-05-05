@@ -96,4 +96,18 @@ struct transformation_t {
     int angle;
 };
 
+typedef struct queue *(*compress_func_type)(const struct image_t *image,
+                                            const int block_size_domain);
+
+typedef void (*decompress_func_type)(struct image_t *image,
+                                     const struct queue *transformations,
+                                     const int iterations);
+
+struct func_suite_t {
+    compress_func_type compress_func;
+    decompress_func_type decompress_func;
+};
+
+struct func_suite_t register_suite();
+
 #endif  // TYPES_H

@@ -41,16 +41,16 @@ double *read_grayscale_file(const string &filename, int *height, int *width) {
     stringstream s(line);
     if (getline(s, word, ';')) {
         const char *x = word.c_str();
-        height[0] = stoi(x);
+        *height = stoi(x);
     }
     if (getline(s, word, ';')) {
         const char *x = word.c_str();
-        width[0] = stoi(x);
+        *width = stoi(x);
     }
 
     // read image data
     auto grayscale_image =
-            (double *) malloc(width[0] * height[0] * sizeof(double));
+            (double *) malloc((*width) * (*height) * sizeof(double));
     while (fin >> line) {
         stringstream s(line);
         while (getline(s, word, ';')) {

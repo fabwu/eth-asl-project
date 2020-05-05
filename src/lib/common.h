@@ -43,20 +43,6 @@ class params_t {
           csv_output_path(csv_output_path) {}
 };
 
-typedef std::vector<struct transformation_t> (*compress_func_type)(
-    const image_t &image, const int block_size_domain);
-
-typedef void (*decompress_func_type)(
-    image_t &image, const std::vector<transformation_t> &transformations,
-    const int iterations);
-
-struct func_suite_t {
-    compress_func_type compress_func;
-    decompress_func_type decompress_func;
-};
-
-func_suite_t register_suite();
-
 inline double mean_squared_error(const struct image_t &original,
                                  const struct image_t &converted) {
     assert(original.size == converted.size);
@@ -81,12 +67,13 @@ inline double psnr(const double mse) {
 inline double verify_compress_decompress_error(const struct image_t &image,
                                                const int block_size_domain,
                                                const func_suite_t &suite) {
-    auto transformations = suite.compress_func(image, block_size_domain);
+    auto transformations = suite.compress_func(&image, block_size_domain);
     struct image_t decompressed_image = make_image(image.size, true);
-    suite.decompress_func(decompressed_image, transformations,
+    suite.decompress_func(&decompressed_image, transformations,
                           VERIFY_DECOMPRESS_ITERATIONS);
 
     double mse = mean_squared_error(image, decompressed_image);
+    free_image_data(&decompressed_image);
 
     return psnr(mse);
 }
@@ -111,7 +98,9 @@ class benchmark_compress_t : public virtual benchmark_t {
         : image(image), block_size_domain(block_size_domain), suite(suite) {}
 
     void perform() const override {
-        suite.compress_func(image, block_size_domain);
+        auto transformations = suite.compress_func(&image, block_size_domain);
+        free_queue(transformations);
+        free(transformations);
     }
 };
 
@@ -120,22 +109,23 @@ class benchmark_decompress_t : public virtual benchmark_t {
     const struct image_t &original_image;
     const func_suite_t suite;
     const size_t iterations;
-    const std::vector<struct transformation_t> transformations;
+    const struct queue *transformations;
 
    public:
     benchmark_decompress_t(const struct image_t &original_image,
-                           std::vector<struct transformation_t> transformations,
+                           const struct queue *transformations,
                            const int decompression_iterations,
                            const func_suite_t &suite)
         : original_image(original_image),
           suite(suite),
           iterations(decompression_iterations),
-          transformations(std::move(transformations)) {}
+          transformations(transformations) {}
 
     void perform() const override {
         struct image_t decompressed_image =
             make_image(original_image.size, true);
-        suite.decompress_func(decompressed_image, transformations, iterations);
+        suite.decompress_func(&decompressed_image, transformations, iterations);
+        free_image_data(&decompressed_image);
     }
 };
 
@@ -221,7 +211,7 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
     std::cout << "\t"
               << "cycles (median): " << median_cycles << std::endl;
 
-#if ENABLE_PERF_COUNTER
+#ifdef ENABLE_PERF_COUNTER
     auto median_flops = median(flops);
     std::cout << "\t"
               << "flops: " << median_flops << std::endl;
@@ -271,6 +261,8 @@ inline void benchmark_compress(const params_t &params) {
                                          params.block_size_domain, suite);
 
     benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
+
+    free(original_image_data);
 }
 
 inline void benchmark_decompress(const params_t &params) {
@@ -285,12 +277,14 @@ inline void benchmark_decompress(const params_t &params) {
     if (!verify_suite(suite, params.block_size_domain, original_image)) return;
 
     auto transformations =
-        suite.compress_func(original_image, params.block_size_domain);
+        suite.compress_func(&original_image, params.block_size_domain);
     const benchmark_decompress_t benchmark(original_image, transformations,
                                            params.decompression_iterations,
                                            suite);
 
     benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
+
+    free(original_image_data);
 }
 
 inline void compress_decompress(const params_t &params) {
@@ -304,11 +298,17 @@ inline void compress_decompress(const params_t &params) {
     const auto suite = register_suite();
     // if (!verify_suite(suite, image)) return;
 
-    auto transformations = suite.compress_func(image, params.block_size_domain);
+    auto transformations =
+        suite.compress_func(&image, params.block_size_domain);
     struct image_t decompressed_image = make_image(width, true);
-    suite.decompress_func(decompressed_image, transformations,
+    suite.decompress_func(&decompressed_image, transformations,
                           params.decompression_iterations);
     print_grayscale_file(decompressed_image.data, height, width);
+
+    free_queue(transformations);
+    free(transformations);
+    free_image_data(&decompressed_image);
+    free(original_image_data);
 }
 
 #endif  // COMMON_H

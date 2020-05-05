@@ -236,13 +236,12 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
 
                 if (error < best_error) {
                     best_error = error;
-                    best_transformation = {
-                        .domain_block = *prepared_domain_block->domain_block,
-                        .range_block = *range_block,
-                        .contrast = contrast,
-                        .brightness = brightness,
-                        .angle = angle,
-                    };
+                    best_transformation->domain_block =
+                        *prepared_domain_block->domain_block;
+                    best_transformation->range_block = *range_block;
+                    best_transformation->contrast = contrast;
+                    best_transformation->brightness = brightness;
+                    best_transformation->angle = angle;
                 }
             }
         }
@@ -278,38 +277,46 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
     return transformations;
 }
 
-void apply_transformation(struct image_t *image, const transformation_t &t) {
-    assert(t.domain_block.width == t.domain_block.height);
-    assert(t.range_block.width == t.range_block.height);
+void apply_transformation(struct image_t *image,
+                          const struct transformation_t *t) {
+    assert(t->domain_block.width == t->domain_block.height);
+    assert(t->range_block.width == t->range_block.height);
 
-    const image_t *scaled_domain_block = scale_block(
-        image, t.domain_block, t.range_block.width, t.range_block.height);
-    image_t rotated_domain_block = image_t(t.range_block.height, false);
-    rotate(rotated_domain_block, *scaled_domain_block, t.angle);
+    struct image_t *scaled_domain_block = scale_block(
+        image, &t->domain_block, t->range_block.width, t->range_block.height);
+    struct image_t rotated_domain_block = make_image(t->range_block.height, 0);
+    rotate(&rotated_domain_block, scaled_domain_block, t->angle);
 
-    for (int i = 0; i < t.range_block.height; ++i) {
-        for (int j = 0; j < t.range_block.width; ++j) {
+    for (int i = 0; i < t->range_block.height; ++i) {
+        for (int j = 0; j < t->range_block.width; ++j) {
             double value =
-                rotated_domain_block[i * rotated_domain_block.size + j];
-            int idx = t.range_block.get_index_in_image(i, j, image);
-            image[idx] = value * t.contrast + t.brightness;
+                rotated_domain_block.data[i * rotated_domain_block.size + j];
+            int idx = get_index_in_image(&t->range_block, i, j, image);
+            image->data[idx] = value * t->contrast + t->brightness;
             __record_double_flops(2);
         }
     }
+
+    free_image_data(scaled_domain_block);
+    free(scaled_domain_block);
+    free_image_data(&rotated_domain_block);
 }
 
-void decompress(image_t &decompressed_image,
-                const vector<transformation_t> &transformations,
-                const int num_iterations) {
+void decompress(struct image_t *decompressed_image,
+                const struct queue *transformations, const int num_iterations) {
     for (int iter = 0; iter < num_iterations; ++iter) {
-        for (const auto t : transformations) {
-            apply_transformation(decompressed_image, t);
+        const struct queue_node *current = transformations->front;
+        while (current != transformations->back) {
+            apply_transformation(
+                decompressed_image,
+                (const struct transformation_t *)current->data);
+            current = current->next;
         }
     }
 }
 
-func_suite_t register_suite() {
-    func_suite_t suite = {.compress_func = &compress,
-                          .decompress_func = &decompress};
+struct func_suite_t register_suite(void) {
+    struct func_suite_t suite = {.compress_func = &compress,
+                                 .decompress_func = &decompress};
     return suite;
 }
