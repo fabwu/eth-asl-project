@@ -185,7 +185,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
     struct block_t *initial_range_blocks =
         create_squared_blocks(image->size, initial_range_block_size, 0, 0);
-    const size_t initial_range_blocks_length = (image->size / initial_range_block_size) * (image->size / initial_range_block_size);
+    const size_t initial_range_blocks_length = 4;
     struct block_t *domain_blocks =
         create_squared_blocks(image->size, current_domain_block_size, 0, 0);
     size_t domain_blocks_length = (image->size / current_domain_block_size) * (image->size / current_domain_block_size);
