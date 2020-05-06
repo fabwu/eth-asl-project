@@ -48,19 +48,21 @@ struct image_t scale_block(const struct image_t *image,
 
     struct image_t scaled_image = make_image(width, 0);
 
-    int idx = 0;
+    size_t scaled_image_idx = 0;
+    size_t original_image_idx = block->rel_y * image->size + block->rel_x;
     for (int y = 0; y < block->height; y += 2) {
         for (int x = 0; x < block->width; x += 2) {
             double val = 0.0;
-            val += image->data[get_index_in_image(block, y, x, image)];
-            val += image->data[get_index_in_image(block, y, x + 1, image)];
-            val += image->data[get_index_in_image(block, y + 1, x, image)];
-            val += image->data[get_index_in_image(block, y + 1, x + 1, image)];
-
-            scaled_image.data[idx] = val / 4.0;
-            idx++;
+            val += image->data[original_image_idx];
+            val += image->data[original_image_idx + 1];
+            val += image->data[original_image_idx + image->size];
+            val += image->data[original_image_idx + image->size + 1];
+            scaled_image.data[scaled_image_idx] = val / 4.0;
+            scaled_image_idx++;
+            original_image_idx += 2;
             __record_double_flops(5);
         }
+        original_image_idx += image->size;
     }
 
     return scaled_image;
@@ -82,7 +84,6 @@ double compute_brightness_and_contrast_with_error(
     const struct image_t *image, const struct image_t *domain_block_image,
     const struct block_t *range_block, double *ret_brightness,
     double *ret_contrast) {
-
     assert(ret_brightness != NULL);
     assert(ret_contrast != NULL);
     assert(domain_block_image->size == range_block->height);
@@ -92,56 +93,27 @@ double compute_brightness_and_contrast_with_error(
     const int n = range_block->width;
     const int num_pixels = n * n;
 
-    double sum_domain_1 = 0.0;
-    double sum_domain_2 = 0.0;
+    double sum_domain = 0.0;
+    double sum_range = 0.0;
+    double sum_range_times_domain = 0.0;
+    double sum_domain_squared = 0.0;
+    double sum_range_squared = 0.0;
 
-    double sum_range_1 = 0.0;
-    double sum_range_2 = 0.0;
-
-    double sum_range_times_domain_1 = 0.0;
-    double sum_range_times_domain_2 = 0.0;
-
-    double sum_domain_squared_1 = 0.0;
-    double sum_domain_squared_2 = 0.0;
-
-    double sum_range_squared_1 = 0.0;
-    double sum_range_squared_2 = 0.0;
-
+    size_t ind =  range_block->rel_y * image->size + range_block->rel_x;
     for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; j += 2) {
-            double di_1 = domain_block_image->data[i * n + j];
-            double di_2 = domain_block_image->data[i * n + j + 1];
-
-            size_t ind = get_index_in_image(range_block, i, j, image);
-            double ri_1 = image->data[ind];
-            double ri_2 = image->data[ind + 1];
-
-            sum_domain_1 += di_1;
-            sum_domain_2 += di_2;
-
-            sum_range_1 += ri_1;
-            sum_range_2 += ri_2;
-
-            sum_range_times_domain_1 += ri_1 * di_1;
-            sum_range_times_domain_2 += ri_2 * di_2;
-
-            sum_domain_squared_1 += di_1 * di_1;
-            sum_domain_squared_2 += di_2 * di_2;
-
-            sum_range_squared_1 += ri_1 * ri_1;
-            sum_range_squared_2 += ri_2 * ri_2;
+        for (int j = 0; j < n; ++j) {
+            double di = domain_block_image->data[i * n + j];
+            double ri = image->data[ind];
+            ind++;
+            sum_domain += di;
+            sum_range += ri;
+            sum_range_times_domain += ri * di;
+            sum_domain_squared += di * di;
+            sum_range_squared += ri * ri;
         }
+        ind += image->size - range_block->width;
     }
 
-    // add partial sums again
-    double sum_domain = sum_domain_1 + sum_domain_2;
-    double sum_range = sum_range_1 + sum_range_2;
-    double sum_range_times_domain =
-        sum_range_times_domain_1 + sum_range_times_domain_2;
-    double sum_domain_squared = sum_domain_squared_1 + sum_domain_squared_2;
-    double sum_range_squared = sum_range_squared_1 + sum_range_squared_2;
-
-    // TODO: still correct?
     __record_double_flops(n * n * 8);
 
     double denominator =
