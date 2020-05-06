@@ -1,9 +1,14 @@
+import argparse
+import configparser
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-import argparse, sys, os, subprocess, configparser
 import numpy as np
+import os
+import subprocess
+import sys
 
 GRAY_DELIM = ";"
+
 
 class Fic(object):
     @staticmethod
@@ -13,7 +18,7 @@ class Fic(object):
     @staticmethod
     def __rgb2gray(rgb):
         # uses PAL/NTSC conversion
-        return np.dot(rgb[...,:3], [299, 587, 114]) / 1000
+        return np.dot(rgb[..., :3], [299, 587, 114]) / 1000
 
     @staticmethod
     def __parse_image(data):
@@ -144,6 +149,7 @@ class Fic(object):
 
         # call function with same name
         getattr(self, args.command)()
+
 
 if __name__ == '__main__':
     Fic()

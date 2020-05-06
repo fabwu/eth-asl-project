@@ -1,8 +1,8 @@
+#include <boost/program_options.hpp>
 #include <cassert>
 #include <string>
-#include "../lib/common.hpp"
 
-#include <boost/program_options.hpp>
+#include "../lib/common.hpp"
 using namespace boost::program_options;
 
 #include <iostream>
@@ -13,23 +13,15 @@ int main(int argc, char const *argv[]) {
 
     options_description desc("Options");
 
-    desc.add_options()
-        ("help,h", "produce help message")
-        ("benchmark,b", "benchmark")
-        ("decompress,d", "decrompress image")
-        ("compress,c", "crompress image")
-        ("iterations,i",
-         value<int>()->default_value(10),
-         "number of decompression iterations")
-        ("filename,f",
-         value<string>(),
-         "gray image file")
-        ("error,e",
-         value<int>()->default_value(100),
-         "the error threshold, which may not be exceeded by any transformation")
-        ("csv,o", value<string>(), "report output csv file")
-        ;
-
+    desc.add_options()("help,h", "produce help message")(
+        "benchmark,b", "benchmark")("decompress,d", "decrompress image")(
+        "compress,c", "crompress image")("iterations,i",
+                                         value<int>()->default_value(10),
+                                         "number of decompression iterations")(
+        "filename,f", value<string>(), "gray image file")(
+        "error,e", value<int>()->default_value(100),
+        "the error threshold, which may not be exceeded by any transformation")(
+        "csv,o", value<string>(), "report output csv file");
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -41,9 +33,8 @@ int main(int argc, char const *argv[]) {
     };
 
     if (vm.count("filename") && vm.count("error")) {
-        params_t params(
-            vm["filename"].as<string>(),
-            vm["error"].as<int>(), vm["iterations"].as<int>());
+        params_t params(vm["filename"].as<string>(), vm["error"].as<int>(),
+                        vm["iterations"].as<int>());
 
         if (vm.count("csv")) {
             params.csv_output = true;
@@ -71,5 +62,4 @@ int main(int argc, char const *argv[]) {
 
     // show help if not yet done
     cout << desc << "\n";
-
 }

@@ -50,4 +50,3 @@ void rotate(struct image_t *out, const struct image_t *in, int angle) {
 
     assert(0);
 }
-

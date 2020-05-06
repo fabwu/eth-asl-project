@@ -24,8 +24,7 @@ struct block_t {
 struct block_t make_block(int x, int y, int width, int height);
 
 int get_index_in_image(const struct block_t *block, const int y_rel_block,
-                       const int x_rel_block,
-                       const struct image_t *full_image);
+                       const int x_rel_block, const struct image_t *full_image);
 
 void print_block(const struct block_t *block, const struct image_t *image);
 

@@ -34,8 +34,8 @@ class params_t {
     bool csv_output;
     std::string csv_output_path;
 
-    params_t(std::string image_path, int error_threshold, int decompression_iterations,
-             bool csv_output = false,
+    params_t(std::string image_path, int error_threshold,
+             int decompression_iterations, bool csv_output = false,
              std::string csv_output_path = std::string())
         : image_path(image_path),
           error_threshold(error_threshold),
@@ -94,8 +94,8 @@ class benchmark_compress_t : public virtual benchmark_t {
     const func_suite_t suite;
 
    public:
-    benchmark_compress_t(const struct image_t &image,
-                         const int error_threshold, const func_suite_t &suite)
+    benchmark_compress_t(const struct image_t &image, const int error_threshold,
+                         const func_suite_t &suite)
         : image(image), error_threshold(error_threshold), suite(suite) {}
 
     void perform() const override {
@@ -258,8 +258,8 @@ inline void benchmark_compress(const params_t &params) {
     const auto suite = register_suite();
     verify_suite(suite, params.error_threshold, original_image);
 
-    const benchmark_compress_t benchmark(original_image,
-                                         params.error_threshold, suite);
+    const benchmark_compress_t benchmark(original_image, params.error_threshold,
+                                         suite);
 
     benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
 
@@ -301,8 +301,7 @@ inline void compress_decompress(const params_t &params) {
     const auto suite = register_suite();
     // if (!verify_suite(suite, image)) return;
 
-    auto transformations =
-        suite.compress_func(&image, params.error_threshold);
+    auto transformations = suite.compress_func(&image, params.error_threshold);
     struct image_t decompressed_image = make_image(width, true);
     suite.decompress_func(&decompressed_image, transformations,
                           params.decompression_iterations);

@@ -3,10 +3,10 @@ extern "C" {
 #include "performance.h"
 }
 
+#include <cassert>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <cassert>
 
 using namespace std;
 
@@ -52,7 +52,7 @@ double *read_grayscale_file(const string &filename, int *height, int *width) {
 
     // read image data
     auto grayscale_image =
-            (double *) malloc((*width) * (*height) * sizeof(double));
+        (double *)malloc((*width) * (*height) * sizeof(double));
     while (fin >> line) {
         stringstream s(line);
         while (getline(s, word, ';')) {
@@ -69,9 +69,8 @@ void write_fic_file(string &filename, double *fic_image) {
     cout << "writing fic file (to be implemented)" << endl;
 }
 
-void output_csv(const vector<double> &cycles,
-                       const vector<long long> &flops,
-                       const string &csv_output_path) {
+void output_csv(const vector<double> &cycles, const vector<long long> &flops,
+                const string &csv_output_path) {
 #ifdef ENABLE_PERF_COUNTER
     assert(cycles.size() == flops.size());
 #endif

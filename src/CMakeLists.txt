@@ -8,7 +8,7 @@ add_library(lib_commons
         lib/tsc_x86.h
         lib/performance.h
         lib/performance.c
-)
+        )
 add_library(lib_types lib/types.h lib/types.c)
 add_library(lib_rotate lib/rotate.h lib/rotate.c)
 add_library(lib_queue lib/queue.h lib/queue.c)

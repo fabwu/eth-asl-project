@@ -1,14 +1,14 @@
 // uncomment to disable assert()
 // #define NDEBUG
 #include <assert.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <float.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-#include "lib/types.h"
 #include "lib/performance.h"
-#include "lib/rotate.h"
 #include "lib/queue.h"
+#include "lib/rotate.h"
+#include "lib/types.h"
 
 #define ALL_ANGLES_LENGTH 4
 static const int ALL_ANGLES[] = {0, 90, 180, 270};
@@ -26,7 +26,8 @@ static struct block_t *create_squared_blocks(const int image_size,
     int index = 0;
     for (int i = 0; i < image_size; i += block_size) {
         for (int j = 0; j < image_size; j += block_size) {
-            blocks[index] = make_block(j + x_offset, i + y_offset, block_size, block_size);
+            blocks[index] =
+                make_block(j + x_offset, i + y_offset, block_size, block_size);
             ++index;
         }
     }
@@ -34,7 +35,8 @@ static struct block_t *create_squared_blocks(const int image_size,
     return blocks;
 }
 
-struct image_t scale_block(const struct image_t *image, const struct block_t *block, int width, int height) {
+struct image_t scale_block(const struct image_t *image,
+                           const struct block_t *block, int width, int height) {
     assert(block->width >= width);
     assert(block->height >= height);
     assert(block->width == block->height);  // just for simplicity
@@ -46,9 +48,9 @@ struct image_t scale_block(const struct image_t *image, const struct block_t *bl
 
     struct image_t scaled_image = make_image(width, 0);
 
-    int idx=0;
-    for (int y = 0; y < block->height; y+=2) {
-        for (int x = 0; x < block->width; x+=2) {
+    int idx = 0;
+    for (int y = 0; y < block->height; y += 2) {
+        for (int x = 0; x < block->width; x += 2) {
             double val = 0.0;
             val += image->data[get_index_in_image(block, y, x, image)];
             val += image->data[get_index_in_image(block, y, x + 1, image)];
@@ -134,7 +136,7 @@ double compute_brightness_and_contrast_with_error(
         num_pixels;
     __record_double_flops(14);
 
-    if(*ret_contrast>1.0 || *ret_contrast < -1.0) error=DBL_MAX;
+    if (*ret_contrast > 1.0 || *ret_contrast < -1.0) error = DBL_MAX;
 
     return error;
 }
@@ -154,7 +156,8 @@ struct prepared_block_t {
     struct image_t angles[ALL_ANGLES_LENGTH];
 };
 
-void free_prepared_blocks(struct prepared_block_t *prepared_domain_blocks, int size) {
+void free_prepared_blocks(struct prepared_block_t *prepared_domain_blocks,
+                          int size) {
     for (size_t i = 0; i < size; ++i) {
         for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
             free_image_data(prepared_domain_blocks[i].angles + j);
@@ -169,12 +172,12 @@ void prepare_domain_blocks(struct prepared_block_t *prepared_domain_blocks,
                            const int domain_blocks_length,
                            const int range_block_size) {
     for (size_t i = 0; i < domain_blocks_length; ++i) {
-        const struct image_t scaled_domain_block =
-            scale_block(image, domain_blocks + i, range_block_size,
-                        range_block_size);
+        const struct image_t scaled_domain_block = scale_block(
+            image, domain_blocks + i, range_block_size, range_block_size);
 
         prepared_domain_blocks[i].domain_block = domain_blocks + i;
-        rotate_domain_blocks(&scaled_domain_block, prepared_domain_blocks[i].angles);
+        rotate_domain_blocks(&scaled_domain_block,
+                             prepared_domain_blocks[i].angles);
     }
 }
 
@@ -192,8 +195,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     // Need to compress domain_block, such that size(domain_block) ==
     // size(range_block) in order to compare difference! That means that a
     // square of n pixels need to be compressed to one pixel
-    struct prepared_block_t *prepared_domain_blocks = (struct prepared_block_t *)malloc(domain_blocks_length * sizeof(struct prepared_block_t));
-    prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks, domain_blocks_length, initial_range_block_size);
+    struct prepared_block_t *prepared_domain_blocks =
+        (struct prepared_block_t *)malloc(domain_blocks_length *
+                                          sizeof(struct prepared_block_t));
+    prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks,
+                          domain_blocks_length, initial_range_block_size);
 
     // The range blocks we start with
     struct queue remaining_range_blocks = make_queue();
@@ -204,11 +210,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     // Learn mappings from domain blocks to range blocks
     // That is, find a domain block for every range block, such that their
     // difference is minimal
-    struct queue *transformations = (struct queue *)malloc(sizeof(struct queue));
+    struct queue *transformations =
+        (struct queue *)malloc(sizeof(struct queue));
     *transformations = make_queue();
     int current_range_block_size = initial_range_block_size;
     while (!queue_empty(&remaining_range_blocks)) {
-        struct block_t *range_block = (struct block_t *)dequeue(&remaining_range_blocks);
+        struct block_t *range_block =
+            (struct block_t *)dequeue(&remaining_range_blocks);
 
         // Should hold because the queue is FIFO and handles all
         // range blocks of a size before reaching smaller sizes
@@ -220,24 +228,29 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             free_prepared_blocks(prepared_domain_blocks, domain_blocks_length);
 
             current_domain_block_size = current_range_block_size;
-            domain_blocks =
-                create_squared_blocks(image->size, current_domain_block_size, 0, 0);
-            domain_blocks_length = (image->size / current_domain_block_size) * (image->size / current_domain_block_size);
+            domain_blocks = create_squared_blocks(
+                image->size, current_domain_block_size, 0, 0);
+            domain_blocks_length = (image->size / current_domain_block_size) *
+                                   (image->size / current_domain_block_size);
 
-            prepared_domain_blocks = (struct prepared_block_t *)malloc(domain_blocks_length * sizeof(struct prepared_block_t));
-            prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks, domain_blocks_length, range_block->width);
+            prepared_domain_blocks = (struct prepared_block_t *)malloc(
+                domain_blocks_length * sizeof(struct prepared_block_t));
+            prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks,
+                                  domain_blocks_length, range_block->width);
 
             current_range_block_size = range_block->width;
         }
 
         double best_error = DBL_MAX;
-        struct transformation_t *best_transformation = (struct transformation_t *)malloc(sizeof(struct transformation_t));
+        struct transformation_t *best_transformation =
+            (struct transformation_t *)malloc(sizeof(struct transformation_t));
 
         for (size_t i = 0; i < domain_blocks_length; ++i) {
             struct prepared_block_t *prepared_domain_block =
                 prepared_domain_blocks + i;
 
-            assert(prepared_domain_block->domain_block->width == 2 * range_block->width);
+            assert(prepared_domain_block->domain_block->width ==
+                   2 * range_block->width);
 
             for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
                 const struct image_t *rotated_domain_block =
@@ -273,7 +286,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         // If range block is not one of the initial range blocks, the range
         // block was created by the quad function and can be freed
         if (!(initial_range_blocks <= range_block &&
-              range_block < initial_range_blocks + initial_range_blocks_length)) {
+              range_block <
+                  initial_range_blocks + initial_range_blocks_length)) {
             free(range_block);
         }
     }

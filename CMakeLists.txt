@@ -15,20 +15,20 @@ set(DEBUG_FLAGS "-g -O0")
 
 option(OPT_ARCH "optimize for arch" ON)
 
-if(OPT_ARCH)
+if (OPT_ARCH)
     set(RELEASE_FLAGS "${RELEASE_FLAGS} -march=native")
-endif()
+endif ()
 
 #
 # override cmake flags (gives us full control)
 #
-set(CMAKE_C_FLAGS           ${DEFAULT_FLAGS})
-set(CMAKE_CXX_FLAGS         ${DEFAULT_FLAGS})
+set(CMAKE_C_FLAGS ${DEFAULT_FLAGS})
+set(CMAKE_CXX_FLAGS ${DEFAULT_FLAGS})
 
-set(CMAKE_C_FLAGS_RELEASE   ${RELEASE_FLAGS})
+set(CMAKE_C_FLAGS_RELEASE ${RELEASE_FLAGS})
 set(CMAKE_CXX_FLAGS_RELEASE ${RELEASE_FLAGS})
 
-set(CMAKE_C_FLAGS_DEBUG     ${DEBUG_FLAGS})
-set(CMAKE_CXX_FLAGS_DEBUG   ${DEBUG_FLAGS})
+set(CMAKE_C_FLAGS_DEBUG ${DEBUG_FLAGS})
+set(CMAKE_CXX_FLAGS_DEBUG ${DEBUG_FLAGS})
 
 add_subdirectory(src)

@@ -1,8 +1,8 @@
 #include "types.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 
 struct image_t make_image(int size, int randomize_data) {
     struct image_t image;
