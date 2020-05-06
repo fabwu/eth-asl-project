@@ -52,9 +52,9 @@ struct image_t *scale_block(const struct image_t *image, const struct block_t *b
         for (int x = 0; x < block->width; x+=2) {
             double val = 0.0;
             val += image->data[get_index_in_image(block, y, x, image)];
-            val += image->data[get_index_in_image(block, y, x+1, image)];
-            val += image->data[get_index_in_image(block, y+1, x, image)];
-            val += image->data[get_index_in_image(block, y+1, x+1, image)];
+            val += image->data[get_index_in_image(block, y, x + 1, image)];
+            val += image->data[get_index_in_image(block, y + 1, x, image)];
+            val += image->data[get_index_in_image(block, y + 1, x + 1, image)];
 
             scaled_image->data[idx] = val / 4.0;
             idx++;
