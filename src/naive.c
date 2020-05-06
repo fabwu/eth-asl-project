@@ -304,8 +304,8 @@ void apply_transformation(struct image_t *image,
                 rotated_domain_block.data[i * rotated_domain_block.size + j];
             int idx = get_index_in_image(&t->range_block, i, j, image);
             int new_pixel_value = value * t->contrast + t->brightness;
-            if(new_pixel_value<0) new_pixel_value = 0;
-            if(new_pixel_value>255) new_pixel_value = 255;
+            if (new_pixel_value < 0) new_pixel_value = 0;
+            if (new_pixel_value > 255) new_pixel_value = 255;
             image->data[idx] = new_pixel_value;
             __record_double_flops(2);
         }
