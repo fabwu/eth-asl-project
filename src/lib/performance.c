@@ -1,6 +1,5 @@
 #include "performance.h"
 
-// TODO: Test if this works
 static long long int nbr_double_flops = 0;
 
 void __reset_flop_counter() {

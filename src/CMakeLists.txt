@@ -13,12 +13,17 @@ add_library(lib_types lib/types.h lib/types.c)
 add_library(lib_rotate lib/rotate.h lib/rotate.c)
 add_library(lib_queue lib/queue.h lib/queue.c)
 add_library(lib_naive naive.c)
+add_library(lib_fast fast.c)
 
+add_executable(baseline exec/fic.cpp)
 add_executable(fic exec/fic.cpp)
 add_executable(test_rotate exec/test_rotate.cpp)
 
 target_link_libraries(lib_commons PRIVATE lib_types lib_queue)
 target_link_libraries(lib_rotate PRIVATE lib_types)
 target_link_libraries(lib_naive PRIVATE lib_types lib_commons lib_queue lib_rotate)
-target_link_libraries(fic PUBLIC lib_types lib_queue lib_commons lib_rotate lib_naive ${Boost_LIBRARIES})
+target_link_libraries(lib_fast PRIVATE lib_types lib_commons lib_queue lib_rotate)
+
+target_link_libraries(baseline PUBLIC lib_types lib_queue lib_commons lib_rotate lib_naive ${Boost_LIBRARIES})
+target_link_libraries(fic PUBLIC lib_types lib_queue lib_commons lib_rotate lib_fast ${Boost_LIBRARIES})
 target_link_libraries(test_rotate PUBLIC lib_rotate)
