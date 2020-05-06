@@ -87,6 +87,11 @@ class Fic(object):
             except ValueError:
                 print("Oops!  That was no valid number.  Try again...")
 
+    @staticmethod
+    def __psnr(orig, new):
+        mse = np.mean(np.square(new - orig))
+        return 20 * np.log10(255) - 10 * np.log10(mse)
+
     def seq(self):
         config = configparser.ConfigParser()
         # default values
@@ -109,13 +114,16 @@ class Fic(object):
         with open('fic.ini', 'w') as configfile:
             config.write(configfile)
 
+        orig_image = self.__read_gray(self.file)
+
         fig = plt.figure()
         fig.suptitle("FIC error threshold {}".format(conf['error']))
         for idx, it in enumerate(iterations, start=1):
             img = self.__call_fic(conf.getint('error'), it)
+            error = self.__psnr(img, orig_image)
             ax = fig.add_subplot(2, 3, idx)
             ax.imshow(img, cmap="gray", interpolation='nearest')
-            ax.set_title('{} Iterations'.format(it))
+            ax.set_title('{} Iterations, {:.2f} psnr'.format(it, error))
             ax.set_yticks([])
             ax.set_xticks([])
         plt.show()
@@ -132,7 +140,7 @@ class Fic(object):
         parser.add_argument("file", type=str)
         args = parser.parse_args(sys.argv[1:3])
 
-        self.file = args.file;
+        self.file = args.file
 
         # call function with same name
         getattr(self, args.command)()
