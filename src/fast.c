@@ -82,6 +82,7 @@ double compute_brightness_and_contrast_with_error(
     const struct image_t *image, const struct image_t *domain_block_image,
     const struct block_t *range_block, double *ret_brightness,
     double *ret_contrast) {
+
     assert(ret_brightness != NULL);
     assert(ret_contrast != NULL);
     assert(domain_block_image->size == range_block->height);
@@ -91,25 +92,56 @@ double compute_brightness_and_contrast_with_error(
     const int n = range_block->width;
     const int num_pixels = n * n;
 
-    double sum_domain = 0.0;
-    double sum_range = 0.0;
-    double sum_range_times_domain = 0.0;
-    double sum_domain_squared = 0.0;
-    double sum_range_squared = 0.0;
+    double sum_domain_1 = 0.0;
+    double sum_domain_2 = 0.0;
+
+    double sum_range_1 = 0.0;
+    double sum_range_2 = 0.0;
+
+    double sum_range_times_domain_1 = 0.0;
+    double sum_range_times_domain_2 = 0.0;
+
+    double sum_domain_squared_1 = 0.0;
+    double sum_domain_squared_2 = 0.0;
+
+    double sum_range_squared_1 = 0.0;
+    double sum_range_squared_2 = 0.0;
 
     for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            double di = domain_block_image->data[i * n + j];
-            double ri =
-                image->data[get_index_in_image(range_block, i, j, image)];
-            sum_domain += di;
-            sum_range += ri;
-            sum_range_times_domain += ri * di;
-            sum_domain_squared += di * di;
-            sum_range_squared += ri * ri;
+        for (int j = 0; j < n; j += 2) {
+            double di_1 = domain_block_image->data[i * n + j];
+            double di_2 = domain_block_image->data[i * n + j + 1];
+
+            size_t ind = get_index_in_image(range_block, i, j, image);
+            double ri_1 = image->data[ind];
+            double ri_2 = image->data[ind + 1];
+
+            sum_domain_1 += di_1;
+            sum_domain_2 += di_2;
+
+            sum_range_1 += ri_1;
+            sum_range_2 += ri_2;
+
+            sum_range_times_domain_1 += ri_1 * di_1;
+            sum_range_times_domain_2 += ri_2 * di_2;
+
+            sum_domain_squared_1 += di_1 * di_1;
+            sum_domain_squared_2 += di_2 * di_2;
+
+            sum_range_squared_1 += ri_1 * ri_1;
+            sum_range_squared_2 += ri_2 * ri_2;
         }
     }
 
+    // add partial sums again
+    double sum_domain = sum_domain_1 + sum_domain_2;
+    double sum_range = sum_range_1 + sum_range_2;
+    double sum_range_times_domain =
+        sum_range_times_domain_1 + sum_range_times_domain_2;
+    double sum_domain_squared = sum_domain_squared_1 + sum_domain_squared_2;
+    double sum_range_squared = sum_range_squared_1 + sum_range_squared_2;
+
+    // TODO: still correct?
     __record_double_flops(n * n * 8);
 
     double denominator =
