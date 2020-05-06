@@ -220,7 +220,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             free(domain_blocks);
             free_prepared_blocks(prepared_domain_blocks, domain_blocks_length);
 
-            current_domain_block_size = 2*range_block->width;
+            current_domain_block_size = current_range_block_size;
             domain_blocks =
                 create_squared_blocks(image->size, current_domain_block_size, 0, 0);
             domain_blocks_length = (image->size / current_domain_block_size) * (image->size / current_domain_block_size);
