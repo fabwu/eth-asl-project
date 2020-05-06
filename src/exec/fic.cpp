@@ -24,9 +24,9 @@ int main(int argc, char const *argv[]) {
         ("filename,f",
          value<string>(),
          "gray image file")
-        ("sizes,s",
-         value<vector<int> >()->multitoken()->default_value(vector<int>{8,16}, "8 16"),
-         "size of range and domain blocks")
+        ("error,e",
+         value<int>()->default_value(100),
+         "the error threshold, which may not be exceeded by any transformation")
         ("csv,o", value<string>(), "report output csv file")
         ;
 
@@ -40,10 +40,10 @@ int main(int argc, char const *argv[]) {
         return 0;
     };
 
-    if (vm.count("filename") && vm["sizes"].as<vector<int> >().size() == 2) {
+    if (vm.count("filename") && vm.count("error")) {
         params_t params(
-            vm["filename"].as<string>(), vm["sizes"].as<vector<int> >()[0],
-            vm["sizes"].as<vector<int> >()[1], vm["iterations"].as<int>());
+            vm["filename"].as<string>(),
+            vm["error"].as<int>(), vm["iterations"].as<int>());
 
         if (vm.count("csv")) {
             params.csv_output = true;

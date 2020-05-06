@@ -38,7 +38,7 @@ struct transformation_t {
 };
 
 typedef struct queue *(*compress_func_type)(const struct image_t *image,
-                                            const int block_size_domain);
+                                            const int error_threshold);
 
 typedef void (*decompress_func_type)(struct image_t *image,
                                      const struct queue *transformations,

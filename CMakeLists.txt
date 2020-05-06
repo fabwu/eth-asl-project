@@ -11,11 +11,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}) # place binaries in buil
 #
 set(DEFAULT_FLAGS "-Wall -lboost_program_options")
 set(RELEASE_FLAGS "-O3 -DNDEBUG")
-set(DEBUG_FLAGS "-O0")
+set(DEBUG_FLAGS "-g -O0")
 
-#
-# options to customize optimizations
-#
 option(OPT_ARCH "optimize for arch" ON)
 
 if(OPT_ARCH)
