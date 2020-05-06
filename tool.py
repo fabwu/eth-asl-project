@@ -70,8 +70,8 @@ class Fic(object):
         plt.imshow(img, cmap="gray")
         plt.show()
 
-    def __call_fic(self, range_block_size, domain_block_size, iterations):
-        args = "build/fic -c -d -s {} {} -i {} -f {}".format(range_block_size, domain_block_size, iterations, self.file)
+    def __call_fic(self, error_threshold, iterations):
+        args = "build/fic -c -d -e {} -i {} -f {}".format(error_threshold, iterations, self.file)
         print("call: {}".format(args))
         p = subprocess.run(args.split(), capture_output=True, text=True)
         return self.__parse_image(p.stdout)
@@ -91,16 +91,13 @@ class Fic(object):
         config = configparser.ConfigParser()
         # default values
         config.read_dict({'FIC': {
-            'range_block_size': 16,
-            'domain_block_size': 32,
+            'error': 100,
             'iterations': '1 2 3 6 10 20',
         }})
         config.read('fic.ini')
         conf = config['FIC']
 
-        conf['range_block_size'] = self.__read_num('range block size', conf['range_block_size'])
-        conf['domain_block_size'] = self.__read_num('domain block size', conf['domain_block_size'])
-        assert conf.getint('range_block_size') <= conf.getint('domain_block_size'), 'range block has to be smaller than domain block'
+        conf['error'] = self.__read_num('error threshold', conf['error'])
 
         data = input('iteration sequence [e.g. 1 2 6 10] (default: {}): '.format(conf['iterations']))
         if data:
@@ -110,12 +107,12 @@ class Fic(object):
         assert len(iterations) <= 6, "Can't show more than 6 plots"
 
         with open('fic.ini', 'w') as configfile:
-           config.write(configfile)
+            config.write(configfile)
 
         fig = plt.figure()
-        fig.suptitle("FIC Range Size {} Domain Size {}".format(conf['range_block_size'], conf['domain_block_size']))
+        fig.suptitle("FIC error threshold {}".format(conf['error']))
         for idx, it in enumerate(iterations, start=1):
-            img = self.__call_fic(conf.getint('range_block_size'), conf.getint('domain_block_size'), it)
+            img = self.__call_fic(conf.getint('error'), it)
             ax = fig.add_subplot(2, 3, idx)
             ax.imshow(img, cmap="gray", interpolation='nearest')
             ax.set_title('{} Iterations'.format(it))

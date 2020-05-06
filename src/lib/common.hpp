@@ -29,19 +29,16 @@ extern "C" struct func_suite_t register_suite();
 class params_t {
    public:
     std::string image_path;
-    int block_size_range;
-    int block_size_domain;
+    int error_threshold;
     int decompression_iterations;
     bool csv_output;
     std::string csv_output_path;
 
-    params_t(std::string image_path, int block_size_range,
-             int block_size_domain, int decompression_iterations,
+    params_t(std::string image_path, int error_threshold, int decompression_iterations,
              bool csv_output = false,
              std::string csv_output_path = std::string())
         : image_path(image_path),
-          block_size_range(block_size_range),
-          block_size_domain(block_size_domain),
+          error_threshold(error_threshold),
           decompression_iterations(decompression_iterations),
           csv_output(csv_output),
           csv_output_path(csv_output_path) {}
@@ -69,9 +66,9 @@ inline double psnr(const double mse) {
 }
 
 inline double verify_compress_decompress_error(const struct image_t &image,
-                                               const int block_size_domain,
+                                               const int error_threshold,
                                                const func_suite_t &suite) {
-    auto transformations = suite.compress_func(&image, block_size_domain);
+    auto transformations = suite.compress_func(&image, error_threshold);
     struct image_t decompressed_image = make_image(image.size, true);
     suite.decompress_func(&decompressed_image, transformations,
                           VERIFY_DECOMPRESS_ITERATIONS);
@@ -93,16 +90,16 @@ class benchmark_t {
 class benchmark_compress_t : public virtual benchmark_t {
    private:
     const struct image_t &image;
-    const int block_size_domain;
+    const int error_threshold;
     const func_suite_t suite;
 
    public:
     benchmark_compress_t(const struct image_t &image,
-                         const int block_size_domain, const func_suite_t &suite)
-        : image(image), block_size_domain(block_size_domain), suite(suite) {}
+                         const int error_threshold, const func_suite_t &suite)
+        : image(image), error_threshold(error_threshold), suite(suite) {}
 
     void perform() const override {
-        auto transformations = suite.compress_func(&image, block_size_domain);
+        auto transformations = suite.compress_func(&image, error_threshold);
         free_queue(transformations);
         free(transformations);
     }
@@ -225,13 +222,13 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
 #endif
 }
 
-inline bool verify_suite(const func_suite_t &suite, const int block_size_domain,
+inline bool verify_suite(const func_suite_t &suite, const int error_threshold,
                          const image_t &image) {
     std::cout << "\033[1m"
               << "VERIFICATION phase"
               << "\033[0m" << std::endl;
     double psnr =
-        verify_compress_decompress_error(image, block_size_domain, suite);
+        verify_compress_decompress_error(image, error_threshold, suite);
     bool verification_failed = psnr < VERIFY_MIN_PSNR;
     std::cout << "\t"
               << "PSNR (dB): " << psnr << " (at least " << VERIFY_MIN_PSNR
@@ -259,10 +256,10 @@ inline void benchmark_compress(const params_t &params) {
     original_image.size = width;
 
     const auto suite = register_suite();
-    verify_suite(suite, params.block_size_domain, original_image);
+    verify_suite(suite, params.error_threshold, original_image);
 
     const benchmark_compress_t benchmark(original_image,
-                                         params.block_size_domain, suite);
+                                         params.error_threshold, suite);
 
     benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
 
@@ -278,10 +275,10 @@ inline void benchmark_decompress(const params_t &params) {
     original_image.size = width;
 
     const auto suite = register_suite();
-    if (!verify_suite(suite, params.block_size_domain, original_image)) return;
+    if (!verify_suite(suite, params.error_threshold, original_image)) return;
 
     auto transformations =
-        suite.compress_func(&original_image, params.block_size_domain);
+        suite.compress_func(&original_image, params.error_threshold);
     const benchmark_decompress_t benchmark(original_image, transformations,
                                            params.decompression_iterations,
                                            suite);
@@ -303,7 +300,7 @@ inline void compress_decompress(const params_t &params) {
     // if (!verify_suite(suite, image)) return;
 
     auto transformations =
-        suite.compress_func(&image, params.block_size_domain);
+        suite.compress_func(&image, params.error_threshold);
     struct image_t decompressed_image = make_image(width, true);
     suite.decompress_func(&decompressed_image, transformations,
                           params.decompression_iterations);

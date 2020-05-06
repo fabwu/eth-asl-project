@@ -41,22 +41,24 @@ struct image_t *scale_block(const struct image_t *image, const struct block_t *b
     assert(block->width % width == 0);      // just for simplicity
     assert(block->height % height == 0);    // just for simplicity
     assert(width == height);                // just for simplicity
+    assert(block->width == 2 * width);
+    assert(block->height == 2 * height);
 
-    const int n = block->width / width;
     struct image_t *scaled_image = (struct image_t *)malloc(sizeof(struct image_t));
     *scaled_image = make_image(width, 0);
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    int idx=0;
+    for (int y = 0; y < block->height; y+=2) {
+        for (int x = 0; x < block->width; x+=2) {
             double val = 0.0;
-            for (int block_y = 0; block_y < n; ++block_y) {
-                for (int block_x = 0; block_x < n; ++block_x) {
-                    val += image->data[(y * n + block_y) * block->width + (x * n + block_x)];
-                    __record_double_flops(1);
-                }
-            }
-            scaled_image->data[y * width + x] = val / n * n;
-            __record_double_flops(2);
+            val += image->data[get_index_in_image(block, y, x, image)];
+            val += image->data[get_index_in_image(block, y, x+1, image)];
+            val += image->data[get_index_in_image(block, y+1, x, image)];
+            val += image->data[get_index_in_image(block, y+1, x+1, image)];
+
+            scaled_image->data[idx] = val / 4.0;
+            idx++;
+            __record_double_flops(5);
         }
     }
 
@@ -133,6 +135,8 @@ double compute_brightness_and_contrast_with_error(
         num_pixels;
     __record_double_flops(14);
 
+    if(*ret_contrast>1.0 || *ret_contrast < -1.0) error=DBL_MAX;
+
     return error;
 }
 
@@ -151,34 +155,46 @@ struct prepared_block_t {
     struct image_t angles[ALL_ANGLES_LENGTH];
 };
 
-struct queue *compress(const struct image_t *image, const int block_size_domain) {
-    // TODO make this a parameter
-    const double error_threshold_per_block = 1000.0;
+void free_prepared_blocks(struct prepared_block_t *prepared_domain_blocks, int size) {
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
+            free_image_data(prepared_domain_blocks[i].angles + j);
+        }
+    }
+    free(prepared_domain_blocks);
+}
 
-    // Goal: Try to map blocks of size block_size_domain to blocks of size
-    // block_size_range
+void prepare_domain_blocks(struct prepared_block_t *prepared_domain_blocks,
+                           const struct image_t *image,
+                           const struct block_t *domain_blocks,
+                           const int domain_blocks_length,
+                           const int range_block_size) {
+    for (size_t i = 0; i < domain_blocks_length; ++i) {
+        const struct image_t *scaled_domain_block =
+            scale_block(image, domain_blocks + i, range_block_size,
+                        range_block_size);
 
-    assert(block_size_domain % 2 == 0);
-    const int initial_range_block_size = block_size_domain / 2;
+        prepared_domain_blocks[i].domain_block = domain_blocks + i;
+        rotate_domain_blocks(scaled_domain_block, prepared_domain_blocks[i].angles);
+    }
+}
+
+struct queue *compress(const struct image_t *image, const int error_threshold) {
+    int current_domain_block_size = image->size;
+    const int initial_range_block_size = current_domain_block_size / 2;
+
     struct block_t *initial_range_blocks =
         create_squared_blocks(image->size, initial_range_block_size, 0, 0);
     const size_t initial_range_blocks_length = (image->size / initial_range_block_size) * (image->size / initial_range_block_size);
     struct block_t *domain_blocks =
-        create_squared_blocks(image->size, block_size_domain, 0, 0);
-    const size_t domain_blocks_length = (image->size / block_size_domain) * (image->size / block_size_domain);
+        create_squared_blocks(image->size, current_domain_block_size, 0, 0);
+    size_t domain_blocks_length = (image->size / current_domain_block_size) * (image->size / current_domain_block_size);
 
     // Need to compress domain_block, such that size(domain_block) ==
     // size(range_block) in order to compare difference! That means that a
     // square of n pixels need to be compressed to one pixel
     struct prepared_block_t *prepared_domain_blocks = (struct prepared_block_t *)malloc(domain_blocks_length * sizeof(struct prepared_block_t));
-    for (size_t i = 0; i < domain_blocks_length; ++i) {
-        const struct image_t *scaled_domain_block =
-            scale_block(image, domain_blocks + i, initial_range_block_size,
-                        initial_range_block_size);
-
-        prepared_domain_blocks[i].domain_block = domain_blocks + i;
-        rotate_domain_blocks(scaled_domain_block, prepared_domain_blocks[i].angles);
-    }
+    prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks, domain_blocks_length, initial_range_block_size);
 
     // The range blocks we start with
     struct queue remaining_range_blocks = make_queue();
@@ -201,21 +217,17 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
                range_block->width == current_range_block_size / 2);
         assert(range_block->width == range_block->height);
         if (range_block->width < current_range_block_size) {
-            for (size_t i = 0; i < domain_blocks_length; ++i) {
-                struct prepared_block_t *prepared_domain_block = prepared_domain_blocks + i;
-                const struct block_t intermediate_block = make_block(
-                    prepared_domain_block->domain_block->rel_x, prepared_domain_block->domain_block->rel_y,
-                    current_range_block_size, current_range_block_size);
-                const struct image_t *scaled_domain_block =
-                    scale_block(&prepared_domain_block->angles[0], &intermediate_block,
-                                range_block->width, range_block->height);
+            free(domain_blocks);
+            free_prepared_blocks(prepared_domain_blocks, domain_blocks_length);
 
-                // Free old space before allocating new
-                for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) free_image_data(prepared_domain_block->angles + j);
+            current_domain_block_size = 2*range_block->width;
+            domain_blocks =
+                create_squared_blocks(image->size, current_domain_block_size, 0, 0);
+            domain_blocks_length = (image->size / current_domain_block_size) * (image->size / current_domain_block_size);
 
-                rotate_domain_blocks(scaled_domain_block, prepared_domain_block->angles);
+            prepared_domain_blocks = (struct prepared_block_t *)malloc(domain_blocks_length * sizeof(struct prepared_block_t));
+            prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks, domain_blocks_length, range_block->width);
 
-            }
             current_range_block_size = range_block->width;
         }
 
@@ -225,6 +237,8 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
         for (size_t i = 0; i < domain_blocks_length; ++i) {
             struct prepared_block_t *prepared_domain_block =
                 prepared_domain_blocks + i;
+
+            assert(prepared_domain_block->domain_block->width == 2*range_block->width);
 
             for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
                 const struct image_t *rotated_domain_block =
@@ -248,7 +262,7 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
             }
         }
 
-        if (best_error > error_threshold_per_block) {
+        if (best_error > error_threshold) {
             assert(range_block->width >= 2);
             assert(range_block->height >= 2);
 
@@ -268,12 +282,7 @@ struct queue *compress(const struct image_t *image, const int block_size_domain)
     // Free all intermediate values
     free(initial_range_blocks);
     free(domain_blocks);
-    for (size_t i = 0; i < domain_blocks_length; ++i) {
-        for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
-            free_image_data(prepared_domain_blocks[i].angles + j);
-        }
-    }
-    free(prepared_domain_blocks);
+    free_prepared_blocks(prepared_domain_blocks, domain_blocks_length);
     free_queue(&remaining_range_blocks);
 
     return transformations;
@@ -294,7 +303,10 @@ void apply_transformation(struct image_t *image,
             double value =
                 rotated_domain_block.data[i * rotated_domain_block.size + j];
             int idx = get_index_in_image(&t->range_block, i, j, image);
-            image->data[idx] = value * t->contrast + t->brightness;
+            int new_pixel_value = value * t->contrast + t->brightness;
+            if(new_pixel_value<0) new_pixel_value = 0;
+            if(new_pixel_value>255) new_pixel_value = 255;
+            image->data[idx] = new_pixel_value;
             __record_double_flops(2);
         }
     }
