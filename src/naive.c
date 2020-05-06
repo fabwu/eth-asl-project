@@ -238,7 +238,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             struct prepared_block_t *prepared_domain_block =
                 prepared_domain_blocks + i;
 
-            assert(prepared_domain_block->domain_block->width == 2*range_block->width);
+            assert(prepared_domain_block->domain_block->width == 2 * range_block->width);
 
             for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
                 const struct image_t *rotated_domain_block =
