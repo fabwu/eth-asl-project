@@ -34,7 +34,7 @@ static struct block_t *create_squared_blocks(const int image_size,
     return blocks;
 }
 
-struct image_t *scale_block(const struct image_t *image, const struct block_t *block, int width, int height) {
+struct image_t scale_block(const struct image_t *image, const struct block_t *block, int width, int height) {
     assert(block->width >= width);
     assert(block->height >= height);
     assert(block->width == block->height);  // just for simplicity
@@ -44,8 +44,7 @@ struct image_t *scale_block(const struct image_t *image, const struct block_t *b
     assert(block->width == 2 * width);
     assert(block->height == 2 * height);
 
-    struct image_t *scaled_image = (struct image_t *)malloc(sizeof(struct image_t));
-    *scaled_image = make_image(width, 0);
+    struct image_t scaled_image = make_image(width, 0);
 
     int idx=0;
     for (int y = 0; y < block->height; y+=2) {
@@ -56,7 +55,7 @@ struct image_t *scale_block(const struct image_t *image, const struct block_t *b
             val += image->data[get_index_in_image(block, y + 1, x, image)];
             val += image->data[get_index_in_image(block, y + 1, x + 1, image)];
 
-            scaled_image->data[idx] = val / 4.0;
+            scaled_image.data[idx] = val / 4.0;
             idx++;
             __record_double_flops(5);
         }
@@ -151,7 +150,7 @@ static void rotate_domain_blocks(const struct image_t *domain_block,
 }
 
 struct prepared_block_t {
-    struct block_t *domain_block;
+    const struct block_t *domain_block;
     struct image_t angles[ALL_ANGLES_LENGTH];
 };
 
@@ -170,12 +169,12 @@ void prepare_domain_blocks(struct prepared_block_t *prepared_domain_blocks,
                            const int domain_blocks_length,
                            const int range_block_size) {
     for (size_t i = 0; i < domain_blocks_length; ++i) {
-        const struct image_t *scaled_domain_block =
+        const struct image_t scaled_domain_block =
             scale_block(image, domain_blocks + i, range_block_size,
                         range_block_size);
 
         prepared_domain_blocks[i].domain_block = domain_blocks + i;
-        rotate_domain_blocks(scaled_domain_block, prepared_domain_blocks[i].angles);
+        rotate_domain_blocks(&scaled_domain_block, prepared_domain_blocks[i].angles);
     }
 }
 
@@ -293,10 +292,10 @@ void apply_transformation(struct image_t *image,
     assert(t->domain_block.width == t->domain_block.height);
     assert(t->range_block.width == t->range_block.height);
 
-    struct image_t *scaled_domain_block = scale_block(
+    struct image_t scaled_domain_block = scale_block(
         image, &t->domain_block, t->range_block.width, t->range_block.height);
     struct image_t rotated_domain_block = make_image(t->range_block.height, 0);
-    rotate(&rotated_domain_block, scaled_domain_block, t->angle);
+    rotate(&rotated_domain_block, &scaled_domain_block, t->angle);
 
     for (int i = 0; i < t->range_block.height; ++i) {
         for (int j = 0; j < t->range_block.width; ++j) {
@@ -311,8 +310,7 @@ void apply_transformation(struct image_t *image,
         }
     }
 
-    free_image_data(scaled_domain_block);
-    free(scaled_domain_block);
+    free_image_data(&scaled_domain_block);
     free_image_data(&rotated_domain_block);
 }
 

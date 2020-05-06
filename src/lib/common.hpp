@@ -285,6 +285,8 @@ inline void benchmark_decompress(const params_t &params) {
 
     benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
 
+    free_queue(transformations);
+    free(transformations);
     free(original_image_data);
 }
 
