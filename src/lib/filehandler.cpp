@@ -1,5 +1,7 @@
-#include "filehandler.h"
+#include "filehandler.hpp"
+extern "C" {
 #include "performance.h"
+}
 
 #include <fstream>
 #include <iomanip>
@@ -41,16 +43,16 @@ double *read_grayscale_file(const string &filename, int *height, int *width) {
     stringstream s(line);
     if (getline(s, word, ';')) {
         const char *x = word.c_str();
-        height[0] = stoi(x);
+        *height = stoi(x);
     }
     if (getline(s, word, ';')) {
         const char *x = word.c_str();
-        width[0] = stoi(x);
+        *width = stoi(x);
     }
 
     // read image data
     auto grayscale_image =
-            (double *) malloc(width[0] * height[0] * sizeof(double));
+            (double *) malloc((*width) * (*height) * sizeof(double));
     while (fin >> line) {
         stringstream s(line);
         while (getline(s, word, ';')) {
@@ -70,14 +72,14 @@ void write_fic_file(string &filename, double *fic_image) {
 void output_csv(const vector<double> &cycles,
                        const vector<long long> &flops,
                        const string &csv_output_path) {
-#if ENABLE_PERF_COUNTER
+#ifdef ENABLE_PERF_COUNTER
     assert(cycles.size() == flops.size());
 #endif
     ofstream fout;
     fout.open(csv_output_path);
 
     fout << "cycles";
-#if ENABLE_PERF_COUNTER
+#ifdef ENABLE_PERF_COUNTER
     fout << ";flops;flops/cycle";
 #endif
     fout << endl;
@@ -85,7 +87,7 @@ void output_csv(const vector<double> &cycles,
     fout << std::fixed;
     for (size_t i = 0; i < cycles.size(); ++i) {
         fout << cycles[i];
-#if ENABLE_PERF_COUNTER
+#ifdef ENABLE_PERF_COUNTER
         fout << ';' << flops[i] << ';' << (double)flops[i] / cycles[i];
 #endif
         fout << endl;

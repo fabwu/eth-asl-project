@@ -1,6 +1,6 @@
 #include <cassert>
 #include <string>
-#include "../common.h"
+#include "../lib/common.hpp"
 
 #include <boost/program_options.hpp>
 using namespace boost::program_options;
