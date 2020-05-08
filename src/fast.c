@@ -81,40 +81,16 @@ struct image_t scale_block(const struct image_t *image,
  *
  */
 double compute_brightness_and_contrast_with_error(
-    const struct image_t *image, const struct image_t *domain_block_image,
     const struct block_t *range_block, double *ret_brightness,
-    double *ret_contrast) {
+    double *ret_contrast, const double sum_range,
+    const double sum_range_squared, const double sum_domain,
+    const double sum_domain_squared, const double sum_range_times_domain) {
     assert(ret_brightness != NULL);
     assert(ret_contrast != NULL);
-    assert(domain_block_image->size == range_block->height);
-    assert(domain_block_image->size == range_block->width);
     assert(range_block->height == range_block->width);
 
     const int n = range_block->width;
     const int num_pixels = n * n;
-
-    double sum_domain = 0.0;
-    double sum_range = 0.0;
-    double sum_range_times_domain = 0.0;
-    double sum_domain_squared = 0.0;
-    double sum_range_squared = 0.0;
-
-    size_t ind =  range_block->rel_y * image->size + range_block->rel_x;
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            double di = domain_block_image->data[i * n + j];
-            double ri = image->data[ind];
-            ind++;
-            sum_domain += di;
-            sum_range += ri;
-            sum_range_times_domain += ri * di;
-            sum_domain_squared += di * di;
-            sum_range_squared += ri * ri;
-        }
-        ind += image->size - range_block->width;
-    }
-
-    __record_double_flops(n * n * 8);
 
     double denominator =
         (num_pixels * sum_domain_squared - (sum_domain * sum_domain));
@@ -158,6 +134,8 @@ static void rotate_domain_blocks(const struct image_t *domain_block,
 struct prepared_block_t {
     const struct block_t *domain_block;
     struct image_t angles[ALL_ANGLES_LENGTH];
+    double sum;
+    double sum_squared;
 };
 
 void free_prepared_blocks(struct prepared_block_t *prepared_domain_blocks,
@@ -179,10 +157,24 @@ void prepare_domain_blocks(struct prepared_block_t *prepared_domain_blocks,
         const struct image_t scaled_domain_block = scale_block(
             image, domain_blocks + i, range_block_size, range_block_size);
 
+        double sum = 0;
+        double sum_squared = 0;
+        for (size_t j = 0;
+             j < scaled_domain_block.size * scaled_domain_block.size; j++) {
+            sum += scaled_domain_block.data[j];
+            sum_squared +=
+                scaled_domain_block.data[j] * scaled_domain_block.data[j];
+        }
+        __record_double_flops(scaled_domain_block.size * scaled_domain_block.size * 3);
+
+        prepared_domain_blocks[i].sum_squared = sum_squared;
+        prepared_domain_blocks[i].sum = sum;
+
         prepared_domain_blocks[i].domain_block = domain_blocks + i;
         rotate_domain_blocks(&scaled_domain_block,
                              prepared_domain_blocks[i].angles);
     }
+
 }
 
 struct queue *compress(const struct image_t *image, const int error_threshold) {
@@ -249,6 +241,20 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         struct transformation_t *best_transformation =
             (struct transformation_t *)malloc(sizeof(struct transformation_t));
 
+        double sum_range = 0;
+        double sum_range_squared = 0;
+        size_t ind = range_block->rel_y * image->size + range_block->rel_x;
+        for (size_t i = 0; i < range_block->height; i++) {
+            for (size_t j = 0; j < range_block->height; j++) {
+                sum_range += image->data[ind];
+                sum_range_squared += image->data[ind] * image->data[ind];
+                ind++;
+            }
+            ind += image->size - range_block->width;
+        }
+
+        __record_double_flops(range_block->width * range_block->height * 3);
+
         for (size_t i = 0; i < domain_blocks_length; ++i) {
             struct prepared_block_t *prepared_domain_block =
                 prepared_domain_blocks + i;
@@ -261,10 +267,25 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     prepared_domain_block->angles + j;
                 const int angle = ALL_ANGLES[j];
 
+                double sum_range_times_domain = 0;
+                size_t ind = range_block->rel_y * image->size + range_block->rel_x;
+                for (size_t i = 0; i < range_block->width; i++) {
+                    for (size_t j = 0; j < range_block->height; j++) {
+                        sum_range_times_domain +=
+                            image->data[ind] *
+                            rotated_domain_block
+                                ->data[i * rotated_domain_block->size + j];
+                        ind++;
+                    }
+                    ind += image->size - range_block->width;
+                }
+                __record_double_flops(range_block->width * range_block->height * 2);
+
                 double brightness, contrast, error;
                 error = compute_brightness_and_contrast_with_error(
-                    image, rotated_domain_block, range_block, &brightness,
-                    &contrast);
+                    range_block, &brightness, &contrast, sum_range,
+                    sum_range_squared, prepared_domain_block->sum,
+                    prepared_domain_block->sum_squared, sum_range_times_domain);
 
                 if (error < best_error) {
                     best_error = error;
