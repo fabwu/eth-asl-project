@@ -22,7 +22,7 @@ extern "C" {
 #define VERIFY_MIN_PSNR 30.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
 #define WARMUP_CYCLES_REQUIRED 1e8
-#define BENCHMARK_REPETITIONS 50
+#define BENCHMARK_REPETITIONS 2
 
 extern "C" struct func_suite_t register_suite();
 

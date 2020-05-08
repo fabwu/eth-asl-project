@@ -12,6 +12,7 @@ struct queue_node {
 
 struct queue {
     struct queue_node *front, *back;
+    int size;
 };
 
 struct queue make_queue(void);

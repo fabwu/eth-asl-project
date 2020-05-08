@@ -11,6 +11,7 @@ struct queue make_queue(void) {
     dummy->next = NULL;
     q.front = dummy;
     q.back = dummy;
+    q.size = 0;
     return q;
 }
 
@@ -29,6 +30,7 @@ void enqueue(struct queue *q, void *entry) {
     q->back->data = entry;
     q->back->next = (struct queue_node *)malloc(sizeof(struct queue_node));
     q->back = q->back->next;
+    q->size++;
 }
 
 void *dequeue(struct queue *q) {
@@ -37,5 +39,6 @@ void *dequeue(struct queue *q) {
     void *data = old_node->data;
     q->front = old_node->next;
     free(old_node);
+    q->size--;
     return data;
 }
