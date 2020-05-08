@@ -1,44 +1,68 @@
 library(ggplot2)
 library(svglite)
 
-## read files
-df64 = read.csv("data/lena_64.csv", sep=';')
-df128 = read.csv("data/monkey_128.csv", sep=';')
-df256 = read.csv("data/lena_256.csv", sep=';')
-df512 = read.csv("data/lena_512.csv", sep=';')
-df1024 = read.csv("data/grey-parrot_1024.csv", sep=';')
-
-
-## create dataframe
-df = data.frame(
-    c(64,
-      128,
-      256,
-      512,
-      1024),
-    c(mean(df64$flops.cycle),
-      mean(df128$flops.cycle),
-      mean(df256$flops.cycle),
-      mean(df512$flops.cycle),
-      mean(df1024$flops.cycle))
+## executables
+executables = c(
+    "baseline",
+    "01_precompute_indices"
 )
-colnames(df) = c("size", "performance")
+
+## image sizes
+## TODO: only read the csv defined here
+image_sizes = c(
+    64,
+    128,
+    256,
+    512,
+    1024
+)
+
+## collect data
+df = data.frame()
+for (exe in executables) {
+
+    ## read files
+    df64 = read.csv(paste("data/", exe, "/lena_64.csv", sep=""), sep=';')
+    df128 = read.csv(paste("data/", exe, "/monkey_128.csv", sep=""), sep=';')
+    df256 = read.csv(paste("data/", exe, "/lena_256.csv", sep=""), sep=';')
+    df512 = read.csv(paste("data/", exe, "/lena_512.csv", sep=""), sep=';')
+    df1024 = read.csv(paste("data/", exe, "/grey-parrot_1024.csv", sep=""), sep=';')
+
+    df_temp = data.frame(
+        rep(exe, length(image_sizes)),
+        image_sizes,
+        c(
+            mean(df64$flops.cycle),
+            mean(df128$flops.cycle),
+            mean(df256$flops.cycle),
+            mean(df512$flops.cycle),
+            mean(df1024$flops.cycle)
+        )
+    )
+    df = rbind(df, df_temp)
+
+}
+colnames(df) = c("executable", "size", "performance")
 
 
 ## Create plot
 theme_set(theme_light(base_size = 24))
-image = ggplot(data=df, aes(x=size)) +
+image = ggplot(data=df,
+               aes(x=size,
+                   y=performance,
+                   group=executable,
+                   color=executable)) +
     ## ggtitle("Performance") +
-    geom_line(aes(y=performance), lwd=2) +
-    geom_point(aes(y=performance), lwd=4) +
+    geom_line(lwd=2) +
+    geom_point(lwd=4) +
     scale_x_continuous(
         name="Image Size (n x n)",
-        expand = c(0, 20),
-        ) +
+        expand = c(0, 20)
+    ) +
     scale_y_continuous(name=("[flops/cycle]"), limits=c(0,4)) +
     theme(
         axis.title.y = element_text(angle=0),
-        legend.position = "none",
+        legend.position = "bottom",
         legend.title = element_blank())
 
 ## save plot
