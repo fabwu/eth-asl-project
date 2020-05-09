@@ -188,16 +188,37 @@ void precompute_sum_range_times_domain(
             int k = 0;
             const struct queue_node *curr = range_block_iter_start;
             while (curr != NULL && curr != range_block_iter_end) {
-                const struct block_t *rb = (struct block_t *)curr->data;
+                struct block_t *rb = (struct block_t *)curr->data;
 
                 const struct image_t *rotated_domain_block =
                     (prepared_domain_blocks + j)->angles + i;
 
-                // calc
+                size_t ind;
+                if(j == 0){
+                    // calc rb->sum, rb->sum_squared
+                    double sum = 0;
+                    double sum_squared = 0;
+                    ind = rb->rel_y * image->size + rb->rel_x;
+                    for (size_t l = 0; l < rb->width; l++) {
+                        for (size_t m = 0; m < rb->height; m++) {
+                            sum += image->data[ind];
+                            sum_squared += image->data[ind] * image->data[ind];
+                            ind++;
+                        }
+                        ind += image->size - rb->height;
+                    }
+                    rb->sum = sum;
+                    rb->sum_squared = sum_squared;
+                    __record_double_flops(rb->width * rb->height * 3);
+                }
+
+                // sum_range_times_domain
                 double sum_range_times_domain = 0;
-                size_t ind = rb->rel_y * image->size + rb->rel_x;
+                ind = rb->rel_y * image->size + rb->rel_x;
                 for (size_t l = 0; l < rb->width; l++) {
                     for (size_t m = 0; m < rb->height; m++) {
+                        /* sum += image->data[ind]; */
+                        /* sum_squared += image->data[ind] * image->data[ind]; */
                         double ri = image->data[ind];
                         double di =
                             rotated_domain_block
@@ -209,8 +230,7 @@ void precompute_sum_range_times_domain(
                 }
                 __record_double_flops(rb->width * rb->height * 2);
 
-                // end calc
-
+                // store sum_range_times_domain in a little array
                 res[k * (domain_blocks_length * ALL_ANGLES_LENGTH) +
                     j * ALL_ANGLES_LENGTH + i] = sum_range_times_domain;
 
@@ -308,19 +328,6 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         struct transformation_t *best_transformation =
             (struct transformation_t *)malloc(sizeof(struct transformation_t));
 
-        double sum_range = 0;
-        double sum_range_squared = 0;
-        size_t ind = range_block->rel_y * image->size + range_block->rel_x;
-        for (size_t i = 0; i < range_block->height; i++) {
-            for (size_t j = 0; j < range_block->height; j++) {
-                sum_range += image->data[ind];
-                sum_range_squared += image->data[ind] * image->data[ind];
-                ind++;
-            }
-            ind += image->size - range_block->width;
-        }
-        __record_double_flops(range_block->width * range_block->height * 3);
-
         for (size_t i = 0; i < domain_blocks_length; ++i) {
             struct prepared_block_t *prepared_domain_block =
                 prepared_domain_blocks + i;
@@ -329,8 +336,6 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                    2 * range_block->width);
 
             for (size_t j = 0; j < ALL_ANGLES_LENGTH; ++j) {
-                const struct image_t *rotated_domain_block =
-                    prepared_domain_block->angles + j;
                 const int angle = ALL_ANGLES[j];
 
                 double sum_range_times_domain =
@@ -341,8 +346,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 double brightness, contrast, error;
                 error = compute_brightness_and_contrast_with_error(
-                    range_block, &brightness, &contrast, sum_range,
-                    sum_range_squared, prepared_domain_block->sum,
+                    range_block, &brightness, &contrast, range_block->sum,
+                    range_block->sum_squared, prepared_domain_block->sum,
                     prepared_domain_block->sum_squared, sum_range_times_domain);
 
                 if (error < best_error) {
