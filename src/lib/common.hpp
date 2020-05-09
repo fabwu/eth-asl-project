@@ -19,7 +19,7 @@ extern "C" {
 #include "types.h"
 }
 
-#define VERIFY_MIN_PSNR 30.0
+#define VERIFY_MIN_PSNR 25.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
 #define WARMUP_CYCLES_REQUIRED 1e8
 
@@ -172,9 +172,7 @@ inline double median(std::vector<T> &vec) {
     }
 }
 
-inline void benchmark_generic(const benchmark_t &benchmark,
-                              int benchmark_repetitions, bool csv_output,
-                              const std::string &csv_output_path) {
+inline void benchmark_generic(const benchmark_t &benchmark, const params_t &params) {
     std::cout << "\033[1m"
               << "WARMUP phase"
               << "\033[0m" << std::endl;
@@ -190,7 +188,7 @@ inline void benchmark_generic(const benchmark_t &benchmark,
     std::vector<double> cycles;
     std::vector<long long> flops;
     myInt64 start, end;
-    for (int rep = 0; rep < benchmark_repetitions; ++rep) {
+    for (int rep = 0; rep < params.benchmark_repetitions; ++rep) {
         __reset_flop_counter();
         start = start_tsc();
         for (long run = 0; run < needed_runs; ++run) {
@@ -203,10 +201,10 @@ inline void benchmark_generic(const benchmark_t &benchmark,
     }
 
     // CSV output has to be generated here before cycles gets sorted in median
-    if (csv_output) {
-        output_csv(cycles, flops, csv_output_path);
+    if (params.csv_output) {
+        output_csv(cycles, flops, params.csv_output_path);
         std::cout << "\t"
-                  << "Created csv file '" << csv_output_path << "'"
+                  << "Created csv file '" << params.csv_output_path << "'"
                   << std::endl;
     }
 
@@ -249,7 +247,19 @@ inline bool verify_suite(const func_suite_t &suite, const int error_threshold,
     return !verification_failed;
 }
 
+inline void print_params(const params_t &params) {
+    std::cout << "\033[1m"
+              << "PARAMETERS"
+              << "\033[0m" << std::endl;
+    std::cout << "\t"
+              << "File: " << params.image_path << std::endl;
+    std::cout << "\t"
+              << "Error: " << params.error_threshold << std::endl;
+}
+
 inline void benchmark_compress(const params_t &params) {
+    print_params(params);
+
     int width, height;
     double *original_image_data =
         read_grayscale_file(params.image_path, &height, &width);
@@ -264,8 +274,7 @@ inline void benchmark_compress(const params_t &params) {
                                          suite);
 
 
-    benchmark_generic(benchmark, params.benchmark_repetitions,
-                      params.csv_output, params.csv_output_path);
+    benchmark_generic(benchmark, params);
     free(original_image_data);
 }
 
@@ -286,8 +295,7 @@ inline void benchmark_decompress(const params_t &params) {
                                            params.decompression_iterations,
                                            suite);
 
-    benchmark_generic(benchmark, params.benchmark_repetitions,
-                      params.csv_output, params.csv_output_path);
+    benchmark_generic(benchmark, params);
     free_queue(transformations);
     free(transformations);
     free(original_image_data);
