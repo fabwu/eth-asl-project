@@ -22,7 +22,6 @@ extern "C" {
 #define VERIFY_MIN_PSNR 30.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
 #define WARMUP_CYCLES_REQUIRED 1e8
-#define BENCHMARK_REPETITIONS 2
 
 extern "C" struct func_suite_t register_suite();
 
@@ -31,15 +30,17 @@ class params_t {
     std::string image_path;
     int error_threshold;
     int decompression_iterations;
+    int benchmark_repetitions;
     bool csv_output;
     std::string csv_output_path;
 
     params_t(std::string image_path, int error_threshold,
-             int decompression_iterations, bool csv_output = false,
+             int decompression_iterations, int benchmark_repetitions, bool csv_output = false,
              std::string csv_output_path = std::string())
         : image_path(image_path),
           error_threshold(error_threshold),
           decompression_iterations(decompression_iterations),
+          benchmark_repetitions(benchmark_repetitions),
           csv_output(csv_output),
           csv_output_path(csv_output_path) {}
 };
@@ -171,7 +172,8 @@ inline double median(std::vector<T> &vec) {
     }
 }
 
-inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
+inline void benchmark_generic(const benchmark_t &benchmark,
+                              int benchmark_repetitions, bool csv_output,
                               const std::string &csv_output_path) {
     std::cout << "\033[1m"
               << "WARMUP phase"
@@ -188,7 +190,7 @@ inline void benchmark_generic(const benchmark_t &benchmark, bool csv_output,
     std::vector<double> cycles;
     std::vector<long long> flops;
     myInt64 start, end;
-    for (size_t rep = 0; rep < BENCHMARK_REPETITIONS; ++rep) {
+    for (int rep = 0; rep < benchmark_repetitions; ++rep) {
         __reset_flop_counter();
         start = start_tsc();
         for (long run = 0; run < needed_runs; ++run) {
@@ -261,8 +263,9 @@ inline void benchmark_compress(const params_t &params) {
     const benchmark_compress_t benchmark(original_image, params.error_threshold,
                                          suite);
 
-    benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
 
+    benchmark_generic(benchmark, params.benchmark_repetitions,
+                      params.csv_output, params.csv_output_path);
     free(original_image_data);
 }
 
@@ -283,8 +286,8 @@ inline void benchmark_decompress(const params_t &params) {
                                            params.decompression_iterations,
                                            suite);
 
-    benchmark_generic(benchmark, params.csv_output, params.csv_output_path);
-
+    benchmark_generic(benchmark, params.benchmark_repetitions,
+                      params.csv_output, params.csv_output_path);
     free_queue(transformations);
     free(transformations);
     free(original_image_data);
