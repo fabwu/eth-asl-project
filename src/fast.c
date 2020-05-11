@@ -10,6 +10,7 @@
 #include "lib/rotate.h"
 #include "lib/types.h"
 
+#define MAX_QUADTREE_DEPTH 10
 #define ALL_ANGLES_LENGTH 4
 static const int ALL_ANGLES[] = {0, 90, 180, 270};
 
@@ -177,58 +178,102 @@ void prepare_domain_blocks(struct prepared_block_t *prepared_domain_blocks,
     }
 }
 
-void precompute_sum_range_times_domain(
-    double *res, const struct image_t *image,
-    const struct prepared_block_t *prepared_domain_blocks,
-    const struct queue_node *range_block_iter_start,
-    const struct queue_node *range_block_iter_end,
-    const int domain_blocks_length) {
+typedef double (*rtd_func_type)(const struct image_t *image,
+                                const struct image_t *rotated_domain_block,
+                                const struct block_t *range_block);
+
+double rtd_2x2(const struct image_t *image,
+               const struct image_t *rotated_domain_block,
+               const struct block_t *range_block) {
+    double sum_range_times_domain = 0;
+
+    size_t idx_rb_image = range_block->rel_y * image->size + range_block->rel_x;
+    size_t idx_db = 0;
+    sum_range_times_domain +=
+        image->data[idx_rb_image] * rotated_domain_block->data[idx_db];
+    sum_range_times_domain +=
+        image->data[idx_rb_image + 1] * rotated_domain_block->data[idx_db + 1];
+
+    idx_rb_image += image->size;
+
+    sum_range_times_domain +=
+        image->data[idx_rb_image] * rotated_domain_block->data[idx_db + 2];
+    sum_range_times_domain +=
+        image->data[idx_rb_image + 1] * rotated_domain_block->data[idx_db + 3];
+
+    return sum_range_times_domain;
+}
+
+double rtd_generic(const struct image_t *image,
+                   const struct image_t *domain_block,
+                   const struct block_t *range_block) {
+    double sum_range_times_domain = 0;
+    size_t ind = range_block->rel_y * image->size + range_block->rel_x;
+    for (size_t l = 0; l < range_block->width; l++) {
+        for (size_t m = 0; m < range_block->height; m++) {
+            double ri = image->data[ind];
+            double di = domain_block->data[l * range_block->height + m];
+            sum_range_times_domain += ri * di;
+            ind++;
+        }
+        ind += image->size - range_block->height;
+    }
+    __record_double_flops(range_block->width * range_block->height * 2);
+
+    return sum_range_times_domain;
+}
+
+void precompute(double *res, const struct image_t *image,
+                const struct prepared_block_t *prepared_domain_blocks,
+                const struct queue_node *range_block_iter_start,
+                const struct queue_node *range_block_iter_end,
+                const int domain_blocks_length) {
+    /**
+     * Compute range block sums
+     */
+    struct queue_node *curr = range_block_iter_start;
+    while (curr != NULL && curr != range_block_iter_end) {
+        struct block_t *rb = (struct block_t *)curr->data;
+        // calc rb->sum, rb->sum_squared
+        double sum = 0;
+        double sum_squared = 0;
+        size_t ind = rb->rel_y * image->size + rb->rel_x;
+        for (size_t l = 0; l < rb->width; l++) {
+            for (size_t m = 0; m < rb->height; m++) {
+                sum += image->data[ind];
+                sum_squared += image->data[ind] * image->data[ind];
+                ind++;
+            }
+            ind += image->size - rb->height;
+        }
+        rb->sum = sum;
+        rb->sum_squared = sum_squared;
+        __record_double_flops(rb->width * rb->height * 3);
+        curr = curr->next;
+    }
+
+    /**
+     * Compute range blocks * domain blocks
+     * rtd: is the actual function which does the calculation
+     */
+    rtd_func_type rtd;
+    if (prepared_domain_blocks[0].domain_block->width == 2)
+        rtd = &rtd_2x2;
+    else
+        rtd = &rtd_generic;
+
     for (size_t i = 0; i < ALL_ANGLES_LENGTH; ++i) {
         for (size_t j = 0; j < domain_blocks_length; ++j) {
-            int k = 0;
-            const struct queue_node *curr = range_block_iter_start;
+            size_t k = 0;
+            struct queue_node *curr = range_block_iter_start;
             while (curr != NULL && curr != range_block_iter_end) {
                 struct block_t *rb = (struct block_t *)curr->data;
 
                 const struct image_t *rotated_domain_block =
                     (prepared_domain_blocks + j)->angles + i;
 
-                size_t ind;
-                if(j == 0){
-                    // calc rb->sum, rb->sum_squared
-                    double sum = 0;
-                    double sum_squared = 0;
-                    ind = rb->rel_y * image->size + rb->rel_x;
-                    for (size_t l = 0; l < rb->width; l++) {
-                        for (size_t m = 0; m < rb->height; m++) {
-                            sum += image->data[ind];
-                            sum_squared += image->data[ind] * image->data[ind];
-                            ind++;
-                        }
-                        ind += image->size - rb->height;
-                    }
-                    rb->sum = sum;
-                    rb->sum_squared = sum_squared;
-                    __record_double_flops(rb->width * rb->height * 3);
-                }
-
-                // sum_range_times_domain
-                double sum_range_times_domain = 0;
-                ind = rb->rel_y * image->size + rb->rel_x;
-                for (size_t l = 0; l < rb->width; l++) {
-                    for (size_t m = 0; m < rb->height; m++) {
-                        /* sum += image->data[ind]; */
-                        /* sum_squared += image->data[ind] * image->data[ind]; */
-                        double ri = image->data[ind];
-                        double di =
-                            rotated_domain_block
-                                ->data[l * rb->height + m];
-                        sum_range_times_domain += ri * di;
-                        ind++;
-                    }
-                    ind += image->size - rb->height;
-                }
-                __record_double_flops(rb->width * rb->height * 2);
+                double sum_range_times_domain =
+                    rtd(image, rotated_domain_block, rb);
 
                 // store sum_range_times_domain in a little array
                 res[k * (domain_blocks_length * ALL_ANGLES_LENGTH) +
@@ -242,6 +287,7 @@ void precompute_sum_range_times_domain(
 }
 
 struct queue *compress(const struct image_t *image, const int error_threshold) {
+    int current_quadtree_depth = 0;
     int current_domain_block_size = image->size;
     const int initial_range_block_size = current_domain_block_size / 2;
 
@@ -270,10 +316,9 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     // todo meaningful comment because code is unreadable
     double *sum_ranges_times_domains =
         (double *)malloc(sizeof(double) * ALL_ANGLES_LENGTH * 4);
-    precompute_sum_range_times_domain(
-        sum_ranges_times_domains, image, prepared_domain_blocks,
-        remaining_range_blocks.front, remaining_range_blocks.back,
-        domain_blocks_length);
+    precompute(sum_ranges_times_domains, image, prepared_domain_blocks,
+               remaining_range_blocks.front, remaining_range_blocks.back,
+               domain_blocks_length);
 
     // Learn mappings from domain blocks to range blocks
     // That is, find a domain block for every range block, such that their
@@ -285,9 +330,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     int current_range_block_index = -1;
     while (!queue_empty(&remaining_range_blocks)) {
         current_range_block_index++;
-        struct queue_node* curr_node = remaining_range_blocks.front;
-        struct block_t *range_block =
-            (struct block_t *)curr_node->data;
+        struct queue_node *curr_node = remaining_range_blocks.front;
+        struct block_t *range_block = (struct block_t *)curr_node->data;
 
         // Should hold because the queue is FIFO and handles all
         // range blocks of a size before reaching smaller sizes
@@ -295,6 +339,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                range_block->width == current_range_block_size / 2);
         assert(range_block->width == range_block->height);
         if (range_block->width < current_range_block_size) {
+            current_quadtree_depth++;
             current_range_block_index = 0;
             free(domain_blocks);
             free_prepared_blocks(prepared_domain_blocks, domain_blocks_length);
@@ -317,10 +362,9 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             sum_ranges_times_domains = (double *)malloc(
                 sizeof(double) * domain_blocks_length *
                 remaining_range_blocks.size * ALL_ANGLES_LENGTH);
-            precompute_sum_range_times_domain(
-                sum_ranges_times_domains, image, prepared_domain_blocks,
-                remaining_range_blocks.front, remaining_range_blocks.back,
-                domain_blocks_length);
+            precompute(sum_ranges_times_domains, image, prepared_domain_blocks,
+                       remaining_range_blocks.front,
+                       remaining_range_blocks.back, domain_blocks_length);
         }
         dequeue(&remaining_range_blocks);
 
@@ -362,7 +406,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             }
         }
 
-        if (best_error > error_threshold) {
+        if (best_error > error_threshold &&
+            current_quadtree_depth < MAX_QUADTREE_DEPTH) {
             assert(range_block->width >= 2);
             assert(range_block->height >= 2);
 
