@@ -1,0 +1,156 @@
+{
+   "empirical": {
+      "gbytes": {
+         "data": [
+            [
+               "L1", 
+               37.43
+            ], 
+            [
+               "L2", 
+               29.95
+            ], 
+            [
+               "DRAM", 
+               17.13
+            ]
+         ], 
+         "metadata": {
+            "TIMESTAMP_DB": 1588791043.379433
+         }
+      }, 
+      "gflops": {
+         "data": [
+            [
+               "FP64 GFLOPs", 
+               9.37
+            ]
+         ], 
+         "metadata": {
+            "TIMESTAMP_DB": 1588791043.379042
+         }
+      }, 
+      "metadata": {
+         "ERT_VERSION": "1.1.0", 
+         "TIMESTAMP_DATA": [
+            1588789650.35, 
+            1588789795.13, 
+            1588789746.36, 
+            1588789697.69, 
+            1588789844.1
+         ], 
+         "HOSTNAME": [
+            "localhost", 
+            [], 
+            [
+               "127.0.0.1"
+            ]
+         ], 
+         "UNAME": [
+            "Linux", 
+            "box", 
+            "5.6.8-arch1-1-surface", 
+            "#1 SMP PREEMPT Thu, 30 Apr 2020 08:30:23 +0000", 
+            "x86_64", 
+            ""
+         ], 
+         "FLOPS": 4, 
+         "CONFIG": {
+            "ERT": [
+               "GPU", 
+               "False"
+            ], 
+            "ERT_WORKING_SET_MIN": [
+               "1"
+            ], 
+            "ERT_CFLAGS": [
+               "-O3", 
+               "-march=skylake"
+            ], 
+            "ERT_CC": [
+               "gcc"
+            ], 
+            "ERT_WSS_MULT": [
+               1.1
+            ], 
+            "ERT_HIP": [
+               false
+            ], 
+            "ERT_MEMORY_MAX": [
+               "1073741824"
+            ], 
+            "ERT_LDFLAGS": [], 
+            "ERT_LDLIBS": [], 
+            "ERT_SPEC_GBYTES_DRAM": [
+               "18.75"
+            ], 
+            "ERT_RUN": [
+               "ERT_CODE"
+            ], 
+            "ERT_OCL": [
+               false
+            ], 
+            "ERT_FLOPS": [
+               "1,2,4,8,16"
+            ], 
+            "ERT_SPEC_GFLOPS": [
+               "30.4"
+            ], 
+            "ERT_MPI": [
+               false
+            ], 
+            "ERT_TRIALS_MIN": [
+               "1"
+            ], 
+            "ERT_DRIVER": [
+               "driver1"
+            ], 
+            "ERT_RESULTS": [
+               "Results/skylake-simd"
+            ], 
+            "ERT_PRECISION": [
+               "FP64"
+            ], 
+            "ERT_KERNEL": [
+               "kernel1"
+            ], 
+            "ERT_OPENMP": [
+               "False"
+            ], 
+            "ERT_LD": [
+               "g++"
+            ], 
+            "ERT_NUM_EXPERIMENTS": [
+               "5"
+            ], 
+            "ERT_GPU": [
+               false
+            ], 
+            "ERT_ALIGN": [
+               "32"
+            ], 
+            "ERT_GNUPLOT": [
+               "gnuplot"
+            ]
+         }
+      }
+   }, 
+   "spec": {
+      "gbytes": {
+         "data": [
+            [
+               "DRAM", 
+               18.75
+            ]
+         ]
+      }, 
+      "gflops": {
+         "data": [
+            [
+               "GFLOPs", 
+               30.4
+            ]
+         ]
+      }
+   }
+}
