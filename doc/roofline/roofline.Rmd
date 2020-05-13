@@ -1,0 +1,267 @@
+---
+title: "Roofline"
+author: "Fabian Wüthrich"
+date: "5/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Intel Core i7-8650U
+
+- [Intel Spec](https://ark.intel.com/content/www/us/en/ark/products/124968/intel-core-i7-8650u-processor-8m-cache-up-to-4-20-ghz.html)
+- [Wikichip CPU](https://en.wikichip.org/wiki/intel/core_i7/i7-8650u)
+- [Wikichip Microarch](https://en.wikichip.org/wiki/intel/microarchitectures/kaby_lake)
+
+## Peak Performance (pi)
+
+Assume Port 0 and 1 can handle FP FMAs
+
+see https://en.wikichip.org/wiki/intel/microarchitectures/skylake_(client)#Scheduler and Intel Opt. Chapter 11.15
+
+- without SIMD:   2 FMAs/cycle => 4 flops/cycle
+- with SIMD:      4 doubles * 4 flops/cycle => 16 flops/cycle
+
+## Bandwidth (beta)
+
+Roofline paper used special STREAM benchmark (see cacm_roofline_appendix_a.pdf)
+
+Püschel used Intel MKL copy routine (see applying_roofline.pdf Section V. G)
+
+_Which beta should we choose?_
+
+Wikichip: 8 byte/cycle (see https://en.wikichip.org/wiki/intel/microarchitectures/kaby_lake#Memory_Hierarchy)
+
+Intel Spec says 37.5 GB/s for two channels (18.75 GB/s for one core) => 9.8684 byte/cycle
+
+Pueschel's law 60% of spec: (18.75 GB/s * 0.6) / 1.9 GHz ~ 6 bytes/cycle
+
+STREAM (single core): 17.1655 GB/s => 9.0345 bytes/cycle
+
+ERT (with SIMD): 17.13 GB/s => 9.0158 bytes/cycle
+
+==> I think 9 bytes/cycle are ok on my machine :)
+
+## Algorithm Model
+
+- Work W(n) and Runtime T(n) empirical by instrumenting code
+- Data movement Q(n) only asymptopically (load image once i.e. 8*n²)
+
+## Plots
+
+```{r plot, echo=FALSE}
+library(tidyverse)
+
+pi_scalar <- 4
+pi_simd <- 16
+beta <- 9
+
+roofline <- function(x) ifelse(x*beta<pi_scalar, x*beta, pi_scalar)
+
+benchmark <- tibble(
+  opt =    c('baseline', 'baseline',  'baseline',  'baseline' ),
+  n =      c(64,         256,         512,         1024       ),
+  flops =  c(2.0804e+07, 1.07571e+09, 4.76046e+09, 3.9249e+10 ),
+  cycles = c(4.6464e+07, 2.30593e+09, 9.59347e+09, 7.53262e+10),
+  bytes = 8*n^2,
+  perf = flops/cycles,
+  op_int = flops/bytes,
+)
+
+ggplot(mapping = aes(x = op_int, y = perf, color = opt), data = benchmark) + 
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = pi_scalar, color = 'darkgrey') +
+  geom_hline(yintercept = pi_simd, color = 'darkgrey') +
+  geom_abline(slope = 1, intercept = 3.2, color = 'darkgrey') +
+  # uncomment to see exact roofline function
+  #stat_function(fun = roofline) +
+  scale_y_continuous(trans='log2', limits = c(NA, 20)) +
+  scale_x_continuous(trans='log2', limits = c(0.08, NA)) +
+  geom_text(aes(x=1400, y=pi_scalar, label = "Peak scal. (4 Flops/Cycle)"), colour = 'darkgrey', vjust=-1) +
+  geom_text(aes(x=1300, y=pi_simd, label = "Peak vec. (16 Flops/Cycle)"), colour = 'darkgrey', vjust=-1) +
+  geom_text(aes(x=0.17, y=1.4, angle = 60, label = "Bandwidth (9 Bytes/Cycle)"), colour = 'darkgrey', vjust=-1) +
+  labs(
+    y = 'Performance [Flops/Cycle]',
+    x = 'Operational Intensity [Flops/Byte]'
+  ) +
+  theme(legend.position = "none")
+```
+
+```{r save, echo=FALSE}
+ggsave("roofline.pdf", width = 7.3, height = 4.5)
+```
+
+## Appendix
+
+### STREAM one core
+
+- Expected bandwidth ~18.75 GB/s
+- Increasing STREAM_ARRAY_SIZE gives compiler error
+
+```
+$ gcc -Ofast  -DSTREAM_ARRAY_SIZE=100000000 stream.c -o stream
+$ ./stream 
+-------------------------------------------------------------
+STREAM version $Revision: 5.10 $
+-------------------------------------------------------------
+This system uses 8 bytes per array element.
+-------------------------------------------------------------
+Array size = 100000000 (elements), Offset = 0 (elements)
+Memory per array = 762.9 MiB (= 0.7 GiB).
+Total memory required = 2288.8 MiB (= 2.2 GiB).
+Each kernel will be executed 10 times.
+ The *best* time for each kernel (excluding the first iteration)
+ will be used to compute the reported bandwidth.
+-------------------------------------------------------------
+Your clock granularity/precision appears to be 1 microseconds.
+Each test below will take on the order of 93592 microseconds.
+   (= 93592 clock ticks)
+Increase the size of the arrays if this shows that
+you are not getting at least 20 clock ticks per test.
+-------------------------------------------------------------
+WARNING -- The above is only a rough guideline.
+For best results, please be sure you know the
+precision of your system timer.
+-------------------------------------------------------------
+Function    Best Rate MB/s  Avg time     Min time     Max time
+Copy:           17165.5     0.093353     0.093210     0.093527
+Scale:          12825.2     0.125195     0.124754     0.126527
+Add:            14243.0     0.169058     0.168504     0.170513
+Triad:          14066.8     0.170994     0.170614     0.171486
+-------------------------------------------------------------
+Solution Validates: avg error less than 1.000000e-13 on all three arrays
+-------------------------------------------------------------
+```
+
+=> got 17.2 GB/s i.e. 17.2 GB/s / 1.9 GHz = 9.05 bytes per cycle (turbo boost turned off)
+
+### STREAM all cores
+
+```
+$ gcc -Ofast -fopenmp -DSTREAM_ARRAY_SIZE=100000000 stream.c -o stream_omp
+$ ./stream_omp 
+-------------------------------------------------------------
+STREAM version $Revision: 5.10 $
+-------------------------------------------------------------
+This system uses 8 bytes per array element.
+-------------------------------------------------------------
+Array size = 100000000 (elements), Offset = 0 (elements)
+Memory per array = 762.9 MiB (= 0.7 GiB).
+Total memory required = 2288.8 MiB (= 2.2 GiB).
+Each kernel will be executed 10 times.
+ The *best* time for each kernel (excluding the first iteration)
+ will be used to compute the reported bandwidth.
+-------------------------------------------------------------
+Number of Threads requested = 8
+Number of Threads counted = 8
+-------------------------------------------------------------
+Your clock granularity/precision appears to be 1 microseconds.
+Each test below will take on the order of 80806 microseconds.
+   (= 80806 clock ticks)
+Increase the size of the arrays if this shows that
+you are not getting at least 20 clock ticks per test.
+-------------------------------------------------------------
+WARNING -- The above is only a rough guideline.
+For best results, please be sure you know the
+precision of your system timer.
+-------------------------------------------------------------
+Function    Best Rate MB/s  Avg time     Min time     Max time
+Copy:           20202.3     0.080604     0.079199     0.086724
+Scale:          13990.7     0.115141     0.114362     0.116096
+Add:            14049.4     0.172711     0.170826     0.175254
+Triad:          14439.4     0.166823     0.166212     0.167873
+-------------------------------------------------------------
+Solution Validates: avg error less than 1.000000e-13 on all three arrays
+-------------------------------------------------------------
+```
+
+=> got 20.2 GB/s but now we have multiple channels...
+
+### ERT scalar
+
+see doc/roofline/roofline-toolkit/Empirical_Roofline_Tool-1.1.0/Results/skylake-scalar/Run.001/roofline.json
+
+```
+"DRAM",         13.94
+"FP64 GFLOPs",  5.45
+```
+
+### ERT SIMD
+
+see doc/roofline/roofline-toolkit/Empirical_Roofline_Tool-1.1.0/Results/skylake-simd/Run.001/roofline.json
+
+somehow I have caches here don't ask me why...
+
+```
+"L1",           37.43             
+"L2",           29.95
+"DRAM",         17.13
+"FP64 GFLOPs",  9.37
+```
+
+### Benchmark Baseline
+
+```
+$ ./build/baseline -b -c -f images/lena_64.gray 
+PARAMETERS
+	File: images/lena_64.gray
+	Error: 350
+VERIFICATION phase
+	PSNR (dB): 26.9019 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+BENCHMARK phase
+	cycles (median): 4.6464e+07
+	flops: 2.0804e+07
+	perf [flops/cycle(median)]: 0.447744
+
+$ ./build/baseline -b -c -f images/lena_256.gray 
+PARAMETERS
+	File: images/lena_256.gray
+	Error: 350
+VERIFICATION phase
+	PSNR (dB): 25.7653 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+BENCHMARK phase
+	cycles (median): 2.30593e+09
+	flops: 1.07571e+09
+	perf [flops/cycle(median)]: 0.4665
+
+$ ./build/baseline -b -c -f images/lena_512.gray 
+PARAMETERS
+	File: images/lena_512.gray
+	Error: 350
+VERIFICATION phase
+	PSNR (dB): 25.7578 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+BENCHMARK phase
+	cycles (median): 9.59347e+09
+	flops: 4.76046e+09
+	perf [flops/cycle(median)]: 0.496219
+
+$ ./build/baseline -b -c -f images/grey-parrot_1024.gray 
+PARAMETERS
+	File: images/grey-parrot_1024.gray
+	Error: 350
+VERIFICATION phase
+	PSNR (dB): 25.4697 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+BENCHMARK phase
+	cycles (median): 7.53262e+10
+	flops: 3.9249e+10
+	perf [flops/cycle(median)]: 0.521053
+```

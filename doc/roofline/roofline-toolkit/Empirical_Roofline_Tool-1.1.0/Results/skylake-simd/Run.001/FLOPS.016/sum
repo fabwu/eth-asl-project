@@ -1,0 +1,17 @@
+     5.02 FP64 GFLOPs
+
+    86.84 Weight
+
+     5.00 DRAM
+
+META_DATA
+ERT_VERSION  1.1.0
+TIMESTAMP_DATA  1588790611.84
+TIMESTAMP_DATA  1588790468.35
+CONFIG  {'ERT': ['GPU', 'False'], 'ERT_WORKING_SET_MIN': ['1'], 'ERT_CFLAGS': ['-O3', '-march=skylake'], 'ERT_CC': ['gcc'], 'ERT_WSS_MULT': [1.1], 'ERT_HIP': [False], 'ERT_MEMORY_MAX': ['1073741824'], 'ERT_LDFLAGS': [], 'ERT_LDLIBS': [], 'ERT_SPEC_GBYTES_DRAM': ['18.75'], 'ERT_RUN': ['ERT_CODE'], 'ERT_OCL': [False], 'ERT_FLOPS': ['1,2,4,8,16'], 'ERT_SPEC_GFLOPS': ['30.4'], 'ERT_MPI': [False], 'ERT_TRIALS_MIN': ['1'], 'ERT_DRIVER': ['driver1'], 'ERT_RESULTS': ['Results/skylake-simd'], 'ERT_OPENMP': ['False'], 'ERT_KERNEL': ['kernel1'], 'ERT_PRECISION': ['FP64'], 'ERT_LD': ['g++'], 'ERT_NUM_EXPERIMENTS': ['5'], 'ERT_GPU': [False], 'ERT_ALIGN': ['32'], 'ERT_GNUPLOT': ['gnuplot']}
+UNAME  ('Linux', 'box', '5.6.8-arch1-1-surface', '#1 SMP PREEMPT Thu, 30 Apr 2020 08:30:23 +0000', 'x86_64', '')
+FLOPS          16
+TIMESTAMP_DATA  1588790755.26
+TIMESTAMP_DATA  1588790899.03
+TIMESTAMP_DATA  1588790324.68
+HOSTNAME  ('localhost', [], ['127.0.0.1'])

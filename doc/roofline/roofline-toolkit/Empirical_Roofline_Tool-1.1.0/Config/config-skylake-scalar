@@ -1,0 +1,40 @@
+# Surface Book 2 Intel Core i7-8650U
+
+ERT_RESULTS Results/skylake-scalar
+
+ERT_SPEC_GBYTES_DRAM    18.75  
+
+ERT_SPEC_GFLOPS         8
+
+ERT_DRIVER  driver1
+ERT_KERNEL  kernel1
+
+ERT_OPENMP         False
+ERT MPI            False
+ERT GPU            False
+
+ERT_FLOPS   1,2,4,8,16
+ERT_ALIGN   32
+
+ERT_CC      gcc
+# -march=skylake should already use FMA instructions
+# -fno-tree-vectorize should turn of vectorization
+ERT_CFLAGS -O3 -march=skylake -fno-tree-vectorize
+
+ERT_LD      g++
+ERT_LDFLAGS 
+ERT_LDLIBS
+
+ERT_PRECISION FP64
+
+ERT_RUN ERT_CODE
+
+ERT_NUM_EXPERIMENTS 5
+
+ERT_MEMORY_MAX 1073741824
+
+ERT_WORKING_SET_MIN 1
+
+ERT_TRIALS_MIN 1
+
+ERT_GNUPLOT gnuplot

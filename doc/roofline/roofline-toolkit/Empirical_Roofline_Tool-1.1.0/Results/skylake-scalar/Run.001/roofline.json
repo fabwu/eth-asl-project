@@ -1,0 +1,157 @@
+{
+   "empirical": {
+      "gbytes": {
+         "data": [
+            [
+               "DRAM", 
+               13.94
+            ]
+         ], 
+         "metadata": {
+            "TIMESTAMP_DATA": [
+               1588784709.51, 
+               1588784499.2, 
+               1588784570.22, 
+               1588784640.06, 
+               1588784427.13
+            ], 
+            "FLOPS": 2, 
+            "TIMESTAMP_DB": 1588786342.843968
+         }
+      }, 
+      "gflops": {
+         "data": [
+            [
+               "FP64 GFLOPs", 
+               5.45
+            ]
+         ], 
+         "metadata": {
+            "TIMESTAMP_DATA": [
+               1588785775.16, 
+               1588786200.75, 
+               1588785633.73, 
+               1588786057.95, 
+               1588785916.45
+            ], 
+            "FLOPS": 16, 
+            "TIMESTAMP_DB": 1588786342.843575
+         }
+      }, 
+      "metadata": {
+         "ERT_VERSION": "1.1.0", 
+         "HOSTNAME": [
+            "localhost", 
+            [], 
+            [
+               "127.0.0.1"
+            ]
+         ], 
+         "CONFIG": {
+            "ERT": [
+               "GPU", 
+               "False"
+            ], 
+            "ERT_WORKING_SET_MIN": [
+               "1"
+            ], 
+            "ERT_CFLAGS": [
+               "-O3", 
+               "-march=skylake", 
+               "-fno-tree-vectorize"
+            ], 
+            "ERT_CC": [
+               "gcc"
+            ], 
+            "ERT_WSS_MULT": [
+               1.1
+            ], 
+            "ERT_HIP": [
+               false
+            ], 
+            "ERT_MEMORY_MAX": [
+               "1073741824"
+            ], 
+            "ERT_LDFLAGS": [], 
+            "ERT_LDLIBS": [], 
+            "ERT_SPEC_GBYTES_DRAM": [
+               "18.75"
+            ], 
+            "ERT_RUN": [
+               "ERT_CODE"
+            ], 
+            "ERT_OCL": [
+               false
+            ], 
+            "ERT_FLOPS": [
+               "1,2,4,8,16"
+            ], 
+            "ERT_SPEC_GFLOPS": [
+               "8"
+            ], 
+            "ERT_MPI": [
+               false
+            ], 
+            "ERT_TRIALS_MIN": [
+               "1"
+            ], 
+            "ERT_DRIVER": [
+               "driver1"
+            ], 
+            "ERT_RESULTS": [
+               "Results/skylake-scalar"
+            ], 
+            "ERT_PRECISION": [
+               "FP64"
+            ], 
+            "ERT_KERNEL": [
+               "kernel1"
+            ], 
+            "ERT_OPENMP": [
+               "False"
+            ], 
+            "ERT_LD": [
+               "g++"
+            ], 
+            "ERT_NUM_EXPERIMENTS": [
+               "5"
+            ], 
+            "ERT_GPU": [
+               false
+            ], 
+            "ERT_ALIGN": [
+               "32"
+            ], 
+            "ERT_GNUPLOT": [
+               "gnuplot"
+            ]
+         }, 
+         "UNAME": [
+            "Linux", 
+            "box", 
+            "5.6.8-arch1-1-surface", 
+            "#1 SMP PREEMPT Thu, 30 Apr 2020 08:30:23 +0000", 
+            "x86_64", 
+            ""
+         ]
+      }
+   }, 
+   "spec": {
+      "gbytes": {
+         "data": [
+            [
+               "DRAM", 
+               18.75
+            ]
+         ]
+      }, 
+      "gflops": {
+         "data": [
+            [
+               "GFLOPs", 
+               8.0
+            ]
+         ]
+      }
+   }
+}
