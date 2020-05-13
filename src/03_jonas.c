@@ -128,13 +128,6 @@ void free_prepared_blocks(struct image_t *prepared_domain_blocks,
     free(prepared_domain_blocks);
 }
 
-void free_blocks(struct block_t *blocks, int length) {
-    for (int i = 0; i < length; ++i) {
-        free(blocks + i);
-    }
-    free(blocks);
-}
-
 void prepare_domain_blocks_norotation(struct image_t *prepared_domain_blocks,
                                       double *sums, double *sums_squared,
                                       const struct image_t *image,
@@ -196,20 +189,20 @@ size_t index_rot0(const size_t i, const size_t j, const int n, const int m) {
     return i * n + j;
 }
 size_t index_rot90(const size_t i, const size_t j, const int n, const int m) {
-    return j * n + (m - i - 1);
+    return (m - j - 1) * n + i;
 }
 size_t index_rot180(const size_t i, const size_t j, const int n, const int m) {
     return (m - i - 1) * n + (n - j - 1);
 }
 size_t index_rot270(const size_t i, const size_t j, const int n, const int m) {
-    return (m - j - 1) * n + i;
+    return j * n + (m - i - 1);
 }
 
 double rtd_generic(const struct image_t *image,
                    const struct image_t *domain_block,
                    const struct block_t *range_block) {
-    const int m = range_block->width;
-    const int n = range_block->height;
+    const int m = domain_block->size;
+    const int n = domain_block->size;
 
     double rtd_sum = 0;
     size_t ind = range_block->rel_y * image->size + range_block->rel_x;
@@ -222,6 +215,32 @@ double rtd_generic(const struct image_t *image,
             ind++;
         }
         ind += image->size - n;
+    }
+    __record_double_flops(m * n * 2);
+    return rtd_sum;
+}
+
+double rtd_generic_with_rot(const struct image_t *image,
+                            const struct image_t *domain_block,
+                            const struct block_t *range_block,
+                            const rotation_index_transformer_type rot) {
+    const int m = domain_block->size;
+    const int n = domain_block->size;
+
+    double rtd_sum = 0;
+    size_t idx_rb = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < m; i++) {
+        for (size_t j = 0; j < n; j++) {
+            double ri = image->data[idx_rb];
+
+            const size_t idx_db = rot(i, j, n, m);
+            double di = domain_block->data[idx_db];
+
+            rtd_sum += ri * di;
+            idx_rb++;
+        }
+        idx_rb += image->size - n;
     }
     __record_double_flops(m * n * 2);
     return rtd_sum;
@@ -255,17 +274,15 @@ void precompute_rtd_with_rotation(
     double *rtd_sum, const struct image_t *image, struct block_t *range_blocks,
     const int range_blocks_length,
     const struct image_t *downsampled_domain_blocks,
-    const int domain_blocks_length, const int angle) {
+    const int domain_blocks_length, rotation_index_transformer_type rot) {
     for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
         const struct image_t *domain_block = downsampled_domain_blocks + idx_db;
-
-        struct image_t rotated_image = make_image(domain_block->size, false);
-        rotate(&rotated_image, domain_block, angle);
 
         for (int idx_rb = 0; idx_rb < range_blocks_length; ++idx_rb) {
             struct block_t *range_block = range_blocks + idx_rb;
 
-            double rtd = rtd_generic(image, &rotated_image, range_block);
+            double rtd =
+                rtd_generic_with_rot(image, domain_block, range_block, rot);
 
             rtd_sum[idx_rb * (domain_blocks_length) + idx_db] = rtd;
         }
@@ -393,7 +410,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             precompute_rtd_with_rotation(
                 rtd_sum_rot0, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, 0);
+                downsampled_domain_blocks, domain_blocks_length, &index_rot0);
 
             rtd_sum_rot90 = malloc(sizeof(double) * domain_blocks_length *
                                    range_blocks_length_current_iteration);
@@ -401,7 +418,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             precompute_rtd_with_rotation(
                 rtd_sum_rot90, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, 90);
+                downsampled_domain_blocks, domain_blocks_length, &index_rot90);
 
             rtd_sum_rot180 = malloc(sizeof(double) * domain_blocks_length *
                                     range_blocks_length_current_iteration);
@@ -409,7 +426,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             precompute_rtd_with_rotation(
                 rtd_sum_rot180, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, 180);
+                downsampled_domain_blocks, domain_blocks_length, &index_rot180);
 
             rtd_sum_rot270 = malloc(sizeof(double) * domain_blocks_length *
                                     range_blocks_length_current_iteration);
@@ -417,7 +434,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             precompute_rtd_with_rotation(
                 rtd_sum_rot270, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, 270);
+                downsampled_domain_blocks, domain_blocks_length, &index_rot270);
         }
 
         // Process each range block
