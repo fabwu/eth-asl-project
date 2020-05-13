@@ -3,6 +3,7 @@ library(svglite)
 
 ## executables
 executables = c(
+    "ref_impl",
     "baseline",
     "01_precompute_indices"
 )
