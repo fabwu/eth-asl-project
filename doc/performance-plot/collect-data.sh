@@ -4,7 +4,7 @@
 dir=$(dirname "$(readlink -f "$0")")
 cd "$dir" || exit 1
 
-for exe in 01_precompute_indices
+for exe in baseline 01_precompute_indices 02_precomputations 03_jonas
 do
   echo " $exe"
   echo "--------------------------------"
