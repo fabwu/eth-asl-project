@@ -1,0 +1,2 @@
+images/lion_4096.gray filter=lfs diff=lfs merge=lfs -text
+images/lion_4096.jpg filter=lfs diff=lfs merge=lfs -text
