@@ -113,8 +113,8 @@ double compute_brightness_and_contrast_with_error(
         __record_double_flops(1);
 
         error = (sum_range_squared +
-                 brightness * (num_pixels * brightness - sr_x_2));
-        __record_double_flops(4);
+                 brightness * (num_pixels * brightness - sr_x_2))*num_pixels_inv;
+        __record_double_flops(5);
 
     } else {
         contrast =
@@ -125,8 +125,8 @@ double compute_brightness_and_contrast_with_error(
         error = (sum_range_squared +
                  contrast * (contrast * sum_domain_squared -
                              2 * sum_range_times_domain + brightness * sd_x_2) +
-                 brightness * (num_pixels * brightness - sr_x_2));
-        __record_double_flops(11);
+                 brightness * (num_pixels * brightness - sr_x_2))*num_pixels_inv;
+        __record_double_flops(12);
     }
 
     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
@@ -502,6 +502,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                      (domain_sum * domain_sum));
                 __record_double_flops(3);
                 const double denominator_inv = 1.0 / denominator;
+                __record_double_flops(1);
                 const double sd_x_sr = range_sum * domain_sum;
                 __record_double_flops(1);
                 const double sd_x_2 = 2 * domain_sum;
@@ -520,8 +521,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     denominator, denominator_inv, num_pixels_of_blocks,
                     num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
                 if (error_rot0 < best_error) {
-                    best_error = error_rot0 * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
+                    best_error = error_rot0;
                     best_domain_block_idx = idx_db;
                     best_range_block_rel_x = range_block->rel_x;
                     best_range_block_rel_y = range_block->rel_y;
@@ -541,8 +541,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     denominator, denominator_inv, num_pixels_of_blocks,
                     num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
                 if (error_rot90 < best_error) {
-                    best_error = error_rot90 * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
+                    best_error = error_rot90;
                     best_domain_block_idx = idx_db;
                     best_range_block_rel_x = range_block->rel_x;
                     best_range_block_rel_y = range_block->rel_y;
@@ -562,8 +561,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     denominator, denominator_inv, num_pixels_of_blocks,
                     num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
                 if (error_rot180 < best_error) {
-                    best_error = error_rot180 * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
+                    best_error = error_rot180;
                     best_domain_block_idx = idx_db;
                     best_range_block_rel_x = range_block->rel_x;
                     best_range_block_rel_y = range_block->rel_y;
@@ -583,8 +581,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     denominator, denominator_inv, num_pixels_of_blocks,
                     num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
                 if (error_rot270 < best_error) {
-                    best_error = error_rot270 * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
+                    best_error = error_rot270;
                     best_domain_block_idx = idx_db;
                     best_range_block_rel_x = range_block->rel_x;
                     best_range_block_rel_y = range_block->rel_y;
