@@ -15,13 +15,5 @@ cmake --build build --target fic
 
 # Git LFS
 
-Large files are stored with git lfs (you may need to install git-lfs).
-
-To add a file to lfs:
-
-```
-git track images/example.gray
-git add .gitattributes
-git add images/example.gray
-git commit -m "Add example.gray"
-```
+Files in the images folder are stored with git lfs (you may need to install
+git-lfs).
