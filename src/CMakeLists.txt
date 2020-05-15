@@ -38,4 +38,4 @@ target_link_libraries(baseline PUBLIC lib_types lib_queue lib_commons lib_rotate
 target_link_libraries(fic PUBLIC lib_types lib_queue lib_commons lib_rotate lib_fast ${Boost_LIBRARIES})
 target_link_libraries(01_precompute_indices PUBLIC lib_types lib_queue lib_commons lib_rotate lib_01_precompute_indices ${Boost_LIBRARIES})
 target_link_libraries(02_precomputations PUBLIC lib_types lib_queue lib_commons lib_rotate lib_02_precomputations ${Boost_LIBRARIES})
-target_link_libraries(03_jonas PUBLIC lib_types lib_queue lib_commons lib_rotate lib_02_precomputations ${Boost_LIBRARIES})
+target_link_libraries(03_jonas PUBLIC lib_types lib_queue lib_commons lib_rotate lib_03_jonas ${Boost_LIBRARIES})
