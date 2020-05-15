@@ -104,27 +104,16 @@ double compute_brightness_and_contrast_with_error(
     assert(ret_contrast != NULL);
 
     double contrast =
-        fma(num_pixels, sum_range_times_domain, -sd_x_sr )*denominator_inv;
-    double brightness = fma(contrast, -domain_sum, range_sum) * num_pixels_inv;
+        (num_pixels * sum_range_times_domain - sd_x_sr) * denominator_inv;
+    double brightness = (range_sum - contrast * domain_sum) * num_pixels_inv;
     __record_double_flops(6);
 
-    double a1 = fma(num_pixels, brightness, -sr_x_2);
-    double a2 = fma(brightness, a1, sum_range_squared);
-    double a3 = fma(brightness, sd_x_2, -sum_range_times_domain);
-    double a4 = fma(contrast, sum_domain_squared, -sum_range_times_domain);
-    double a5 = a3 + a4;
-    double error = fma(a5, contrast, a2);
-    error *= num_pixels_inv;
+    double error =
+        (sum_range_squared +
+         contrast * (contrast * sum_domain_squared -
+                     2 * sum_range_times_domain + brightness * sd_x_2) +
+         brightness * (num_pixels * brightness - sr_x_2))*num_pixels_inv;
     __record_double_flops(12);
-
-    /* double a1 = fma(num_pixels, brightness, -sr_x_2); */
-    /* double a2 = fma(brightness, a1, sum_range_squared); */
-    /* double a3 = fma(brightness, sd_x_2, -sum_range_times_domain); */
-    /* double a4 = fma(contrast, sum_domain_squared, -sum_range_times_domain); */
-    /* double a5 = (a3+a4) *
-    /* double error = a2 + a5; */
-    /* error *= num_pixels_inv; */
-    /* __record_double_flops(12); */
 
     /* TODO: should fp comparissons count as flop? */
     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;

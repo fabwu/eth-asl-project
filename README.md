@@ -15,5 +15,7 @@ cmake --build build --target fic
 
 # Git LFS
 
-Files in the images folder are stored with git lfs (you may need to install
-git-lfs).
+Files in the images folder are stored with git lfs.
+
+Install git lfs on your host and then run `git lfs install` and `git lfs pull`
+here.
