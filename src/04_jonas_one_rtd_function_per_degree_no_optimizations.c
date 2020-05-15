@@ -219,7 +219,7 @@ double rtd_generic_with_rot0(const struct image_t *image,
         idx_rb += image->size - dbs;
     }
 
-    __record_double_flops(dbs * dbs);
+    __record_double_flops(dbs * dbs * 2);
 
     return rtd_sum1 + rtd_sum2;
 }
@@ -252,7 +252,7 @@ double rtd_generic_with_rot90(const struct image_t *image,
         idx_rb1 += image->size - dbs;
     }
 
-    __record_double_flops(dbs * dbs);
+    __record_double_flops(dbs * dbs * 2);
 
     return rtd_sum1 + rtd_sum2;
 }
@@ -285,7 +285,7 @@ double rtd_generic_with_rot180(const struct image_t *image,
         idx_rb1 += image->size - dbs;
     }
 
-    __record_double_flops(dbs * dbs);
+    __record_double_flops(dbs * dbs * 2);
 
     return rtd_sum1 + rtd_sum2;
 }
@@ -318,7 +318,7 @@ double rtd_generic_with_rot270(const struct image_t *image,
         idx_rb1 += image->size - dbs;
     }
 
-    __record_double_flops(dbs * dbs);
+    __record_double_flops(dbs * dbs * 2);
 
     return rtd_sum1 + rtd_sum2;
 }
