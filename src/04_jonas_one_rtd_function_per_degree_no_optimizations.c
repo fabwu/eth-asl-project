@@ -191,44 +191,42 @@ size_t index_rot270(const size_t i, const size_t j, const int n, const int m) {
     return j * n + (m - i - 1);
 }
 
-//double rtd_generic_with_rot(const struct image_t *image,
-//                            const struct image_t *domain_block,
-//                            const struct block_t *range_block,
-//                            const rotation_index_transformer_type rot) {
-//    const int dbs = domain_block->size;
-//
-//    double rtd_sum1 = 0;
-//    double rtd_sum2 = 0;
-//
-//    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
-//
-//    for (size_t i = 0; i < dbs; i++) {
-//        for (size_t j = 0; j < dbs; j += 2) {
-//            const size_t idx_db1 = rot(i, j, dbs, dbs);
-//
-//            double ri1 = image->data[idx_rb1];
-//            double di1 = domain_block->data[idx_db1];
-//            rtd_sum1 = fma(ri1, di1, rtd_sum1);
-//            idx_rb1++;
-//
-//            const size_t idx_db2 = rot(i, j + 1, dbs, dbs);
-//            double ri2 = image->data[idx_rb1];
-//            double di2 = domain_block->data[idx_db2];
-//            rtd_sum2 = fma(ri2, di2, rtd_sum2);
-//            idx_rb1++;
-//        }
-//        idx_rb1 += image->size - dbs;
-//    }
-//
-//    __record_double_flops(dbs * dbs * 2);
-//
-//    return rtd_sum1 + rtd_sum2;
-//}
+double rtd_generic_with_rot0(const struct image_t *image,
+                             const struct image_t *domain_block,
+                             const struct block_t *range_block) {
+    const int dbs = domain_block->size;
 
-double rtd_generic_with_rot(const struct image_t *image,
-                            const struct image_t *domain_block,
-                            const struct block_t *range_block,
-                            const rotation_index_transformer_type rot) {
+    double rtd_sum1 = 0;
+    double rtd_sum2 = 0;
+
+    size_t idx_rb = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < dbs; i++) {
+        for (size_t j = 0; j < dbs; j += 2) {
+            const size_t idx_db1 = i * dbs + j;
+
+            double ri1 = image->data[idx_rb];
+            double di1 = domain_block->data[idx_db1];
+            rtd_sum1 = fma(ri1, di1, rtd_sum1);
+            idx_rb++;
+
+            const size_t idx_db2 = i * dbs + j + 1;
+            double ri2 = image->data[idx_rb];
+            double di2 = domain_block->data[idx_db2];
+            rtd_sum2 = fma(ri2, di2, rtd_sum2);
+            idx_rb++;
+        }
+        idx_rb += image->size - dbs;
+    }
+
+    __record_double_flops(dbs * dbs);
+
+    return rtd_sum1 + rtd_sum2;
+}
+
+double rtd_generic_with_rot90(const struct image_t *image,
+                              const struct image_t *domain_block,
+                              const struct block_t *range_block) {
     const int dbs = domain_block->size;
 
     double rtd_sum1 = 0;
@@ -238,14 +236,14 @@ double rtd_generic_with_rot(const struct image_t *image,
 
     for (size_t i = 0; i < dbs; i++) {
         for (size_t j = 0; j < dbs; j += 2) {
-            const size_t idx_db1 = rot(i, j, dbs, dbs);
+            const size_t idx_db1 = (dbs - j - 1) * dbs + i;
 
             double ri1 = image->data[idx_rb1];
             double di1 = domain_block->data[idx_db1];
             rtd_sum1 = fma(ri1, di1, rtd_sum1);
             idx_rb1++;
 
-            const size_t idx_db2 = rot(i, j + 1, dbs, dbs);
+            const size_t idx_db2 = (dbs - (j + 1) - 1) * dbs + i;
             double ri2 = image->data[idx_rb1];
             double di2 = domain_block->data[idx_db2];
             rtd_sum2 = fma(ri2, di2, rtd_sum2);
@@ -259,6 +257,71 @@ double rtd_generic_with_rot(const struct image_t *image,
     return rtd_sum1 + rtd_sum2;
 }
 
+double rtd_generic_with_rot180(const struct image_t *image,
+                               const struct image_t *domain_block,
+                               const struct block_t *range_block) {
+    const int dbs = domain_block->size;
+
+    double rtd_sum1 = 0;
+    double rtd_sum2 = 0;
+
+    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < dbs; i++) {
+        for (size_t j = 0; j < dbs; j += 2) {
+            const size_t idx_db1 = (dbs - i - 1) * dbs + (dbs - j - 1);
+
+            double ri1 = image->data[idx_rb1];
+            double di1 = domain_block->data[idx_db1];
+            rtd_sum1 = fma(ri1, di1, rtd_sum1);
+            idx_rb1++;
+
+            const size_t idx_db2 = (dbs - i - 1) * dbs + (dbs - (j + 1) - 1);
+            double ri2 = image->data[idx_rb1];
+            double di2 = domain_block->data[idx_db2];
+            rtd_sum2 = fma(ri2, di2, rtd_sum2);
+            idx_rb1++;
+        }
+        idx_rb1 += image->size - dbs;
+    }
+
+    __record_double_flops(dbs * dbs);
+
+    return rtd_sum1 + rtd_sum2;
+}
+
+double rtd_generic_with_rot270(const struct image_t *image,
+                               const struct image_t *domain_block,
+                               const struct block_t *range_block) {
+    const int dbs = domain_block->size;
+
+    double rtd_sum1 = 0;
+    double rtd_sum2 = 0;
+
+    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < dbs; i++) {
+        for (size_t j = 0; j < dbs; j += 2) {
+            const size_t idx_db1 = j * dbs + (dbs - i - 1);
+
+            double ri1 = image->data[idx_rb1];
+            double di1 = domain_block->data[idx_db1];
+            rtd_sum1 = fma(ri1, di1, rtd_sum1);
+            idx_rb1++;
+
+            const size_t idx_db2 = (j + 1) * dbs + (dbs - i - 1);
+            double ri2 = image->data[idx_rb1];
+            double di2 = domain_block->data[idx_db2];
+            rtd_sum2 = fma(ri2, di2, rtd_sum2);
+            idx_rb1++;
+        }
+        idx_rb1 += image->size - dbs;
+    }
+
+    __record_double_flops(dbs * dbs);
+
+    return rtd_sum1 + rtd_sum2;
+}
 
 void precompute_sums(double *sums, double *sums_squared,
                      const struct block_t *blocks, const int blocks_length,
@@ -283,58 +346,17 @@ void precompute_sums(double *sums, double *sums_squared,
     }
 }
 
-void precompute_rtd_with_rotation0(
-    double *rtd_sums, const struct image_t *image, struct block_t *range_blocks,
-    const int range_blocks_length,
-    const struct image_t *downsampled_domain_blocks,
-    const int domain_blocks_length) {
-    assert(domain_blocks_length % 2 == 0);
-
-    for (size_t idx_db = 0; idx_db < domain_blocks_length; idx_db++) {
-        const struct image_t *domain_block = downsampled_domain_blocks + idx_db;
-        const int dbs = domain_block->size;
-        for (int idx_rb = 0; idx_rb < range_blocks_length; ++idx_rb) {
-            struct block_t *range_block = range_blocks + idx_rb;
-
-            // Compute the sum
-            double rtd_sum = 0;
-            double rtd_sum2 = 0;
-
-            size_t idx1_rb =
-                range_block->rel_y * image->size + range_block->rel_x;
-            size_t idx1_db = 0;
-            for (size_t i = 0; i < dbs; i++) {
-                for (size_t j = 0; j < dbs; j++) {
-                    double ri = image->data[idx1_rb];
-                    double di = domain_block->data[idx1_db];
-
-                    rtd_sum += ri * di;
-                    idx1_rb++;
-                    idx1_db++;
-                }
-                idx1_rb += image->size - dbs;
-            }
-            __record_double_flops(dbs * dbs * 2);
-
-            rtd_sums[idx_rb * (domain_blocks_length) + idx_db] =
-                rtd_sum + rtd_sum2;
-        }
-    }
-}
-
-void precompute_rtd_with_rotation(
+void precompute_rtd_with_rotation_v2(
     double *rtd_sum, const struct image_t *image, struct block_t *range_blocks,
     const int range_blocks_length,
     const struct image_t *downsampled_domain_blocks,
-    const int domain_blocks_length, rotation_index_transformer_type rot) {
+    const int domain_blocks_length, rtd_func_type rtd_func) {
     for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
         const struct image_t *domain_block = downsampled_domain_blocks + idx_db;
-
         for (int idx_rb = 0; idx_rb < range_blocks_length; ++idx_rb) {
             struct block_t *range_block = range_blocks + idx_rb;
 
-            double rtd =
-                rtd_generic_with_rot(image, domain_block, range_block, rot);
+            double rtd = rtd_func(image, domain_block, range_block);
 
             rtd_sum[idx_rb * (domain_blocks_length) + idx_db] = rtd;
         }
@@ -463,34 +485,38 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             rtd_sum_rot0 = malloc(sizeof(double) * domain_blocks_length *
                                   range_blocks_length_current_iteration);
             assert(rtd_sum_rot0 != NULL);
-            precompute_rtd_with_rotation(
+            precompute_rtd_with_rotation_v2(
                 rtd_sum_rot0, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, &index_rot0);
+                downsampled_domain_blocks, domain_blocks_length,
+                &rtd_generic_with_rot0);
 
             rtd_sum_rot90 = malloc(sizeof(double) * domain_blocks_length *
                                    range_blocks_length_current_iteration);
             assert(rtd_sum_rot90 != NULL);
-            precompute_rtd_with_rotation(
+            precompute_rtd_with_rotation_v2(
                 rtd_sum_rot90, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, &index_rot90);
+                downsampled_domain_blocks, domain_blocks_length,
+                &rtd_generic_with_rot90);
 
             rtd_sum_rot180 = malloc(sizeof(double) * domain_blocks_length *
                                     range_blocks_length_current_iteration);
             assert(rtd_sum_rot180 != NULL);
-            precompute_rtd_with_rotation(
+            precompute_rtd_with_rotation_v2(
                 rtd_sum_rot180, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, &index_rot180);
+                downsampled_domain_blocks, domain_blocks_length,
+                &rtd_generic_with_rot180);
 
             rtd_sum_rot270 = malloc(sizeof(double) * domain_blocks_length *
                                     range_blocks_length_current_iteration);
             assert(rtd_sum_rot270 != NULL);
-            precompute_rtd_with_rotation(
+            precompute_rtd_with_rotation_v2(
                 rtd_sum_rot270, image, range_blocks_curr_iteration,
                 range_blocks_length_current_iteration,
-                downsampled_domain_blocks, domain_blocks_length, &index_rot270);
+                downsampled_domain_blocks, domain_blocks_length,
+                &rtd_generic_with_rot270);
         }
 
         // Process each range block
@@ -592,7 +618,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 assert(range_block->height >= 2);
 
                 quad2(range_block, range_blocks_next_iteration +
-                                   range_blocks_length_next_iteration);
+                                       range_blocks_length_next_iteration);
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
@@ -670,6 +696,6 @@ void decompress(struct image_t *decompressed_image,
 
 struct func_suite_t register_suite(void) {
     struct func_suite_t suite = {.compress_func = &compress,
-        .decompress_func = &decompress};
+                                 .decompress_func = &decompress};
     return suite;
 }
