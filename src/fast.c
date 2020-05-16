@@ -280,6 +280,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             const double sr_x_2 = 2 * range_sum;
             __record_double_flops(1);
 
+            int rtd_start_rb = range_block->rel_y * image->size + range_block->rel_x;
+
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 assert(domain_blocks[idx_db].width == 2 * range_block->width);
                 struct image_t *downsampled_domain_block =
@@ -325,10 +327,9 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 __record_double_flops(3);
 
                 /************************ BEGIN precompute rtd *************************/
-                int rtd_idx_rb =
-                    range_block->rel_y * image->size + range_block->rel_x;
-
+                int rtd_idx_rb = rtd_start_rb;
                 int dbs = downsampled_domain_block->size;
+                int dbs_dbs = dbs*dbs;
 
                 double rtd_sum_0_1 = 0;
                 double rtd_sum_0_2 = 0;
@@ -339,16 +340,18 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 double rtd_sum_270_1 = 0;
                 double rtd_sum_270_2 = 0;
 
+                int dbs_i = 0;
                 for (int i = 0; i < dbs; i++) {
+                    int dbs_j = 0;
                     for (int j = 0; j < dbs; j += 2) {
-                        int idx_0_db1 = i * dbs + j;
-                        int idx_0_db2 = i * dbs + j + 1;
-                        int idx_90_db1 = (dbs - j - 1) * dbs + i;
-                        int idx_90_db2 = (dbs - (j + 1) - 1) * dbs + i;
-                        int idx_180_db1 = (dbs - i - 1) * dbs + (dbs - j - 1);
-                        int idx_180_db2 = (dbs - i - 1) * dbs + (dbs - (j + 1) - 1);
-                        int idx_270_db1 = j * dbs + (dbs - i - 1);
-                        int idx_270_db2 = (j + 1) * dbs + (dbs - i - 1);
+                        int idx_0_db1 = dbs_i + j;
+                        int idx_0_db2 = idx_0_db1 + 1;
+                        int idx_90_db1 = dbs_dbs - dbs_j - dbs + i;
+                        int idx_90_db2 = idx_90_db1 - dbs;
+                        int idx_180_db1 = dbs_dbs - dbs_i - j - 1;
+                        int idx_180_db2 = idx_180_db1 - 1;
+                        int idx_270_db1 = dbs_j + dbs - i - 1;
+                        int idx_270_db2 = idx_270_db1 + dbs;
 
                         int idx_rb2 = rtd_idx_rb + 1;
 
@@ -385,8 +388,10 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                         rtd_sum_270_2 = fma(ri2, di_270_2, rtd_sum_270_2);
 
                         rtd_idx_rb += 2;
+                        dbs_j = dbs_j + dbs + dbs;
                     }
                     rtd_idx_rb += image->size - dbs;
+                    dbs_i += dbs;
                 }
 
                 __record_double_flops(dbs * dbs * 2 * 8);
