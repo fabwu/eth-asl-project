@@ -124,18 +124,6 @@ typedef double (*rtd_func_type)(const struct image_t *image,
 typedef size_t (*rotation_index_transformer_type)(const size_t i,
                                                   const size_t j, const int n,
                                                   const int m);
-size_t index_rot0(const size_t i, const size_t j, const int n, const int m) {
-    return i * n + j;
-}
-size_t index_rot90(const size_t i, const size_t j, const int n, const int m) {
-    return (m - j - 1) * n + i;
-}
-size_t index_rot180(const size_t i, const size_t j, const int n, const int m) {
-    return (m - i - 1) * n + (n - j - 1);
-}
-size_t index_rot270(const size_t i, const size_t j, const int n, const int m) {
-    return j * n + (m - i - 1);
-}
 
 double rtd_generic_with_rot0(const struct image_t *image,
                              const struct image_t *domain_block,
