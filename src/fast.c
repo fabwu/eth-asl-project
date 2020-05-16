@@ -284,8 +284,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 assert(domain_blocks[idx_db].width == 2 * range_block->width);
-                struct image_t *downsampled_domain_block =
-                    downsampled_domain_blocks + idx_db;
+                struct image_t *downsampled_db = downsampled_domain_blocks + idx_db;
 
                 const double domain_sum = domain_block_sums[idx_db];
                 const double domain_sum_squared =
@@ -328,7 +327,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 /************************ BEGIN precompute rtd *************************/
                 int rtd_idx_rb = rtd_start_rb;
-                int dbs = downsampled_domain_block->size;
+                int dbs = downsampled_db->size;
                 int dbs_dbs = dbs*dbs;
 
                 double rtd_sum_0_1 = 0;
@@ -358,22 +357,14 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                         double ri1 = image->data[rtd_idx_rb];
                         double ri2 = image->data[idx_rb2];
 
-                        double di_0_1 =
-                            downsampled_domain_block->data[idx_0_db1];
-                        double di_0_2 =
-                            downsampled_domain_block->data[idx_0_db2];
-                        double di_90_1 =
-                            downsampled_domain_block->data[idx_90_db1];
-                        double di_90_2 =
-                            downsampled_domain_block->data[idx_90_db2];
-                        double di_180_1 =
-                            downsampled_domain_block->data[idx_180_db1];
-                        double di_180_2 =
-                            downsampled_domain_block->data[idx_180_db2];
-                        double di_270_1 =
-                            downsampled_domain_block->data[idx_270_db1];
-                        double di_270_2 =
-                            downsampled_domain_block->data[idx_270_db2];
+                        double di_0_1 = downsampled_db->data[idx_0_db1];
+                        double di_0_2 = downsampled_db->data[idx_0_db2];
+                        double di_90_1 = downsampled_db->data[idx_90_db1];
+                        double di_90_2 = downsampled_db->data[idx_90_db2];
+                        double di_180_1 = downsampled_db->data[idx_180_db1];
+                        double di_180_2 = downsampled_db->data[idx_180_db2];
+                        double di_270_1 = downsampled_db->data[idx_270_db1];
+                        double di_270_2 = downsampled_db->data[idx_270_db2];
 
                         rtd_sum_0_1 = fma(ri1, di_0_1, rtd_sum_0_1);
                         rtd_sum_0_2 = fma(ri2, di_0_2, rtd_sum_0_2);
