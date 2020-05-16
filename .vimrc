@@ -1,1 +1,1 @@
-set makeprg=cmake\ --build\ build
+set makeprg=cmake\ --build\ build\ --target\ fic
