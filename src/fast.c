@@ -117,146 +117,6 @@ void prepare_domain_blocks_norotation(struct image_t *prepared_domain_blocks,
     }
 }
 
-typedef double (*rtd_func_type)(const struct image_t *image,
-                                const struct image_t *rotated_domain_block,
-                                const struct block_t *range_block);
-
-typedef size_t (*rotation_index_transformer_type)(const size_t i,
-                                                  const size_t j, const int n,
-                                                  const int m);
-
-double rtd_generic_with_rot0(const struct image_t *image,
-                             const struct image_t *domain_block,
-                             const struct block_t *range_block) {
-    const int dbs = domain_block->size;
-
-    double rtd_sum1 = 0;
-    double rtd_sum2 = 0;
-
-    size_t idx_rb = range_block->rel_y * image->size + range_block->rel_x;
-
-    for (size_t i = 0; i < dbs; i++) {
-        for (size_t j = 0; j < dbs; j += 2) {
-            const size_t idx_db1 = i * dbs + j;
-
-            double ri1 = image->data[idx_rb];
-            double di1 = domain_block->data[idx_db1];
-            rtd_sum1 = fma(ri1, di1, rtd_sum1);
-            idx_rb++;
-
-            const size_t idx_db2 = i * dbs + j + 1;
-            double ri2 = image->data[idx_rb];
-            double di2 = domain_block->data[idx_db2];
-            rtd_sum2 = fma(ri2, di2, rtd_sum2);
-            idx_rb++;
-        }
-        idx_rb += image->size - dbs;
-    }
-
-    __record_double_flops(dbs * dbs * 2);
-
-    return rtd_sum1 + rtd_sum2;
-}
-
-double rtd_generic_with_rot90(const struct image_t *image,
-                              const struct image_t *domain_block,
-                              const struct block_t *range_block) {
-    const int dbs = domain_block->size;
-
-    double rtd_sum1 = 0;
-    double rtd_sum2 = 0;
-
-    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
-
-    for (size_t i = 0; i < dbs; i++) {
-        for (size_t j = 0; j < dbs; j += 2) {
-            const size_t idx_db1 = (dbs - j - 1) * dbs + i;
-
-            double ri1 = image->data[idx_rb1];
-            double di1 = domain_block->data[idx_db1];
-            rtd_sum1 = fma(ri1, di1, rtd_sum1);
-            idx_rb1++;
-
-            const size_t idx_db2 = (dbs - (j + 1) - 1) * dbs + i;
-            double ri2 = image->data[idx_rb1];
-            double di2 = domain_block->data[idx_db2];
-            rtd_sum2 = fma(ri2, di2, rtd_sum2);
-            idx_rb1++;
-        }
-        idx_rb1 += image->size - dbs;
-    }
-
-    __record_double_flops(dbs * dbs * 2);
-
-    return rtd_sum1 + rtd_sum2;
-}
-
-double rtd_generic_with_rot180(const struct image_t *image,
-                               const struct image_t *domain_block,
-                               const struct block_t *range_block) {
-    const int dbs = domain_block->size;
-
-    double rtd_sum1 = 0;
-    double rtd_sum2 = 0;
-
-    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
-
-    for (size_t i = 0; i < dbs; i++) {
-        for (size_t j = 0; j < dbs; j += 2) {
-            const size_t idx_db1 = (dbs - i - 1) * dbs + (dbs - j - 1);
-
-            double ri1 = image->data[idx_rb1];
-            double di1 = domain_block->data[idx_db1];
-            rtd_sum1 = fma(ri1, di1, rtd_sum1);
-            idx_rb1++;
-
-            const size_t idx_db2 = (dbs - i - 1) * dbs + (dbs - (j + 1) - 1);
-            double ri2 = image->data[idx_rb1];
-            double di2 = domain_block->data[idx_db2];
-            rtd_sum2 = fma(ri2, di2, rtd_sum2);
-            idx_rb1++;
-        }
-        idx_rb1 += image->size - dbs;
-    }
-
-    __record_double_flops(dbs * dbs * 2);
-
-    return rtd_sum1 + rtd_sum2;
-}
-
-double rtd_generic_with_rot270(const struct image_t *image,
-                               const struct image_t *domain_block,
-                               const struct block_t *range_block) {
-    const int dbs = domain_block->size;
-
-    double rtd_sum1 = 0;
-    double rtd_sum2 = 0;
-
-    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
-
-    for (size_t i = 0; i < dbs; i++) {
-        for (size_t j = 0; j < dbs; j += 2) {
-            const size_t idx_db1 = j * dbs + (dbs - i - 1);
-
-            double ri1 = image->data[idx_rb1];
-            double di1 = domain_block->data[idx_db1];
-            rtd_sum1 = fma(ri1, di1, rtd_sum1);
-            idx_rb1++;
-
-            const size_t idx_db2 = (j + 1) * dbs + (dbs - i - 1);
-            double ri2 = image->data[idx_rb1];
-            double di2 = domain_block->data[idx_db2];
-            rtd_sum2 = fma(ri2, di2, rtd_sum2);
-            idx_rb1++;
-        }
-        idx_rb1 += image->size - dbs;
-    }
-
-    __record_double_flops(dbs * dbs * 2);
-
-    return rtd_sum1 + rtd_sum2;
-}
-
 void precompute_sums(double *sums, double *sums_squared,
                      const struct block_t *blocks, const int blocks_length,
                      const struct image_t *image) {
@@ -464,22 +324,92 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 const double sd_x_2 = 2 * domain_sum;
                 __record_double_flops(3);
 
+                /************************ BEGIN precompute rtd *************************/
+                int rtd_idx_rb =
+                    range_block->rel_y * image->size + range_block->rel_x;
+
+                int dbs = downsampled_domain_block->size;
+
+                double rtd_sum_0_1 = 0;
+                double rtd_sum_0_2 = 0;
+                double rtd_sum_90_1 = 0;
+                double rtd_sum_90_2 = 0;
+                double rtd_sum_180_1 = 0;
+                double rtd_sum_180_2 = 0;
+                double rtd_sum_270_1 = 0;
+                double rtd_sum_270_2 = 0;
+
+                for (int i = 0; i < dbs; i++) {
+                    for (int j = 0; j < dbs; j += 2) {
+                        int idx_0_db1 = i * dbs + j;
+                        int idx_0_db2 = i * dbs + j + 1;
+                        int idx_90_db1 = (dbs - j - 1) * dbs + i;
+                        int idx_90_db2 = (dbs - (j + 1) - 1) * dbs + i;
+                        int idx_180_db1 = (dbs - i - 1) * dbs + (dbs - j - 1);
+                        int idx_180_db2 = (dbs - i - 1) * dbs + (dbs - (j + 1) - 1);
+                        int idx_270_db1 = j * dbs + (dbs - i - 1);
+                        int idx_270_db2 = (j + 1) * dbs + (dbs - i - 1);
+
+                        int idx_rb2 = rtd_idx_rb + 1;
+
+                        double ri1 = image->data[rtd_idx_rb];
+                        double ri2 = image->data[idx_rb2];
+
+                        double di_0_1 =
+                            downsampled_domain_block->data[idx_0_db1];
+                        double di_0_2 =
+                            downsampled_domain_block->data[idx_0_db2];
+                        double di_90_1 =
+                            downsampled_domain_block->data[idx_90_db1];
+                        double di_90_2 =
+                            downsampled_domain_block->data[idx_90_db2];
+                        double di_180_1 =
+                            downsampled_domain_block->data[idx_180_db1];
+                        double di_180_2 =
+                            downsampled_domain_block->data[idx_180_db2];
+                        double di_270_1 =
+                            downsampled_domain_block->data[idx_270_db1];
+                        double di_270_2 =
+                            downsampled_domain_block->data[idx_270_db2];
+
+                        rtd_sum_0_1 = fma(ri1, di_0_1, rtd_sum_0_1);
+                        rtd_sum_0_2 = fma(ri2, di_0_2, rtd_sum_0_2);
+
+                        rtd_sum_90_1 = fma(ri1, di_90_1, rtd_sum_90_1);
+                        rtd_sum_90_2 = fma(ri2, di_90_2, rtd_sum_90_2);
+
+                        rtd_sum_180_1 = fma(ri1, di_180_1, rtd_sum_180_1);
+                        rtd_sum_180_2 = fma(ri2, di_180_2, rtd_sum_180_2);
+
+                        rtd_sum_270_1 = fma(ri1, di_270_1, rtd_sum_270_1);
+                        rtd_sum_270_2 = fma(ri2, di_270_2, rtd_sum_270_2);
+
+                        rtd_idx_rb += 2;
+                    }
+                    rtd_idx_rb += image->size - dbs;
+                }
+
+                __record_double_flops(dbs * dbs * 2 * 8);
+
+                double rtd_0 = rtd_sum_0_1 + rtd_sum_0_2;
+                double rtd_90 = rtd_sum_90_1 + rtd_sum_90_2;
+                double rtd_180 = rtd_sum_180_1 + rtd_sum_180_2;
+                double rtd_270 = rtd_sum_270_1 + rtd_sum_270_2;
+
+                __record_double_flops(4);
+
+                /************************ END precompute rtd *************************/
+
                 // ROTATION 0
                 {
-                    double sum_range_times_domain = rtd_generic_with_rot0(
-                        image, downsampled_domain_block, range_block);
-
                     double contrast =
-                        fma(num_pixels, sum_range_times_domain, -sd_x_sr) *
-                        denominator_inv;
+                        fma(num_pixels, rtd_0, -sd_x_sr) * denominator_inv;
                     double brightness = fma(contrast, -domain_sum, range_sum) *
                                         num_pixels_of_blocks_inv;
                     double a1 = fma(num_pixels, brightness, -sr_x_2);
                     double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 =
-                        fma(brightness, sd_x_2, -sum_range_times_domain);
-                    double a4 = fma(contrast, domain_sum_squared,
-                                    -sum_range_times_domain);
+                    double a3 = fma(brightness, sd_x_2, -rtd_0);
+                    double a4 = fma(contrast, domain_sum_squared, -rtd_0);
                     double a5 = a3 + a4;
                     double error = fma(a5, contrast, a2);
                     error *= num_pixels_of_blocks_inv;
@@ -501,20 +431,14 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 // ROTATION 90
                 {
-                    double sum_range_times_domain = rtd_generic_with_rot90(
-                        image, downsampled_domain_block, range_block);
-
                     double contrast =
-                        fma(num_pixels, sum_range_times_domain, -sd_x_sr) *
-                        denominator_inv;
+                        fma(num_pixels, rtd_90, -sd_x_sr) * denominator_inv;
                     double brightness = fma(contrast, -domain_sum, range_sum) *
                                         num_pixels_of_blocks_inv;
                     double a1 = fma(num_pixels, brightness, -sr_x_2);
                     double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 =
-                        fma(brightness, sd_x_2, -sum_range_times_domain);
-                    double a4 = fma(contrast, domain_sum_squared,
-                                    -sum_range_times_domain);
+                    double a3 = fma(brightness, sd_x_2, -rtd_90);
+                    double a4 = fma(contrast, domain_sum_squared, -rtd_90);
                     double a5 = a3 + a4;
                     double error = fma(a5, contrast, a2);
                     error *= num_pixels_of_blocks_inv;
@@ -536,20 +460,14 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 // ROTATION 180
                 {
-                    double sum_range_times_domain = rtd_generic_with_rot180(
-                        image, downsampled_domain_block, range_block);
-
                     double contrast =
-                        fma(num_pixels, sum_range_times_domain, -sd_x_sr) *
-                        denominator_inv;
+                        fma(num_pixels, rtd_180, -sd_x_sr) * denominator_inv;
                     double brightness = fma(contrast, -domain_sum, range_sum) *
                                         num_pixels_of_blocks_inv;
                     double a1 = fma(num_pixels, brightness, -sr_x_2);
                     double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 =
-                        fma(brightness, sd_x_2, -sum_range_times_domain);
-                    double a4 = fma(contrast, domain_sum_squared,
-                                    -sum_range_times_domain);
+                    double a3 = fma(brightness, sd_x_2, -rtd_180);
+                    double a4 = fma(contrast, domain_sum_squared, -rtd_180);
                     double a5 = a3 + a4;
                     double error = fma(a5, contrast, a2);
                     error *= num_pixels_of_blocks_inv;
@@ -571,20 +489,14 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 // ROTATION 270
                 {
-                    double sum_range_times_domain = rtd_generic_with_rot270(
-                        image, downsampled_domain_block, range_block);
-
                     double contrast =
-                        fma(num_pixels, sum_range_times_domain, -sd_x_sr) *
-                        denominator_inv;
+                        fma(num_pixels, rtd_270, -sd_x_sr) * denominator_inv;
                     double brightness = fma(contrast, -domain_sum, range_sum) *
                                         num_pixels_of_blocks_inv;
                     double a1 = fma(num_pixels, brightness, -sr_x_2);
                     double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 =
-                        fma(brightness, sd_x_2, -sum_range_times_domain);
-                    double a4 = fma(contrast, domain_sum_squared,
-                                    -sum_range_times_domain);
+                    double a3 = fma(brightness, sd_x_2, -rtd_270);
+                    double a4 = fma(contrast, domain_sum_squared, -rtd_270);
                     double a5 = a3 + a4;
                     double error = fma(a5, contrast, a2);
                     error *= num_pixels_of_blocks_inv;
