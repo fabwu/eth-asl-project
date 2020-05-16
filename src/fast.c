@@ -366,17 +366,17 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                         double di_270_1 = downsampled_db->data[idx_270_db1];
                         double di_270_2 = downsampled_db->data[idx_270_db2];
 
-                        rtd_sum_0_1 = fma(ri1, di_0_1, rtd_sum_0_1);
-                        rtd_sum_0_2 = fma(ri2, di_0_2, rtd_sum_0_2);
+                        rtd_sum_0_1 += ri1*di_0_1;
+                        rtd_sum_0_2 += ri2*di_0_2;
 
-                        rtd_sum_90_1 = fma(ri1, di_90_1, rtd_sum_90_1);
-                        rtd_sum_90_2 = fma(ri2, di_90_2, rtd_sum_90_2);
+                        rtd_sum_90_1 += ri1*di_90_1;
+                        rtd_sum_90_2 += ri2*di_90_2;
 
-                        rtd_sum_180_1 = fma(ri1, di_180_1, rtd_sum_180_1);
-                        rtd_sum_180_2 = fma(ri2, di_180_2, rtd_sum_180_2);
+                        rtd_sum_180_1 += ri1*di_180_1;
+                        rtd_sum_180_2 += ri2*di_180_2;
 
-                        rtd_sum_270_1 = fma(ri1, di_270_1, rtd_sum_270_1);
-                        rtd_sum_270_2 = fma(ri2, di_270_2, rtd_sum_270_2);
+                        rtd_sum_270_1 += ri1*di_270_1;
+                        rtd_sum_270_2 += ri2*di_270_2;
 
                         rtd_idx_rb += 2;
                         dbs_j = dbs_j + dbs + dbs;
