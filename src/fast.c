@@ -411,7 +411,6 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
-                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
@@ -440,7 +439,6 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
-                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
@@ -469,7 +467,6 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
-                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
@@ -498,7 +495,6 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
-                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
