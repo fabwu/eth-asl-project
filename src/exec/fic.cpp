@@ -20,9 +20,9 @@ int main(int argc, char const *argv[]) {
         ("decompress,d", "decrompress image")
         ("filename,f", value<string>(), "gray image file")
         ("csv,o", value<string>(), "report output csv file")
-        ("iterations,i",value<int>()->default_value(10),"number of decompression iterations")
+        ("iterations,i",value<int>()->default_value(3),"number of decompression iterations")
         ("repetitions,r",value<int>()->default_value(2),"number of benchmark repetitions")
-        ("error,e", value<int>()->default_value(100),
+        ("error,e", value<int>()->default_value(350),
         "the error threshold, which may not be exceeded by any transformation")
         ;
 
