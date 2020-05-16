@@ -215,7 +215,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             range_blocks_length_next_iteration = 0;
             range_blocks_size_next_iteration /= 2;
-            range_blocks_next_iteration =
+            range_blocks_next_iteration = (struct block_t *)
                 malloc(4 * range_blocks_length_current_iteration *
                        sizeof(struct block_t));
 
@@ -233,12 +233,12 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 (image->size / domain_block_size_current_iteration) *
                 (image->size / domain_block_size_current_iteration);
 
-            downsampled_domain_blocks =
+            downsampled_domain_blocks = (struct image_t *)
                 malloc(domain_blocks_length * sizeof(struct image_t));
 
-            domain_block_sums = malloc(sizeof(double) * domain_blocks_length);
+            domain_block_sums = (double *) malloc(sizeof(double) * domain_blocks_length);
             domain_block_sums_squared =
-                malloc(sizeof(double) * domain_blocks_length);
+                (double *)malloc(sizeof(double) * domain_blocks_length);
 
             prepare_domain_blocks_norotation(
                 downsampled_domain_blocks, domain_block_sums,
@@ -250,10 +250,10 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
         // Precomputations on domain / range blocks
         {
-            range_block_sums =
+            range_block_sums = (double *)
                 malloc(sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums != NULL);
-            range_block_sums_squared =
+            range_block_sums_squared = (double *)
                 malloc(sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums_squared != NULL);
             precompute_sums(range_block_sums, range_block_sums_squared,
@@ -532,7 +532,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
-                struct transformation_t *best_transformation =
+                struct transformation_t *best_transformation = (struct transformation_t *)
                     malloc(sizeof(struct transformation_t));
                 best_transformation->range_block =
                     make_block(best_range_block_rel_x, best_range_block_rel_y,
