@@ -26,7 +26,6 @@ add_library(lib_08_jopa  08_jopa.c)
 ##################################################################################
 
 add_executable(test_rotate exec/test_rotate.cpp)
-add_executable(bench_rtd exec/bench_rtd.c)
 add_executable(baseline exec/fic.cpp)
 add_executable(fic exec/fic.cpp)
 add_executable(01_precompute_indices exec/fic.cpp)
@@ -58,7 +57,6 @@ target_link_libraries(lib_08_jopa PRIVATE lib_types lib_commons lib_queue lib_ro
 ##################################################################################
 
 target_link_libraries(test_rotate PUBLIC lib_rotate)
-target_link_libraries(bench_rtd PUBLIC -lm lib_types lib_queue)
 target_link_libraries(baseline PUBLIC lib_types lib_queue lib_commons lib_rotate lib_naive ${Boost_LIBRARIES})
 target_link_libraries(fic PUBLIC lib_types lib_queue lib_commons lib_rotate lib_fast ${Boost_LIBRARIES})
 target_link_libraries(01_precompute_indices PUBLIC lib_types lib_queue lib_commons lib_rotate lib_01_precompute_indices ${Boost_LIBRARIES})
