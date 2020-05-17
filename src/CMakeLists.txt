@@ -22,6 +22,7 @@ add_library(lib_05_jonas 05_rtd_in_main_loop.c)
 # add_library(lib_06_jonas 06_optimize_compute_and_brightness.c)
 # add_library(lib_07_jopa  07_jopa.c)
 add_library(lib_08_jopa  08_jopa.c)
+add_library(lib_09_basel  09_basel.c)
 
 ##################################################################################
 
@@ -37,6 +38,7 @@ add_executable(05_rtd_no_precompute exec/fic.cpp)
 # delete 6
 # delete 7
 add_executable(08_remove_function_and_add_fma exec/fic.cpp)
+add_executable(09_basel exec/fic.cpp)
 
 
 ##################################################################################
@@ -53,6 +55,7 @@ target_link_libraries(lib_05_jonas PRIVATE lib_types lib_commons lib_queue lib_r
 # target_link_libraries(lib_06_jonas PRIVATE lib_types lib_commons lib_queue lib_rotate)
 # target_link_libraries(lib_07_jopa PRIVATE lib_types lib_commons lib_queue lib_rotate)
 target_link_libraries(lib_08_jopa PRIVATE lib_types lib_commons lib_queue lib_rotate)
+target_link_libraries(lib_09_basel PRIVATE lib_types lib_commons lib_queue lib_rotate)
 
 ##################################################################################
 
@@ -67,3 +70,4 @@ target_link_libraries(05_rtd_no_precompute PUBLIC lib_types lib_queue lib_common
 # target_link_libraries(06_jonas PUBLIC lib_types lib_queue lib_commons lib_rotate lib_06_jonas ${Boost_LIBRARIES})
 # target_link_libraries(07_jopa PUBLIC lib_types lib_queue lib_commons lib_rotate lib_07_jopa ${Boost_LIBRARIES})
 target_link_libraries(08_remove_function_and_add_fma PUBLIC lib_types lib_queue lib_commons lib_rotate lib_08_jopa ${Boost_LIBRARIES})
+target_link_libraries(09_basel PUBLIC lib_types lib_queue lib_commons lib_rotate lib_09_basel ${Boost_LIBRARIES})
