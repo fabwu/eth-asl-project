@@ -8,11 +8,11 @@
  */
 #include <assert.h>
 #include <float.h>
+#include <immintrin.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <immintrin.h>
 
 #include "lib/performance.h"
 #include "lib/queue.h"
@@ -216,9 +216,9 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             range_blocks_length_next_iteration = 0;
             range_blocks_size_next_iteration /= 2;
-            range_blocks_next_iteration = (struct block_t *)
-                malloc(4 * range_blocks_length_current_iteration *
-                       sizeof(struct block_t));
+            range_blocks_next_iteration = (struct block_t *)malloc(
+                4 * range_blocks_length_current_iteration *
+                sizeof(struct block_t));
 
             __record_double_flops(2);
         }
@@ -234,10 +234,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 (image->size / domain_block_size_current_iteration) *
                 (image->size / domain_block_size_current_iteration);
 
-            downsampled_domain_blocks = (struct image_t *)
-                malloc(domain_blocks_length * sizeof(struct image_t));
+            downsampled_domain_blocks = (struct image_t *)malloc(
+                domain_blocks_length * sizeof(struct image_t));
 
-            domain_block_sums = (double *) malloc(sizeof(double) * domain_blocks_length);
+            domain_block_sums =
+                (double *)malloc(sizeof(double) * domain_blocks_length);
             domain_block_sums_squared =
                 (double *)malloc(sizeof(double) * domain_blocks_length);
 
@@ -251,11 +252,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
         // Precomputations on domain / range blocks
         {
-            range_block_sums = (double *)
-                malloc(sizeof(double) * range_blocks_length_current_iteration);
+            range_block_sums = (double *)malloc(
+                sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums != NULL);
-            range_block_sums_squared = (double *)
-                malloc(sizeof(double) * range_blocks_length_current_iteration);
+            range_block_sums_squared = (double *)malloc(
+                sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums_squared != NULL);
             precompute_sums(range_block_sums, range_block_sums_squared,
                             range_blocks_curr_iteration,
@@ -281,11 +282,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             const double sr_x_2 = 2 * range_sum;
             __record_double_flops(1);
 
-            int rtd_start_rb = range_block->rel_y * image->size + range_block->rel_x;
+            int rtd_start_rb =
+                range_block->rel_y * image->size + range_block->rel_x;
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 assert(domain_blocks[idx_db].width == 2 * range_block->width);
-                struct image_t *downsampled_db = downsampled_domain_blocks + idx_db;
+                struct image_t *downsampled_db =
+                    downsampled_domain_blocks + idx_db;
 
                 const double domain_sum = domain_block_sums[idx_db];
                 const double domain_sum_squared =
@@ -326,20 +329,23 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 const double sd_x_2 = 2 * domain_sum;
                 __record_double_flops(3);
 
-                /************************ BEGIN precompute rtd *************************/
+                /************************ BEGIN precompute rtd
+                 * *************************/
                 int rtd_idx_rb = rtd_start_rb;
                 int dbs = downsampled_db->size;
-                int dbs_dbs = dbs*dbs;
+                int dbs_dbs = dbs * dbs;
 
-                double rtd_sum_0_1 = 0;
-                double rtd_sum_0_2 = 0;
-                double rtd_sum_90_1 = 0;
-                double rtd_sum_90_2 = 0;
-                double rtd_sum_180_1 = 0;
-                double rtd_sum_180_2 = 0;
-                double rtd_sum_270_1 = 0;
-                double rtd_sum_270_2 = 0;
+                //                double rtd_sum_0_1 = 0;
+                //                double rtd_sum_0_2 = 0;
+                //                double rtd_sum_90_1 = 0;
+                //                double rtd_sum_90_2 = 0;
+                //                double rtd_sum_180_1 = 0;
+                //                double rtd_sum_180_2 = 0;
+                //                double rtd_sum_270_1 = 0;
+                //                double rtd_sum_270_2 = 0;
 
+                __m256d v_rtd_sum_1 = _mm256_setzero_pd();
+                __m256d v_rtd_sum_2 = _mm256_setzero_pd();
                 int dbs_i = 0;
                 for (int i = 0; i < dbs; i++) {
                     int dbs_j = 0;
@@ -353,31 +359,50 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                         int idx_270_db1 = dbs_j + dbs - i - 1;
                         int idx_270_db2 = idx_270_db1 + dbs;
 
+                        __m256d di_1 = _mm256_setzero_pd();
+                        __m256d di_2 = _mm256_setzero_pd();
+                        // DO THIS (worse)
+                        //                        const __m256i offset_db_1 =
+                        //                        _mm256_set_epi64x(
+                        //                            idx_270_db1, idx_180_db1,
+                        //                            idx_90_db1, idx_0_db1);
+                        //                        di_1 =
+                        //                        _mm256_i64gather_pd(downsampled_db->data,
+                        //                                                   offset_db_1,
+                        //                                                   8);
+                        //
+                        //                        const __m256i offset_db_2 =
+                        //                        _mm256_set_epi64x(
+                        //                            idx_270_db2, idx_180_db2,
+                        //                            idx_90_db2, idx_0_db2);
+                        //                        di_2 =
+                        //                        _mm256_i64gather_pd(downsampled_db->data,
+                        //                                                   offset_db_2,
+                        //                                                   8);
+
+                        // OR THIS (better)
+                        di_1[0] = downsampled_db->data[idx_0_db1];
+                        di_2[0] = downsampled_db->data[idx_0_db2];
+                        di_1[1] = downsampled_db->data[idx_90_db1];
+                        di_2[1] = downsampled_db->data[idx_90_db2];
+                        di_1[2] = downsampled_db->data[idx_180_db1];
+                        di_2[2] = downsampled_db->data[idx_180_db2];
+                        di_1[3] = downsampled_db->data[idx_270_db1];
+                        di_2[3] = downsampled_db->data[idx_270_db2];
+
                         int idx_rb2 = rtd_idx_rb + 1;
 
                         double ri1 = image->data[rtd_idx_rb];
                         double ri2 = image->data[idx_rb2];
 
-                        double di_0_1 = downsampled_db->data[idx_0_db1];
-                        double di_0_2 = downsampled_db->data[idx_0_db2];
-                        double di_90_1 = downsampled_db->data[idx_90_db1];
-                        double di_90_2 = downsampled_db->data[idx_90_db2];
-                        double di_180_1 = downsampled_db->data[idx_180_db1];
-                        double di_180_2 = downsampled_db->data[idx_180_db2];
-                        double di_270_1 = downsampled_db->data[idx_270_db1];
-                        double di_270_2 = downsampled_db->data[idx_270_db2];
+                        const __m256d v_ri1 = _mm256_set1_pd(ri1);
+                        const __m256d v_ri2 = _mm256_set1_pd(ri2);
 
-                        rtd_sum_0_1 += ri1*di_0_1;
-                        rtd_sum_0_2 += ri2*di_0_2;
+                        __m256d a = _mm256_mul_pd(v_ri1, di_1);
+                        v_rtd_sum_1 = _mm256_add_pd(v_rtd_sum_1, a);
 
-                        rtd_sum_90_1 += ri1*di_90_1;
-                        rtd_sum_90_2 += ri2*di_90_2;
-
-                        rtd_sum_180_1 += ri1*di_180_1;
-                        rtd_sum_180_2 += ri2*di_180_2;
-
-                        rtd_sum_270_1 += ri1*di_270_1;
-                        rtd_sum_270_2 += ri2*di_270_2;
+                        __m256d b = _mm256_mul_pd(v_ri2, di_2);
+                        v_rtd_sum_2 = _mm256_add_pd(v_rtd_sum_2, b);
 
                         rtd_idx_rb += 2;
                         dbs_j = dbs_j + dbs + dbs;
@@ -388,39 +413,44 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 __record_double_flops(dbs * dbs * 8);
 
-                double rtd_0 = rtd_sum_0_1 + rtd_sum_0_2;
-                double rtd_90 = rtd_sum_90_1 + rtd_sum_90_2;
-                double rtd_180 = rtd_sum_180_1 + rtd_sum_180_2;
-                double rtd_270 = rtd_sum_270_1 + rtd_sum_270_2;
+                __m256d v_rtd = _mm256_add_pd(v_rtd_sum_1, v_rtd_sum_2);
+                //                double rtd_0 = rtd_sum_0_1 + rtd_sum_0_2;
+                //                double rtd_90 = rtd_sum_90_1 + rtd_sum_90_2;
+                //                double rtd_180 = rtd_sum_180_1 +
+                //                rtd_sum_180_2; double rtd_270 = rtd_sum_270_1
+                //                + rtd_sum_270_2;
 
                 __record_double_flops(4);
 
-                /************************ END precompute rtd *************************/
+                /************************ END precompute rtd
+                 * *************************/
 
                 __m256d v_contrast, v_brightness, v_error, v_num_pixels,
-                    v_minus_sd_x_sr, v_sd_x_2, v_denominator_inv, v_rtd,
-                    v_minus_rtd, v_minus_domain_sum, v_domain_sum_squared,
-                    v_range_sum, v_num_pixels_of_blocks_inv, v_a1, v_a2, v_a3,
-                    v_a4, v_a5, v_minus_sr_x_2, v_range_sum_squared;
+                    v_minus_sd_x_sr, v_sd_x_2, v_denominator_inv, v_minus_rtd,
+                    v_minus_domain_sum, v_domain_sum_squared, v_range_sum,
+                    v_num_pixels_of_blocks_inv, v_a1, v_a2, v_a3, v_a4, v_a5,
+                    v_minus_sr_x_2, v_range_sum_squared;
 
-                v_num_pixels = _mm256_set1_pd((double) num_pixels);
+                v_num_pixels = _mm256_set1_pd((double)num_pixels);
                 v_minus_sd_x_sr = _mm256_set1_pd(-sd_x_sr);
                 /* TODO:l make this more efficient */
                 v_denominator_inv = _mm256_set1_pd(denominator_inv);
-                v_rtd = _mm256_set_pd(rtd_270, rtd_180, rtd_90, rtd_0);
-
 
                 // compute contrast
-                v_contrast = _mm256_fmadd_pd(v_num_pixels, v_rtd, v_minus_sd_x_sr);
+                v_contrast =
+                    _mm256_fmadd_pd(v_num_pixels, v_rtd, v_minus_sd_x_sr);
                 v_contrast = _mm256_mul_pd(v_contrast, v_denominator_inv);
                 __record_double_flops(12);
 
                 // compute brightness
                 v_minus_domain_sum = _mm256_set1_pd(-domain_sum);
                 v_range_sum = _mm256_set1_pd(range_sum);
-                v_num_pixels_of_blocks_inv = _mm256_set1_pd(num_pixels_of_blocks_inv);
-                v_brightness = _mm256_fmadd_pd(v_contrast, v_minus_domain_sum, v_range_sum);
-                v_brightness = _mm256_mul_pd(v_brightness, v_num_pixels_of_blocks_inv);
+                v_num_pixels_of_blocks_inv =
+                    _mm256_set1_pd(num_pixels_of_blocks_inv);
+                v_brightness = _mm256_fmadd_pd(v_contrast, v_minus_domain_sum,
+                                               v_range_sum);
+                v_brightness =
+                    _mm256_mul_pd(v_brightness, v_num_pixels_of_blocks_inv);
                 __record_double_flops(12);
 
                 // compute error
@@ -428,33 +458,26 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 v_minus_rtd = _mm256_sub_pd(_mm256_set1_pd(0.0), v_rtd);
                 v_sd_x_2 = _mm256_set1_pd(sd_x_2);
                 v_domain_sum_squared = _mm256_set1_pd(domain_sum_squared);
-                v_range_sum_squared =  _mm256_set1_pd(range_sum_squared);
-                v_a1 = _mm256_fmadd_pd(v_num_pixels, v_brightness, v_minus_sr_x_2);
+                v_range_sum_squared = _mm256_set1_pd(range_sum_squared);
+                v_a1 =
+                    _mm256_fmadd_pd(v_num_pixels, v_brightness, v_minus_sr_x_2);
                 v_a2 = _mm256_fmadd_pd(v_brightness, v_a1, v_range_sum_squared);
                 v_a3 = _mm256_fmadd_pd(v_brightness, v_sd_x_2, v_minus_rtd);
-                v_a4 = _mm256_fmadd_pd(v_contrast, v_domain_sum_squared, v_minus_rtd);
+                v_a4 = _mm256_fmadd_pd(v_contrast, v_domain_sum_squared,
+                                       v_minus_rtd);
                 v_a5 = _mm256_add_pd(v_a3, v_a4);
                 v_error = _mm256_fmadd_pd(v_a5, v_contrast, v_a2);
                 v_error = _mm256_mul_pd(v_error, v_num_pixels_of_blocks_inv);
                 __record_double_flops(48);
 
-                // set contrast to DBL_MAX if necessary
-                __m256d v_ones, v_mask;
-                /* V_DBL_MAX, v_abs_contrast */
-                /* V_DBL_MAX = _mm256_set1_pd(DBL_MAX); */
-                /* v_abs_contrast = _mm256_abs_epi64(v_contrast); */
-                v_ones = _mm256_set1_pd(1.0);
-                v_mask = _mm256_cmp_pd(v_contrast, v_ones, _CMP_GT_OQ);
-
                 int min_index = -1;
                 double min_error = DBL_MAX;
-                for(int i = 0; i < 4; i++){
-                    if(v_error[i] < min_error && v_mask[i] != 1) {
+                for (int i = 0; i < 4; i++) {
+                    if (v_error[i] < min_error && fabs(v_contrast[i]) <= 1) {
                         min_index = i;
                         min_error = v_error[i];
                     }
                 }
-                assert(min_index >= 0);
 
                 if (min_error < best_error) {
                     best_error = min_error;
@@ -463,7 +486,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     best_range_block_rel_y = range_block->rel_y;
                     best_contrast = v_contrast[min_index];
                     best_brightness = v_brightness[min_index];
-                    best_angle = 90*min_index;
+                    best_angle = 90 * min_index;
                 }
             }
 
@@ -474,12 +497,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 assert(range_block->height >= 2);
 
                 quad2(range_block, range_blocks_next_iteration +
-                                   range_blocks_length_next_iteration);
+                                       range_blocks_length_next_iteration);
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
-                struct transformation_t *best_transformation = (struct transformation_t *)
-                    malloc(sizeof(struct transformation_t));
+                struct transformation_t *best_transformation =
+                    (struct transformation_t *)malloc(
+                        sizeof(struct transformation_t));
                 best_transformation->range_block =
                     make_block(best_range_block_rel_x, best_range_block_rel_y,
                                range_blocks_size_current_iteration,
@@ -548,6 +572,6 @@ void decompress(struct image_t *decompressed_image,
 
 struct func_suite_t register_suite(void) {
     struct func_suite_t suite = {.compress_func = &compress,
-        .decompress_func = &decompress};
+                                 .decompress_func = &decompress};
     return suite;
 }
