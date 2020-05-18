@@ -24,6 +24,7 @@ add_library(lib_05_jonas 05_rtd_in_main_loop.c)
 add_library(lib_08_jopa  08_jopa.c)
 add_library(lib_09_basel  09_basel.c)
 add_library(lib_10_simd_brightness_and_contrast 10_simd_brightness_and_contrast.c)
+add_library(lib_11_simd_rtd 11_simd_rtd.c)
 
 ##################################################################################
 
@@ -41,7 +42,7 @@ add_executable(05_rtd_no_precompute exec/fic.cpp)
 add_executable(08_remove_function_and_add_fma exec/fic.cpp)
 add_executable(09_basel exec/fic.cpp)
 add_executable(10_simd_brightness_and_contrast exec/fic.cpp)
-
+add_executable(11_simd_rtd exec/fic.cpp)
 
 ##################################################################################
 
@@ -59,7 +60,7 @@ target_link_libraries(lib_05_jonas PRIVATE lib_types lib_commons lib_queue lib_r
 target_link_libraries(lib_08_jopa PRIVATE lib_types lib_commons lib_queue lib_rotate)
 target_link_libraries(lib_09_basel PRIVATE lib_types lib_commons lib_queue lib_rotate)
 target_link_libraries(lib_10_simd_brightness_and_contrast PRIVATE lib_types lib_commons lib_queue lib_rotate)
-
+target_link_libraries(lib_11_simd_rtd PRIVATE lib_types lib_commons lib_queue lib_rotate)
 
 ##################################################################################
 
@@ -76,3 +77,4 @@ target_link_libraries(05_rtd_no_precompute PUBLIC lib_types lib_queue lib_common
 target_link_libraries(08_remove_function_and_add_fma PUBLIC lib_types lib_queue lib_commons lib_rotate lib_08_jopa ${Boost_LIBRARIES})
 target_link_libraries(09_basel PUBLIC lib_types lib_queue lib_commons lib_rotate lib_09_basel ${Boost_LIBRARIES})
 target_link_libraries(10_simd_brightness_and_contrast PUBLIC lib_types lib_queue lib_commons lib_rotate lib_10_simd_brightness_and_contrast ${Boost_LIBRARIES})
+target_link_libraries(11_simd_rtd PUBLIC lib_types lib_queue lib_commons lib_rotate lib_11_simd_rtd ${Boost_LIBRARIES})
