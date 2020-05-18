@@ -10,7 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}) # place binaries in buil
 # default flags (they get extended by options)
 #
 set(DEFAULT_FLAGS "-Wall -lboost_program_options")
-set(RELEASE_FLAGS "-O3 -DNDEBUG")
+set(RELEASE_FLAGS "-O3 -DNDEBUG -fno-tree-vectorize")
 set(DEBUG_FLAGS "-g -O0")
 
 option(OPT_ARCH "optimize for arch" ON)
