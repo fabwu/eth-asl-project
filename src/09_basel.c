@@ -328,8 +328,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 const double sd_x_2 = 2 * domain_sum;
                 __record_double_flops(3);
 
-                /************************ BEGIN precompute rtd
-                 * *************************/
+                // BEGIN precompute rtd
                 int rtd_idx_rb = rtd_start_rb;
                 int dbs = downsampled_db->size;
                 int dbs_dbs = dbs * dbs;
@@ -398,8 +397,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 __record_double_flops(4);
 
-                /************************ END precompute rtd
-                 * *************************/
+                // END precompute rtd
 
                 // ROTATION 0
                 {

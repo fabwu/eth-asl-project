@@ -21,6 +21,7 @@ extern "C" {
 
 #define VERIFY_MIN_PSNR 25.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
+#define SMALL_IMAGE_SIZE 1024
 #define WARMUP_CYCLES_REQUIRED 1e8
 
 extern "C" struct func_suite_t register_suite();
@@ -85,19 +86,20 @@ inline double verify_compress_decompress_error(const struct image_t &image,
  */
 class benchmark_t {
    public:
+    const struct image_t &image;
+    benchmark_t(const struct image_t &image) : image(image) {}
     virtual void perform() const = 0;
 };
 
 class benchmark_compress_t : public virtual benchmark_t {
    private:
-    const struct image_t &image;
     const int error_threshold;
     const func_suite_t suite;
 
    public:
     benchmark_compress_t(const struct image_t &image, const int error_threshold,
                          const func_suite_t &suite)
-        : image(image), error_threshold(error_threshold), suite(suite) {}
+        : benchmark_t(image), error_threshold(error_threshold), suite(suite) {}
 
     void perform() const override {
         auto transformations = suite.compress_func(&image, error_threshold);
@@ -108,24 +110,23 @@ class benchmark_compress_t : public virtual benchmark_t {
 
 class benchmark_decompress_t : public virtual benchmark_t {
    private:
-    const struct image_t &original_image;
     const func_suite_t suite;
     const size_t iterations;
     const struct queue *transformations;
 
    public:
-    benchmark_decompress_t(const struct image_t &original_image,
+    benchmark_decompress_t(const struct image_t &image,
                            const struct queue *transformations,
                            const int decompression_iterations,
                            const func_suite_t &suite)
-        : original_image(original_image),
+        : benchmark_t(image),
           suite(suite),
           iterations(decompression_iterations),
           transformations(transformations) {}
 
     void perform() const override {
         struct image_t decompressed_image =
-            make_image(original_image.size, true);
+            make_image(image.size, true);
         suite.decompress_func(&decompressed_image, transformations, iterations);
         free_image_data(&decompressed_image);
     }
@@ -170,23 +171,64 @@ inline double median(std::vector<T> &vec) {
     }
 }
 
-inline void benchmark_generic(const benchmark_t &benchmark, const params_t &params) {
+inline void print_params(const params_t &params, int runs, int repetitions) {
+    std::cout << "\033[1m"
+              << "PARAMETERS"
+              << "\033[0m" << std::endl;
+    std::cout << "\t"
+              << "File: " << params.image_path << std::endl;
+    std::cout << "\t"
+              << "Error: " << params.error_threshold << std::endl;
+    std::cout << "\t"
+              << "Warmup: ";
+    if (runs > 1) {
+        std::cout << "Yes" << std::endl;
+    } else {
+        std::cout << "No" << std::endl;
+    }
+
+    std::cout << "\t"
+              << "Repetitions: " << repetitions << std::endl;
+}
+
+inline void benchmark_generic(const benchmark_t &benchmark,
+                              const params_t &params) {
+    int needed_runs = 1;
+    int benchmark_repetitions = 1;
+
     std::cout << "\033[1m"
               << "WARMUP phase"
               << "\033[0m" << std::endl;
-    std::cout << "\t"
-              << "performing function for at least " << WARMUP_CYCLES_REQUIRED
-              << " cycles" << std::endl;
-    auto needed_runs = warmup(benchmark);
 
-    std::cout << "\t" << needed_runs << " runs needed" << std::endl;
+    if (benchmark.image.size <= SMALL_IMAGE_SIZE) {
+        // small image -> use warmup and multiple repetitions
+        std::cout << "\t"
+                  << "performing function for at least "
+                  << WARMUP_CYCLES_REQUIRED << " cycles" << std::endl;
+        needed_runs = warmup(benchmark);
+        std::cout << "\t" << needed_runs << " runs needed" << std::endl;
+        benchmark_repetitions = 10;
+    } else {
+        // large image -> no warmup and one repetition
+        std::cout << "\t"
+                  << "image is larger than " << SMALL_IMAGE_SIZE
+                  << " pixel: skipping warmup..." << std::endl;
+    }
+
+    if (params.benchmark_repetitions > 0) {
+        // repetitions are overwritten by params
+        benchmark_repetitions = params.benchmark_repetitions;
+    }
+
+    print_params(params, needed_runs, benchmark_repetitions);
+
     std::cout << "\033[1m"
               << "BENCHMARK phase"
               << "\033[0m" << std::endl;
     std::vector<double> cycles;
     std::vector<long long> flops;
     myInt64 start, end;
-    for (int rep = 0; rep < params.benchmark_repetitions; ++rep) {
+    for (int rep = 0; rep < benchmark_repetitions; ++rep) {
         __reset_flop_counter();
         start = start_tsc();
         for (long run = 0; run < needed_runs; ++run) {
@@ -245,19 +287,7 @@ inline bool verify_suite(const func_suite_t &suite, const int error_threshold,
     return !verification_failed;
 }
 
-inline void print_params(const params_t &params) {
-    std::cout << "\033[1m"
-              << "PARAMETERS"
-              << "\033[0m" << std::endl;
-    std::cout << "\t"
-              << "File: " << params.image_path << std::endl;
-    std::cout << "\t"
-              << "Error: " << params.error_threshold << std::endl;
-}
-
 inline void benchmark_compress(const params_t &params) {
-    print_params(params);
-
     int width, height;
     double *original_image_data =
         read_grayscale_file(params.image_path, &height, &width);
