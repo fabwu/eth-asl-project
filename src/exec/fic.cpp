@@ -22,6 +22,7 @@ int main(int argc, char const *argv[]) {
         ("csv,o", value<string>(), "report output csv file")
         ("iterations,i",value<int>()->default_value(3),"number of decompression iterations")
         ("repetitions,r",value<int>()->default_value(0),"number of benchmark repetitions")
+        ("flops",value<double>(),"specify flops manually")
         ("error,e", value<int>()->default_value(300),
         "the error threshold, which may not be exceeded by any transformation")
         ;
@@ -45,6 +46,20 @@ int main(int argc, char const *argv[]) {
             params.csv_output = true;
             params.csv_output_path = vm["csv"].as<string>();
         }
+
+#ifdef ENABLE_PERF_COUNTER
+        if (vm.count("flops")) {
+            throw runtime_error(
+                "using ENABLE_PERF_COUNTER and --flops not allowed");
+        }
+#else
+        if (vm.count("flops")) {
+            params.flops = vm["flops"].as<double>();
+        } else {
+            throw runtime_error(
+                "ENABLE_PERF_COUNTER not defined. Specify flops with --flops");
+        }
+#endif
 
         // benchmark compress
         if (vm.count("benchmark") && vm.count("compress")) {

@@ -34,6 +34,7 @@ class params_t {
     int benchmark_repetitions;
     bool csv_output;
     std::string csv_output_path;
+    double flops;
 
     params_t(std::string image_path, int error_threshold,
              int decompression_iterations, int benchmark_repetitions, bool csv_output = false,
@@ -252,14 +253,17 @@ inline void benchmark_generic(const benchmark_t &benchmark,
     std::cout << "\t"
               << "cycles (median): " << median_cycles << std::endl;
 
+    double median_flops;
 #ifdef ENABLE_PERF_COUNTER
-    auto median_flops = median(flops);
+    median_flops = median(flops);
+#else
+    median_flops = params.flops;
+#endif
     std::cout << "\t"
               << "flops: " << median_flops << std::endl;
     std::cout << "\t"
               << "perf [flops/cycle(median)]: "
               << (double)median_flops / median_cycles << std::endl;
-#endif
 }
 
 inline bool verify_suite(const func_suite_t &suite, const int error_threshold,
