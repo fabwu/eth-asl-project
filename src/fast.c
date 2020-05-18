@@ -510,7 +510,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             }
 
             if (best_error > error_threshold &&
-                current_quadtree_depth < MAX_QUADTREE_DEPTH) {
+                current_quadtree_depth < MAX_QUADTREE_DEPTH && range_blocks_size_next_iteration % 2 == 0) {
                 assert(range_block->width >= 2);
                 assert(range_block->height >= 2);
 

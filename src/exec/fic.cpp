@@ -22,7 +22,7 @@ int main(int argc, char const *argv[]) {
         ("csv,o", value<string>(), "report output csv file")
         ("iterations,i",value<int>()->default_value(3),"number of decompression iterations")
         ("repetitions,r",value<int>()->default_value(3),"number of benchmark repetitions")
-        ("error,e", value<int>()->default_value(350),
+        ("error,e", value<int>()->default_value(300),
         "the error threshold, which may not be exceeded by any transformation")
         ;
 

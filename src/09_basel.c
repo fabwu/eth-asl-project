@@ -215,9 +215,9 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             range_blocks_length_next_iteration = 0;
             range_blocks_size_next_iteration /= 2;
-            range_blocks_next_iteration = (struct block_t *)
-                malloc(4 * range_blocks_length_current_iteration *
-                       sizeof(struct block_t));
+            range_blocks_next_iteration = (struct block_t *)malloc(
+                4 * range_blocks_length_current_iteration *
+                sizeof(struct block_t));
 
             __record_double_flops(2);
         }
@@ -233,10 +233,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 (image->size / domain_block_size_current_iteration) *
                 (image->size / domain_block_size_current_iteration);
 
-            downsampled_domain_blocks = (struct image_t *)
-                malloc(domain_blocks_length * sizeof(struct image_t));
+            downsampled_domain_blocks = (struct image_t *)malloc(
+                domain_blocks_length * sizeof(struct image_t));
 
-            domain_block_sums = (double *) malloc(sizeof(double) * domain_blocks_length);
+            domain_block_sums =
+                (double *)malloc(sizeof(double) * domain_blocks_length);
             domain_block_sums_squared =
                 (double *)malloc(sizeof(double) * domain_blocks_length);
 
@@ -250,11 +251,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
         // Precomputations on domain / range blocks
         {
-            range_block_sums = (double *)
-                malloc(sizeof(double) * range_blocks_length_current_iteration);
+            range_block_sums = (double *)malloc(
+                sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums != NULL);
-            range_block_sums_squared = (double *)
-                malloc(sizeof(double) * range_blocks_length_current_iteration);
+            range_block_sums_squared = (double *)malloc(
+                sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums_squared != NULL);
             precompute_sums(range_block_sums, range_block_sums_squared,
                             range_blocks_curr_iteration,
@@ -280,11 +281,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             const double sr_x_2 = 2 * range_sum;
             __record_double_flops(1);
 
-            int rtd_start_rb = range_block->rel_y * image->size + range_block->rel_x;
+            int rtd_start_rb =
+                range_block->rel_y * image->size + range_block->rel_x;
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 assert(domain_blocks[idx_db].width == 2 * range_block->width);
-                struct image_t *downsampled_db = downsampled_domain_blocks + idx_db;
+                struct image_t *downsampled_db =
+                    downsampled_domain_blocks + idx_db;
 
                 const double domain_sum = domain_block_sums[idx_db];
                 const double domain_sum_squared =
@@ -325,10 +328,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 const double sd_x_2 = 2 * domain_sum;
                 __record_double_flops(3);
 
-                /************************ BEGIN precompute rtd *************************/
+                /************************ BEGIN precompute rtd
+                 * *************************/
                 int rtd_idx_rb = rtd_start_rb;
                 int dbs = downsampled_db->size;
-                int dbs_dbs = dbs*dbs;
+                int dbs_dbs = dbs * dbs;
 
                 double rtd_sum_0_1 = 0;
                 double rtd_sum_0_2 = 0;
@@ -366,17 +370,17 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                         double di_270_1 = downsampled_db->data[idx_270_db1];
                         double di_270_2 = downsampled_db->data[idx_270_db2];
 
-                        rtd_sum_0_1 += ri1*di_0_1;
-                        rtd_sum_0_2 += ri2*di_0_2;
+                        rtd_sum_0_1 += ri1 * di_0_1;
+                        rtd_sum_0_2 += ri2 * di_0_2;
 
-                        rtd_sum_90_1 += ri1*di_90_1;
-                        rtd_sum_90_2 += ri2*di_90_2;
+                        rtd_sum_90_1 += ri1 * di_90_1;
+                        rtd_sum_90_2 += ri2 * di_90_2;
 
-                        rtd_sum_180_1 += ri1*di_180_1;
-                        rtd_sum_180_2 += ri2*di_180_2;
+                        rtd_sum_180_1 += ri1 * di_180_1;
+                        rtd_sum_180_2 += ri2 * di_180_2;
 
-                        rtd_sum_270_1 += ri1*di_270_1;
-                        rtd_sum_270_2 += ri2*di_270_2;
+                        rtd_sum_270_1 += ri1 * di_270_1;
+                        rtd_sum_270_2 += ri2 * di_270_2;
 
                         rtd_idx_rb += 2;
                         dbs_j = dbs_j + dbs + dbs;
@@ -385,7 +389,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     dbs_i += dbs;
                 }
 
-                __record_double_flops(dbs * dbs * 2 * 8);
+                __record_double_flops(dbs * dbs * 8);
 
                 double rtd_0 = rtd_sum_0_1 + rtd_sum_0_2;
                 double rtd_90 = rtd_sum_90_1 + rtd_sum_90_2;
@@ -394,7 +398,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 __record_double_flops(4);
 
-                /************************ END precompute rtd *************************/
+                /************************ END precompute rtd
+                 * *************************/
 
                 // ROTATION 0
                 {
@@ -510,17 +515,18 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             }
 
             if (best_error > error_threshold &&
-                current_quadtree_depth < MAX_QUADTREE_DEPTH) {
+                current_quadtree_depth < MAX_QUADTREE_DEPTH && range_blocks_size_next_iteration % 2 == 0) {
                 assert(range_block->width >= 2);
                 assert(range_block->height >= 2);
 
                 quad2(range_block, range_blocks_next_iteration +
-                                   range_blocks_length_next_iteration);
+                                       range_blocks_length_next_iteration);
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
-                struct transformation_t *best_transformation = (struct transformation_t *)
-                    malloc(sizeof(struct transformation_t));
+                struct transformation_t *best_transformation =
+                    (struct transformation_t *)malloc(
+                        sizeof(struct transformation_t));
                 best_transformation->range_block =
                     make_block(best_range_block_rel_x, best_range_block_rel_y,
                                range_blocks_size_current_iteration,
@@ -589,6 +595,6 @@ void decompress(struct image_t *decompressed_image,
 
 struct func_suite_t register_suite(void) {
     struct func_suite_t suite = {.compress_func = &compress,
-        .decompress_func = &decompress};
+                                 .decompress_func = &decompress};
     return suite;
 }

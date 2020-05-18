@@ -618,12 +618,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             }
 
             if (best_error > error_threshold &&
-                current_quadtree_depth < MAX_QUADTREE_DEPTH) {
+                current_quadtree_depth < MAX_QUADTREE_DEPTH &&
+                range_blocks_size_next_iteration % 2 == 0) {
                 assert(range_block->width >= 2);
                 assert(range_block->height >= 2);
 
                 quad2(range_block, range_blocks_next_iteration +
-                                   range_blocks_length_next_iteration);
+                                       range_blocks_length_next_iteration);
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
@@ -697,6 +698,6 @@ void decompress(struct image_t *decompressed_image,
 
 struct func_suite_t register_suite(void) {
     struct func_suite_t suite = {.compress_func = &compress,
-        .decompress_func = &decompress};
+                                 .decompress_func = &decompress};
     return suite;
 }
