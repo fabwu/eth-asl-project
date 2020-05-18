@@ -215,7 +215,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             range_blocks_length_next_iteration = 0;
             range_blocks_size_next_iteration /= 2;
-            range_blocks_next_iteration = (struct block_t *)
+            range_blocks_next_iteration =
                 malloc(4 * range_blocks_length_current_iteration *
                        sizeof(struct block_t));
 
@@ -233,12 +233,12 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 (image->size / domain_block_size_current_iteration) *
                 (image->size / domain_block_size_current_iteration);
 
-            downsampled_domain_blocks = (struct image_t *)
+            downsampled_domain_blocks =
                 malloc(domain_blocks_length * sizeof(struct image_t));
 
-            domain_block_sums = (double *) malloc(sizeof(double) * domain_blocks_length);
+            domain_block_sums = malloc(sizeof(double) * domain_blocks_length);
             domain_block_sums_squared =
-                (double *)malloc(sizeof(double) * domain_blocks_length);
+                malloc(sizeof(double) * domain_blocks_length);
 
             prepare_domain_blocks_norotation(
                 downsampled_domain_blocks, domain_block_sums,
@@ -250,10 +250,10 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
         // Precomputations on domain / range blocks
         {
-            range_block_sums = (double *)
+            range_block_sums =
                 malloc(sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums != NULL);
-            range_block_sums_squared = (double *)
+            range_block_sums_squared =
                 malloc(sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums_squared != NULL);
             precompute_sums(range_block_sums, range_block_sums_squared,
@@ -280,11 +280,10 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             const double sr_x_2 = 2 * range_sum;
             __record_double_flops(1);
 
-            int rtd_start_rb = range_block->rel_y * image->size + range_block->rel_x;
-
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 assert(domain_blocks[idx_db].width == 2 * range_block->width);
-                struct image_t *downsampled_db = downsampled_domain_blocks + idx_db;
+                struct image_t *downsampled_domain_block =
+                    downsampled_domain_blocks + idx_db;
 
                 const double domain_sum = domain_block_sums[idx_db];
                 const double domain_sum_squared =
@@ -326,10 +325,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 __record_double_flops(3);
 
                 /************************ BEGIN precompute rtd *************************/
-                int rtd_idx_rb = rtd_start_rb;
-                int dbs = downsampled_db->size;
-                int dbs_dbs = dbs*dbs;
+                int rtd_idx_rb1 =
+                    range_block->rel_y * image->size + range_block->rel_x;
 
+                int dbs = downsampled_domain_block->size;
+//printf("dbs: %d rb: %d\n", dbs, rtd_idx_rb1);
                 double rtd_sum_0_1 = 0;
                 double rtd_sum_0_2 = 0;
                 double rtd_sum_90_1 = 0;
@@ -339,51 +339,89 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 double rtd_sum_270_1 = 0;
                 double rtd_sum_270_2 = 0;
 
-                int dbs_i = 0;
-                for (int i = 0; i < dbs; i++) {
-                    int dbs_j = 0;
+// 2 3 208 192 253 252 47 63 | 2 3
+// 252 253 63 47 3 2 192 208 | 972 973
+
+// 14 15 16 0 241 240 239 255 | 14 15
+// 240 241 255 239 15 14 0 16 | 960 961
+
+// 238 239 30 14 17 16 225 241 | 910 911
+// 16 17 241 225 239 238 14 30 | 64 65
+int magic_start = (dbs-1)*image->size + dbs -2;
+
+                for (int i = 0; i < dbs/2; i++) {
                     for (int j = 0; j < dbs; j += 2) {
-                        int idx_0_db1 = dbs_i + j;
-                        int idx_0_db2 = idx_0_db1 + 1;
-                        int idx_90_db1 = dbs_dbs - dbs_j - dbs + i;
-                        int idx_90_db2 = idx_90_db1 - dbs;
-                        int idx_180_db1 = dbs_dbs - dbs_i - j - 1;
-                        int idx_180_db2 = idx_180_db1 - 1;
-                        int idx_270_db1 = dbs_j + dbs - i - 1;
-                        int idx_270_db2 = idx_270_db1 + dbs;
+                        int idx_0_db1 = i * dbs + j;
+                        int idx_0_db2 = i * dbs + j + 1;
+                        int idx_90_db1 = (dbs - j - 1) * dbs + i;
+                        int idx_90_db2 = (dbs - (j + 1) - 1) * dbs + i;
+                        int idx_180_db1 = (dbs - i - 1) * dbs + (dbs - j - 1);
+                        int idx_180_db2 = (dbs - i - 1) * dbs + (dbs - (j + 1) - 1);
+                        int idx_270_db1 = j * dbs + (dbs - i - 1);
+                        int idx_270_db2 = (j + 1) * dbs + (dbs - i - 1);
 
-                        int idx_rb2 = rtd_idx_rb + 1;
+                        int rtd_idx_rb2 = rtd_idx_rb1 + 1;
 
-                        double ri1 = image->data[rtd_idx_rb];
-                        double ri2 = image->data[idx_rb2];
+                        int idx_rb_back_1 = magic_start - rtd_idx_rb1;
+                        int idx_rb_back_2 = idx_rb_back_1 + 1;
+                        
+                        printf("%d %d %d %d %d %d %d %d | %d %d\n", idx_0_db1,
+                               idx_0_db2, idx_90_db1, idx_90_db2, idx_180_db1,
+                               idx_180_db2, idx_270_db1, idx_270_db2, rtd_idx_rb1, magic_start - rtd_idx_rb1 );
 
-                        double di_0_1 = downsampled_db->data[idx_0_db1];
-                        double di_0_2 = downsampled_db->data[idx_0_db2];
-                        double di_90_1 = downsampled_db->data[idx_90_db1];
-                        double di_90_2 = downsampled_db->data[idx_90_db2];
-                        double di_180_1 = downsampled_db->data[idx_180_db1];
-                        double di_180_2 = downsampled_db->data[idx_180_db2];
-                        double di_270_1 = downsampled_db->data[idx_270_db1];
-                        double di_270_2 = downsampled_db->data[idx_270_db2];
+                        double ri1 = image->data[rtd_idx_rb1];
+                        double ri_back_1 = image->data[idx_rb_back_1];
 
-                        rtd_sum_0_1 += ri1*di_0_1;
-                        rtd_sum_0_2 += ri2*di_0_2;
+                        double ri2 = image->data[rtd_idx_rb2];
+                        double ri_back_2 = image->data[idx_rb_back_2];
 
-                        rtd_sum_90_1 += ri1*di_90_1;
-                        rtd_sum_90_2 += ri2*di_90_2;
+                        double di_0_1 =
+                            downsampled_domain_block->data[idx_0_db1];
+                        double di_0_2 =
+                            downsampled_domain_block->data[idx_0_db2];
+                        double di_90_1 =
+                            downsampled_domain_block->data[idx_90_db1];
+                        double di_90_2 =
+                            downsampled_domain_block->data[idx_90_db2];
+                        double di_180_1 =
+                            downsampled_domain_block->data[idx_180_db1];
+                        double di_180_2 =
+                            downsampled_domain_block->data[idx_180_db2];
+                        double di_270_1 =
+                            downsampled_domain_block->data[idx_270_db1];
+                        double di_270_2 =
+                            downsampled_domain_block->data[idx_270_db2];
 
-                        rtd_sum_180_1 += ri1*di_180_1;
-                        rtd_sum_180_2 += ri2*di_180_2;
+                        // 0 1 240 224 255 254 15 31 | 0 1
+                        // 254 255 31 15 1 0 224 240 | 974 975
 
-                        rtd_sum_270_1 += ri1*di_270_1;
-                        rtd_sum_270_2 += ri2*di_270_2;
 
-                        rtd_idx_rb += 2;
-                        dbs_j = dbs_j + dbs + dbs;
+                        rtd_sum_0_1 = fma(ri1, di_0_1, rtd_sum_0_1);
+                        rtd_sum_0_1 = fma(ri_back_1, di_180_2, rtd_sum_0_1);
+                        rtd_sum_0_2 = fma(ri2, di_0_2, rtd_sum_0_2);
+                        rtd_sum_0_2 = fma(ri_back_2, di_180_1, rtd_sum_0_2);
+
+                        rtd_sum_90_1 = fma(ri1, di_90_1, rtd_sum_90_1);
+                        rtd_sum_90_1 = fma(ri_back_1, di_270_2, rtd_sum_90_1);
+                        rtd_sum_90_2 = fma(ri2, di_90_2, rtd_sum_90_2);
+                        rtd_sum_90_2 = fma(ri_back_2, di_270_1, rtd_sum_90_2);
+
+                        rtd_sum_180_1 = fma(ri1, di_180_1, rtd_sum_180_1);
+                        rtd_sum_180_1 = fma(ri_back_1, di_0_2, rtd_sum_180_1);
+                        rtd_sum_180_2 = fma(ri2, di_180_2, rtd_sum_180_2);
+                        rtd_sum_180_2 = fma(ri_back_2, di_0_1, rtd_sum_180_2);
+
+                        rtd_sum_270_1 = fma(ri1, di_270_1, rtd_sum_270_1);
+                        rtd_sum_270_1 = fma(ri_back_1, di_90_2, rtd_sum_270_1);
+                        rtd_sum_270_2 = fma(ri2, di_270_2, rtd_sum_270_2);
+                        rtd_sum_270_2 = fma(ri_back_2, di_90_1, rtd_sum_270_2);
+
+                        rtd_idx_rb1 += 2;
                     }
-                    rtd_idx_rb += image->size - dbs;
-                    dbs_i += dbs;
+                    rtd_idx_rb1 = rtd_idx_rb1 + image->size - dbs;
                 }
+
+              //  printf("%d\n", rtd_idx_rb1);
 
                 __record_double_flops(dbs * dbs * 2 * 8);
 
@@ -411,6 +449,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
+                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
@@ -439,6 +478,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
+                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
@@ -467,6 +507,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
+                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
@@ -495,6 +536,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     error *= num_pixels_of_blocks_inv;
                     __record_double_flops(18);
 
+                    /* TODO: should fp comparissons count as flop? */
                     if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
 
                     if (error < best_error) {
@@ -506,6 +548,17 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                         best_brightness = brightness;
                         best_angle = 270;
                     }
+                }
+
+                printf("SUMS: %.2f %.2f %.2f %.2f\n", rtd_0, rtd_90, rtd_180, rtd_270);
+
+                if (rtd_0 != 4330229 || rtd_90 != 4364092.25 ||
+                    rtd_180 != 4336454.25 || rtd_270 != 4301820.75) {
+                    printf("ERRORRRR!!!\n");
+                    exit(-1);
+                } else {
+                    printf("OK\n");
+                    exit(0);
                 }
             }
 
@@ -519,7 +572,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
-                struct transformation_t *best_transformation = (struct transformation_t *)
+                struct transformation_t *best_transformation =
                     malloc(sizeof(struct transformation_t));
                 best_transformation->range_block =
                     make_block(best_range_block_rel_x, best_range_block_rel_y,

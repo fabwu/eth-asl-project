@@ -21,7 +21,6 @@ extern "C" {
 
 #define VERIFY_MIN_PSNR 25.0
 #define VERIFY_DECOMPRESS_ITERATIONS 10
-#define WARMUP_CYCLES_REQUIRED 1e8
 
 extern "C" struct func_suite_t register_suite();
 
@@ -131,34 +130,6 @@ class benchmark_decompress_t : public virtual benchmark_t {
     }
 };
 
-/**
- * Copied from Code Expert
- * Returns the number of repetitions
- * @param image
- * @param suite
- */
-inline long warmup(const benchmark_t &benchmark) {
-    long num_runs = 2;
-    double multiplier = 1;
-    myInt64 start, end;
-    // Warm-up phase: we determine a number of executions that allows
-    // the code to be executed for at least CYCLES_REQUIRED cycles.
-    // This helps excluding timing overhead when measuring small runtimes.
-    do {
-        num_runs = (long)((double)num_runs * multiplier);
-        start = start_tsc();
-        for (long i = 0; i < num_runs; i++) {
-            benchmark.perform();
-        }
-        end = stop_tsc(start);
-
-        auto cycles = (double)end;
-        multiplier = (WARMUP_CYCLES_REQUIRED) / (cycles);
-
-    } while (multiplier > 2);
-    return num_runs;
-}
-
 template <typename T>
 inline double median(std::vector<T> &vec) {
     sort(vec.begin(), vec.end());
@@ -173,15 +144,7 @@ inline double median(std::vector<T> &vec) {
 }
 
 inline void benchmark_generic(const benchmark_t &benchmark, const params_t &params) {
-    std::cout << "\033[1m"
-              << "WARMUP phase"
-              << "\033[0m" << std::endl;
-    std::cout << "\t"
-              << "performing function for at least " << WARMUP_CYCLES_REQUIRED
-              << " cycles" << std::endl;
-    auto needed_runs = warmup(benchmark);
-    std::cout << "\t" << needed_runs << " runs needed" << std::endl;
-
+    int needed_runs = 2;
     std::cout << "\033[1m"
               << "BENCHMARK phase"
               << "\033[0m" << std::endl;

@@ -10,7 +10,6 @@
 #include <float.h>
 #include <math.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "lib/performance.h"
@@ -81,6 +80,49 @@ struct image_t scale_block(const struct image_t *image,
     return scaled_image;
 }
 
+/**
+ * Returns brightness (o) and contrast (s), such that the RMS between the domain
+ * image block and the range block is minimal. Mathematically, this is a least
+ * squares problem. The Python implementation we based this naive code on uses
+ * such an approach.
+ *
+ * The Fractal Image Compression book uses a bit a different, more analytical
+ * approach. It formulates the error as formula with respect to s and o, and
+ * then does partial differentiation with respect to the two variables to get a
+ * "direct" solution. Details can be found in the book on page 20 and 21.
+ *
+ */
+double compute_brightness_and_contrast_with_error(
+    const int range_block_size, double *ret_brightness, double *ret_contrast,
+    const double range_sum, const double sum_range_squared,
+    const double domain_sum, const double sum_domain_squared,
+    const double sum_range_times_domain, const double denominator,
+    const double denominator_inv, const int num_pixels,
+    const double num_pixels_inv, const double sd_x_sr, const double sd_x_2,
+    const double sr_x_2) {
+    assert(ret_brightness != NULL);
+    assert(ret_contrast != NULL);
+
+    double contrast =
+        (num_pixels * sum_range_times_domain - sd_x_sr) * denominator_inv;
+    double brightness = (range_sum - contrast * domain_sum) * num_pixels_inv;
+    __record_double_flops(6);
+
+    double error =
+        (sum_range_squared +
+         contrast * (contrast * sum_domain_squared -
+                     2 * sum_range_times_domain + brightness * sd_x_2) +
+         brightness * (num_pixels * brightness - sr_x_2))*num_pixels_inv;
+    __record_double_flops(12);
+
+    /* TODO: should fp comparissons count as flop? */
+    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
+
+    *ret_contrast = contrast;
+    *ret_brightness = brightness;
+    return error;
+}
+
 void free_prepared_blocks(struct image_t *prepared_domain_blocks,
                           const int length) {
     for (size_t i = 0; i < length; ++i) {
@@ -117,11 +159,163 @@ void prepare_domain_blocks_norotation(struct image_t *prepared_domain_blocks,
     }
 }
 
+typedef double (*rtd_func_type)(const struct image_t *image,
+                                const struct image_t *rotated_domain_block,
+                                const struct block_t *range_block);
+
+typedef size_t (*rotation_index_transformer_type)(const size_t i,
+                                                  const size_t j, const int n,
+                                                  const int m);
+size_t index_rot0(const size_t i, const size_t j, const int n, const int m) {
+    return i * n + j;
+}
+size_t index_rot90(const size_t i, const size_t j, const int n, const int m) {
+    return (m - j - 1) * n + i;
+}
+size_t index_rot180(const size_t i, const size_t j, const int n, const int m) {
+    return (m - i - 1) * n + (n - j - 1);
+}
+size_t index_rot270(const size_t i, const size_t j, const int n, const int m) {
+    return j * n + (m - i - 1);
+}
+
+double rtd_generic_with_rot0(const struct image_t *image,
+                             const struct image_t *domain_block,
+                             const struct block_t *range_block) {
+    const int dbs = domain_block->size;
+
+    double rtd_sum1 = 0;
+    double rtd_sum2 = 0;
+
+    size_t idx_rb = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < dbs; i++) {
+        for (size_t j = 0; j < dbs; j += 2) {
+            const size_t idx_db1 = i * dbs + j;
+
+            double ri1 = image->data[idx_rb];
+            double di1 = domain_block->data[idx_db1];
+            rtd_sum1 = fma(ri1, di1, rtd_sum1);
+            idx_rb++;
+
+            const size_t idx_db2 = i * dbs + j + 1;
+            double ri2 = image->data[idx_rb];
+            double di2 = domain_block->data[idx_db2];
+            rtd_sum2 = fma(ri2, di2, rtd_sum2);
+            idx_rb++;
+        }
+        idx_rb += image->size - dbs;
+    }
+
+    __record_double_flops(dbs * dbs * 2);
+
+    return rtd_sum1 + rtd_sum2;
+}
+
+double rtd_generic_with_rot90(const struct image_t *image,
+                              const struct image_t *domain_block,
+                              const struct block_t *range_block) {
+    const int dbs = domain_block->size;
+
+    double rtd_sum1 = 0;
+    double rtd_sum2 = 0;
+
+    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < dbs; i++) {
+        for (size_t j = 0; j < dbs; j += 2) {
+            const size_t idx_db1 = (dbs - j - 1) * dbs + i;
+
+            double ri1 = image->data[idx_rb1];
+            double di1 = domain_block->data[idx_db1];
+            rtd_sum1 = fma(ri1, di1, rtd_sum1);
+            idx_rb1++;
+
+            const size_t idx_db2 = (dbs - (j + 1) - 1) * dbs + i;
+            double ri2 = image->data[idx_rb1];
+            double di2 = domain_block->data[idx_db2];
+            rtd_sum2 = fma(ri2, di2, rtd_sum2);
+            idx_rb1++;
+        }
+        idx_rb1 += image->size - dbs;
+    }
+
+    __record_double_flops(dbs * dbs * 2);
+
+    return rtd_sum1 + rtd_sum2;
+}
+
+double rtd_generic_with_rot180(const struct image_t *image,
+                               const struct image_t *domain_block,
+                               const struct block_t *range_block) {
+    const int dbs = domain_block->size;
+
+    double rtd_sum1 = 0;
+    double rtd_sum2 = 0;
+
+    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < dbs; i++) {
+        for (size_t j = 0; j < dbs; j += 2) {
+            const size_t idx_db1 = (dbs - i - 1) * dbs + (dbs - j - 1);
+
+            double ri1 = image->data[idx_rb1];
+            double di1 = domain_block->data[idx_db1];
+            rtd_sum1 = fma(ri1, di1, rtd_sum1);
+            idx_rb1++;
+
+            const size_t idx_db2 = (dbs - i - 1) * dbs + (dbs - (j + 1) - 1);
+            double ri2 = image->data[idx_rb1];
+            double di2 = domain_block->data[idx_db2];
+            rtd_sum2 = fma(ri2, di2, rtd_sum2);
+            idx_rb1++;
+        }
+        idx_rb1 += image->size - dbs;
+    }
+
+    __record_double_flops(dbs * dbs * 2);
+
+    return rtd_sum1 + rtd_sum2;
+}
+
+double rtd_generic_with_rot270(const struct image_t *image,
+                               const struct image_t *domain_block,
+                               const struct block_t *range_block) {
+    const int dbs = domain_block->size;
+
+    double rtd_sum1 = 0;
+    double rtd_sum2 = 0;
+
+    size_t idx_rb1 = range_block->rel_y * image->size + range_block->rel_x;
+
+    for (size_t i = 0; i < dbs; i++) {
+        for (size_t j = 0; j < dbs; j += 2) {
+            const size_t idx_db1 = j * dbs + (dbs - i - 1);
+
+            double ri1 = image->data[idx_rb1];
+            double di1 = domain_block->data[idx_db1];
+            rtd_sum1 = fma(ri1, di1, rtd_sum1);
+            idx_rb1++;
+
+            const size_t idx_db2 = (j + 1) * dbs + (dbs - i - 1);
+            double ri2 = image->data[idx_rb1];
+            double di2 = domain_block->data[idx_db2];
+            rtd_sum2 = fma(ri2, di2, rtd_sum2);
+            idx_rb1++;
+        }
+        idx_rb1 += image->size - dbs;
+    }
+
+    __record_double_flops(dbs * dbs * 2);
+
+    return rtd_sum1 + rtd_sum2;
+}
+
 void precompute_sums(double *sums, double *sums_squared,
                      const struct block_t *blocks, const int blocks_length,
                      const struct image_t *image) {
     for (int i = 0; i < blocks_length; ++i) {
-        const struct block_t *rb = blocks + i;
+        struct block_t *rb = blocks + i;
         double sum = 0;
         double sum_squared = 0;
         size_t ind = rb->rel_y * image->size + rb->rel_x;
@@ -179,8 +373,6 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     double *range_block_sums_squared;
     double *domain_block_sums;
     double *domain_block_sums_squared;
-    int num_pixels;
-    double num_pixels_of_blocks_inv;
 
     // Queue for saving transformations
     struct queue *transformations =
@@ -209,17 +401,14 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             range_blocks_curr_iteration = range_blocks_next_iteration;
             range_blocks_size_current_iteration =
                 range_blocks_size_next_iteration;
-            num_pixels = range_blocks_size_current_iteration *
-                         range_blocks_size_current_iteration;
-            num_pixels_of_blocks_inv = 1.0 / num_pixels;
 
             range_blocks_length_next_iteration = 0;
             range_blocks_size_next_iteration /= 2;
-            range_blocks_next_iteration = (struct block_t *)
+            range_blocks_next_iteration =
                 malloc(4 * range_blocks_length_current_iteration *
                        sizeof(struct block_t));
 
-            __record_double_flops(2);
+            __record_double_flops(1);
         }
 
         // Prepare the domain blocks
@@ -233,12 +422,12 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 (image->size / domain_block_size_current_iteration) *
                 (image->size / domain_block_size_current_iteration);
 
-            downsampled_domain_blocks = (struct image_t *)
+            downsampled_domain_blocks =
                 malloc(domain_blocks_length * sizeof(struct image_t));
 
-            domain_block_sums = (double *) malloc(sizeof(double) * domain_blocks_length);
+            domain_block_sums = malloc(sizeof(double) * domain_blocks_length);
             domain_block_sums_squared =
-                (double *)malloc(sizeof(double) * domain_blocks_length);
+                malloc(sizeof(double) * domain_blocks_length);
 
             prepare_domain_blocks_norotation(
                 downsampled_domain_blocks, domain_block_sums,
@@ -250,10 +439,10 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
         // Precomputations on domain / range blocks
         {
-            range_block_sums = (double *)
+            range_block_sums =
                 malloc(sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums != NULL);
-            range_block_sums_squared = (double *)
+            range_block_sums_squared =
                 malloc(sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums_squared != NULL);
             precompute_sums(range_block_sums, range_block_sums_squared,
@@ -268,151 +457,55 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             double best_error = DBL_MAX;
 
-            int best_range_block_rel_x = -1;
-            int best_range_block_rel_y = -1;
-            int best_domain_block_idx = -1;
-            double best_contrast = -1;
-            double best_brightness = -1;
-            int best_angle = -1;
+            int best_range_block_rel_x;
+            int best_range_block_rel_y;
+            int best_domain_block_idx;
+            double best_contrast;
+            double best_brightness;
+            int best_angle;
 
             const double range_sum = range_block_sums[idx_rb];
             const double range_sum_squared = range_block_sums_squared[idx_rb];
-            const double sr_x_2 = 2 * range_sum;
-            __record_double_flops(1);
-
-            int rtd_start_rb = range_block->rel_y * image->size + range_block->rel_x;
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 assert(domain_blocks[idx_db].width == 2 * range_block->width);
-                struct image_t *downsampled_db = downsampled_domain_blocks + idx_db;
+                struct image_t *downsampled_domain_block =
+                    downsampled_domain_blocks + idx_db;
 
                 const double domain_sum = domain_block_sums[idx_db];
                 const double domain_sum_squared =
                     domain_block_sums_squared[idx_db];
 
-                const double ds_x_ds = domain_sum * domain_sum;
-                const double num_pixels_x_dss = num_pixels * domain_sum_squared;
-                const double denominator = num_pixels_x_dss - ds_x_ds;
+                // Marker: ASDF
+
+                const int num_pixels_of_blocks =
+                    range_blocks_size_current_iteration *
+                    range_blocks_size_current_iteration;
+                const double num_pixels_of_blocks_inv =
+                    1.0 / num_pixels_of_blocks;
+                __record_double_flops(1);
+                const double denominator =
+                    (num_pixels_of_blocks * domain_sum_squared -
+                     (domain_sum * domain_sum));
                 __record_double_flops(3);
+                const double denominator_inv = 1.0 / denominator;
+                __record_double_flops(1);
+                const double sd_x_sr = range_sum * domain_sum;
+                __record_double_flops(1);
+                const double sd_x_2 = 2 * domain_sum;
+                __record_double_flops(1);
+                const double sr_x_2 = 2 * range_sum;
+                __record_double_flops(1);
 
                 if (denominator == 0) {
+                    double contrast = 0.0;
                     double brightness = range_sum * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
-                    double error;
-                    if (num_pixels == 1) {
-                        error = 0.0;
-                    } else {
-                        error =
-                            (range_sum_squared +
-                             brightness * (num_pixels * brightness - sr_x_2)) *
-                            num_pixels_of_blocks_inv;
-                        __record_double_flops(5);
-                    }
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_rel_x = range_block->rel_x;
-                        best_range_block_rel_y = range_block->rel_y;
-                        best_contrast = 0.0;
-                        best_brightness = brightness;
-                        best_angle = 0;
-                    }
-                }
-
-                const double sd_x_sr = range_sum * domain_sum;
-                const double denominator_inv = 1.0 / denominator;
-                const double sd_x_2 = 2 * domain_sum;
-                __record_double_flops(3);
-
-                /************************ BEGIN precompute rtd *************************/
-                int rtd_idx_rb = rtd_start_rb;
-                int dbs = downsampled_db->size;
-                int dbs_dbs = dbs*dbs;
-
-                double rtd_sum_0_1 = 0;
-                double rtd_sum_0_2 = 0;
-                double rtd_sum_90_1 = 0;
-                double rtd_sum_90_2 = 0;
-                double rtd_sum_180_1 = 0;
-                double rtd_sum_180_2 = 0;
-                double rtd_sum_270_1 = 0;
-                double rtd_sum_270_2 = 0;
-
-                int dbs_i = 0;
-                for (int i = 0; i < dbs; i++) {
-                    int dbs_j = 0;
-                    for (int j = 0; j < dbs; j += 2) {
-                        int idx_0_db1 = dbs_i + j;
-                        int idx_0_db2 = idx_0_db1 + 1;
-                        int idx_90_db1 = dbs_dbs - dbs_j - dbs + i;
-                        int idx_90_db2 = idx_90_db1 - dbs;
-                        int idx_180_db1 = dbs_dbs - dbs_i - j - 1;
-                        int idx_180_db2 = idx_180_db1 - 1;
-                        int idx_270_db1 = dbs_j + dbs - i - 1;
-                        int idx_270_db2 = idx_270_db1 + dbs;
-
-                        int idx_rb2 = rtd_idx_rb + 1;
-
-                        double ri1 = image->data[rtd_idx_rb];
-                        double ri2 = image->data[idx_rb2];
-
-                        double di_0_1 = downsampled_db->data[idx_0_db1];
-                        double di_0_2 = downsampled_db->data[idx_0_db2];
-                        double di_90_1 = downsampled_db->data[idx_90_db1];
-                        double di_90_2 = downsampled_db->data[idx_90_db2];
-                        double di_180_1 = downsampled_db->data[idx_180_db1];
-                        double di_180_2 = downsampled_db->data[idx_180_db2];
-                        double di_270_1 = downsampled_db->data[idx_270_db1];
-                        double di_270_2 = downsampled_db->data[idx_270_db2];
-
-                        rtd_sum_0_1 += ri1*di_0_1;
-                        rtd_sum_0_2 += ri2*di_0_2;
-
-                        rtd_sum_90_1 += ri1*di_90_1;
-                        rtd_sum_90_2 += ri2*di_90_2;
-
-                        rtd_sum_180_1 += ri1*di_180_1;
-                        rtd_sum_180_2 += ri2*di_180_2;
-
-                        rtd_sum_270_1 += ri1*di_270_1;
-                        rtd_sum_270_2 += ri2*di_270_2;
-
-                        rtd_idx_rb += 2;
-                        dbs_j = dbs_j + dbs + dbs;
-                    }
-                    rtd_idx_rb += image->size - dbs;
-                    dbs_i += dbs;
-                }
-
-                __record_double_flops(dbs * dbs * 2 * 8);
-
-                double rtd_0 = rtd_sum_0_1 + rtd_sum_0_2;
-                double rtd_90 = rtd_sum_90_1 + rtd_sum_90_2;
-                double rtd_180 = rtd_sum_180_1 + rtd_sum_180_2;
-                double rtd_270 = rtd_sum_270_1 + rtd_sum_270_2;
-
-                __record_double_flops(4);
-
-                /************************ END precompute rtd *************************/
-
-                // ROTATION 0
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_0, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_0);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_0);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
-
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
+                    double error =
+                        (range_sum_squared +
+                         brightness *
+                             (num_pixels_of_blocks * brightness - sr_x_2)) *
+                        num_pixels_of_blocks_inv;
+                    __record_double_flops(6);
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db;
@@ -422,90 +515,87 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                         best_brightness = brightness;
                         best_angle = 0;
                     }
+                    continue;
+                }
+
+                // ROTATION 0
+                double brightness_rot0, contrast_rot0, error_rot0;
+                error_rot0 = compute_brightness_and_contrast_with_error(
+                    range_blocks_size_current_iteration, &brightness_rot0,
+                    &contrast_rot0, range_sum, range_sum_squared, domain_sum,
+                    domain_sum_squared,
+                    rtd_generic_with_rot0(image, downsampled_domain_block,
+                                          range_block),
+                    denominator, denominator_inv, num_pixels_of_blocks,
+                    num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
+                if (error_rot0 < best_error) {
+                    best_error = error_rot0;
+                    best_domain_block_idx = idx_db;
+                    best_range_block_rel_x = range_block->rel_x;
+                    best_range_block_rel_y = range_block->rel_y;
+                    best_contrast = contrast_rot0;
+                    best_brightness = brightness_rot0;
+                    best_angle = 0;
                 }
 
                 // ROTATION 90
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_90, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_90);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_90);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
-
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_rel_x = range_block->rel_x;
-                        best_range_block_rel_y = range_block->rel_y;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 90;
-                    }
+                double brightness_rot90, contrast_rot90, error_rot90;
+                error_rot90 = compute_brightness_and_contrast_with_error(
+                    range_blocks_size_current_iteration, &brightness_rot90,
+                    &contrast_rot90, range_sum, range_sum_squared, domain_sum,
+                    domain_sum_squared,
+                    rtd_generic_with_rot90(image, downsampled_domain_block,
+                                           range_block),
+                    denominator, denominator_inv, num_pixels_of_blocks,
+                    num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
+                if (error_rot90 < best_error) {
+                    best_error = error_rot90;
+                    best_domain_block_idx = idx_db;
+                    best_range_block_rel_x = range_block->rel_x;
+                    best_range_block_rel_y = range_block->rel_y;
+                    best_contrast = contrast_rot90;
+                    best_brightness = brightness_rot90;
+                    best_angle = 90;
                 }
 
                 // ROTATION 180
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_180, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_180);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_180);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
-
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_rel_x = range_block->rel_x;
-                        best_range_block_rel_y = range_block->rel_y;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 180;
-                    }
+                double brightness_rot180, contrast_rot180, error_rot180;
+                error_rot180 = compute_brightness_and_contrast_with_error(
+                    range_blocks_size_current_iteration, &brightness_rot180,
+                    &contrast_rot180, range_sum, range_sum_squared, domain_sum,
+                    domain_sum_squared,
+                    rtd_generic_with_rot180(image, downsampled_domain_block,
+                                            range_block),
+                    denominator, denominator_inv, num_pixels_of_blocks,
+                    num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
+                if (error_rot180 < best_error) {
+                    best_error = error_rot180;
+                    best_domain_block_idx = idx_db;
+                    best_range_block_rel_x = range_block->rel_x;
+                    best_range_block_rel_y = range_block->rel_y;
+                    best_contrast = contrast_rot180;
+                    best_brightness = brightness_rot180;
+                    best_angle = 180;
                 }
 
                 // ROTATION 270
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_270, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_270);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_270);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
-
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_rel_x = range_block->rel_x;
-                        best_range_block_rel_y = range_block->rel_y;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 270;
-                    }
+                double brightness_rot270, contrast_rot270, error_rot270;
+                error_rot270 = compute_brightness_and_contrast_with_error(
+                    range_blocks_size_current_iteration, &brightness_rot270,
+                    &contrast_rot270, range_sum, range_sum_squared, domain_sum,
+                    domain_sum_squared,
+                    rtd_generic_with_rot270(image, downsampled_domain_block,
+                                            range_block),
+                    denominator, denominator_inv, num_pixels_of_blocks,
+                    num_pixels_of_blocks_inv, sd_x_sr, sd_x_2, sr_x_2);
+                if (error_rot270 < best_error) {
+                    best_error = error_rot270;
+                    best_domain_block_idx = idx_db;
+                    best_range_block_rel_x = range_block->rel_x;
+                    best_range_block_rel_y = range_block->rel_y;
+                    best_contrast = contrast_rot270;
+                    best_brightness = brightness_rot270;
+                    best_angle = 270;
                 }
             }
 
@@ -519,7 +609,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
-                struct transformation_t *best_transformation = (struct transformation_t *)
+                struct transformation_t *best_transformation =
                     malloc(sizeof(struct transformation_t));
                 best_transformation->range_block =
                     make_block(best_range_block_rel_x, best_range_block_rel_y,

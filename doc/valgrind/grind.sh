@@ -21,3 +21,12 @@ valgrind --tool=cachegrind \
 valgrind --tool=callgrind \
          --callgrind-out-file="./doc/valgrind/logs/callgrind-01_precompute_indices.log" \
          ./build/01_precompute_indices $fic_opts &
+
+# 02_precomputations
+valgrind --tool=cachegrind \
+         --cachegrind-out-file="./doc/valgrind/logs/cachegrind-02_precomputations.log" \
+         --log-file="./doc/valgrind/logs/cachegrind-02_precomputations.log" \
+         ./build/02_precomputations $fic_opts &
+valgrind --tool=callgrind \
+         --callgrind-out-file="./doc/valgrind/logs/callgrind-02_precomputations.log" \
+         ./build/02_precomputations $fic_opts

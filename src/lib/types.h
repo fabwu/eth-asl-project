@@ -19,6 +19,7 @@ void free_image_data(const struct image_t *image);
 struct block_t {
     int rel_x, rel_y;
     int width, height;
+    double sum, sum_squared;
 };
 
 struct block_t make_block(int x, int y, int width, int height);

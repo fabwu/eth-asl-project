@@ -12,3 +12,10 @@ cmake --build build --target fic
 # run benchmark
 ./build/fic -b -c -f images/lenasmall.gray
 ```
+
+# Git LFS
+
+Files in the images folder are stored with git lfs.
+
+Install git lfs on your host and then run `git lfs install` and `git lfs pull`
+here.
