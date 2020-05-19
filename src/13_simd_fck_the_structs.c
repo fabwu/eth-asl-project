@@ -16,7 +16,6 @@
 
 #include "lib/performance.h"
 #include "lib/queue.h"
-#include "lib/rotate.h"
 #include "lib/types.h"
 
 /**
@@ -27,170 +26,187 @@
 #define MIN_QUADTREE_DEPTH 1
 #define MAX_QUADTREE_DEPTH 7
 
-static struct block_t *create_squared_blocks(const int image_size,
-                                             const int block_size,
-                                             const int x_offset,
-                                             const int y_offset) {
-    assert(image_size % block_size == 0);
+void rotate_raw(double *out, const double *in, int size, int angle) {
+    int m = size;
+    int n = size;
 
-    const int num_blocks =
-        (image_size / block_size) * (image_size / block_size);
-    struct block_t *blocks =
-        (struct block_t *)malloc(num_blocks * sizeof(struct block_t));
-    int index = 0;
-    for (int i = 0; i < image_size; i += block_size) {
-        for (int j = 0; j < image_size; j += block_size) {
-            blocks[index] =
-                make_block(j + x_offset, i + y_offset, block_size, block_size);
-            ++index;
+    if (angle == 0) {
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                out[i * n + j] = in[i * n + j];
+            }
         }
+        return;
     }
 
-    return blocks;
+    if (angle == 90) {
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                // first row has to be last column
+                // (too be honest it was trial and error)
+                out[j * n + (m - i - 1)] = in[i * n + j];
+            }
+        }
+        return;
+    }
+
+    if (angle == 180) {
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                // first row has to be last row reversed
+                out[(m - i - 1) * n + (n - j - 1)] = in[i * n + j];
+            }
+        }
+        return;
+    }
+
+    if (angle == 270) {
+        for (int i = 0; i < m; ++i) {
+            for (int j = 0; j < n; ++j) {
+                // first row has to be first column reversed
+                out[(m - j - 1) * n + i] = in[i * n + j];
+            }
+        }
+        return;
+    }
+
+    assert(0);
 }
 
-struct image_t scale_block(const struct image_t *image,
-                           const struct block_t *block, int width, int height) {
-    assert(block->width >= width);
-    assert(block->height >= height);
-    assert(block->width == block->height);  // just for simplicity
-    assert(block->width % width == 0);      // just for simplicity
-    assert(block->height % height == 0);    // just for simplicity
-    assert(width == height);                // just for simplicity
-    assert(block->width == 2 * width);
-    assert(block->height == 2 * height);
-
-    struct image_t scaled_image = make_image(width, 0);
+void scale_block(double *out, const double *image, const int image_size,
+                 const int block_rel_x, const int block_rel_y,
+                 const int block_size) {
+    assert(out != NULL);
 
     size_t scaled_image_idx = 0;
-    size_t original_image_idx = block->rel_y * image->size + block->rel_x;
-    for (int y = 0; y < block->height; y += 2) {
-        for (int x = 0; x < block->width; x += 2) {
+    size_t original_image_idx = block_rel_y * image_size + block_rel_x;
+    for (int y = 0; y < block_size; y += 2) {
+        for (int x = 0; x < block_size; x += 2) {
             double val = 0.0;
-            val += image->data[original_image_idx];
-            val += image->data[original_image_idx + 1];
-            val += image->data[original_image_idx + image->size];
-            val += image->data[original_image_idx + image->size + 1];
-            scaled_image.data[scaled_image_idx] = val * 0.25;
+            val += image[original_image_idx];
+            val += image[original_image_idx + 1];
+            val += image[original_image_idx + image_size];
+            val += image[original_image_idx + image_size + 1];
+            out[scaled_image_idx] = val * 0.25;
             scaled_image_idx++;
             original_image_idx += 2;
             __record_double_flops(5);
         }
-        original_image_idx += image->size;
+        original_image_idx += image_size;
     }
-
-    return scaled_image;
 }
 
-void free_prepared_blocks(struct image_t *prepared_blocks, const int length) {
-    for (size_t i = 0; i < length; ++i) {
-        free((prepared_blocks + i)->data);
-    }
-    free(prepared_blocks);
-}
+#define BLOCK_CORD_REL_X(block_id, block_size, image_size) \
+    (block_id % (image_size / block_size)) * block_size
+#define BLOCK_CORD_REL_Y(block_id, block_size, image_size) \
+    ((int)(block_id / (image_size / block_size))) * block_size;
+#define BLOCK_CORD_X(block_id, block_size, image_size) \
+    (block_id % (image_size / block_size))
+#define BLOCK_CORD_Y(block_id, block_size, image_size) \
+    ((int)(block_id / (image_size / block_size)));
 
-void prepare_domain_blocks_norotation(struct image_t *prepared_domain_blocks,
+void prepare_domain_blocks_norotation(double *prepared_domain_blocks,
                                       double *sums, double *sums_squared,
                                       const struct image_t *image,
-                                      const struct block_t *domain_blocks,
+                                      const int domain_block_size,
                                       const int domain_blocks_length,
                                       const int range_block_size) {
     for (size_t i = 0; i < domain_blocks_length; ++i) {
-        const struct image_t scaled_domain_block = scale_block(
-            image, domain_blocks + i, range_block_size, range_block_size);
+        const int db_x = BLOCK_CORD_REL_X(i, domain_block_size, image->size);
+        const int db_y = BLOCK_CORD_REL_Y(i, domain_block_size, image->size);
+        scale_block(
+            prepared_domain_blocks + i * range_block_size * range_block_size,
+            image->data, image->size, db_x, db_y, domain_block_size);
 
         double sum = 0;
         double sum_squared = 0;
-        for (size_t j = 0;
-             j < scaled_domain_block.size * scaled_domain_block.size; j++) {
-            sum += scaled_domain_block.data[j];
-            sum_squared +=
-                scaled_domain_block.data[j] * scaled_domain_block.data[j];
+        for (size_t j = 0; j < range_block_size * range_block_size; j++) {
+            double val = *(prepared_domain_blocks +
+                           i * range_block_size * range_block_size + j);
+            sum += val;
+            sum_squared += val * val;
         }
-        __record_double_flops(scaled_domain_block.size *
-                              scaled_domain_block.size * 3);
+        __record_double_flops(range_block_size * range_block_size * 3);
 
         sums[i] = sum;
         sums_squared[i] = sum_squared;
-
-        prepared_domain_blocks[i] = scaled_domain_block;
     }
 }
 
-void precompute_sums(double *sums, double *sums_squared,
-                     const struct block_t *blocks, const int blocks_length,
-                     const struct image_t *image) {
-    for (int i = 0; i < blocks_length; ++i) {
-        const struct block_t *rb = blocks + i;
-        double sum = 0;
-        double sum_squared = 0;
-        size_t ind = rb->rel_y * image->size + rb->rel_x;
-        for (size_t l = 0; l < rb->width; l++) {
-            for (size_t m = 0; m < rb->height; m++) {
-                sum += image->data[ind];
-                sum_squared += image->data[ind] * image->data[ind];
-                ind++;
-            }
-            ind += image->size - rb->height;
+void quad3(int *list, const int id, const int curr_block_size,
+           const int image_size) {
+    const int blocks_per_row = image_size / curr_block_size;
+    int rel_x = BLOCK_CORD_X(id, curr_block_size, image_size);
+    int rel_y = BLOCK_CORD_Y(id, curr_block_size, image_size);
+
+    int next_id_1 = 4 * rel_y * blocks_per_row + 2 * rel_x;
+    int next_id_2 = next_id_1 + 1;
+    int next_id_3 = next_id_1 + 2 * blocks_per_row;
+    int next_id_4 = next_id_3 + 1;
+    *(list + 0) = next_id_1;
+    *(list + 1) = next_id_2;
+    *(list + 2) = next_id_3;
+    *(list + 3) = next_id_4;
+}
+
+typedef double (*rtd_func_type)(const double *domain_block,
+                                const double *range_block, const int size);
+
+void load_block(double *ret_out, double *ret_sum, double *ret_sum_squared,
+                const int id, const int block_size,
+                const struct image_t *image) {
+    int block_rel_x = BLOCK_CORD_REL_X(id, block_size, image->size);
+    int block_rel_y = BLOCK_CORD_REL_Y(id, block_size, image->size);
+
+    double sum = 0;
+    double sum_squared = 0;
+
+    int idx = 0;
+    int idx_in_image = block_rel_y * image->size + block_rel_x;
+    for (int i = 0; i < block_size; ++i) {
+        for (int j = 0; j < block_size; ++j) {
+            double val = image->data[idx_in_image];
+            sum += val;
+            sum_squared = fma(val, val, sum_squared);
+            ret_out[idx] = val;
+            idx++;
+            idx_in_image++;
         }
-
-        sums[i] = sum;
-        sums_squared[i] = sum_squared;
-        __record_double_flops(rb->width * rb->height * 3);
+        idx_in_image += image->size - block_size;
     }
+
+    __record_double_flops(block_size * block_size * 3);
+
+    *ret_sum = sum;
+    *ret_sum_squared = sum_squared;
 }
 
-void quad2(const struct block_t *block, struct block_t *list) {
-    assert(block->width % 2 == 0);
-    assert(block->height % 2 == 0);
-    assert(block->width >= 2);
-    assert(block->height >= 2);
-
-    const int quad_width = block->width / 2;
-    const int quad_height = block->height / 2;
-
-    *list = make_block(block->rel_x, block->rel_y, quad_width, quad_height);
-    *(list + 1) = make_block(block->rel_x + quad_width, block->rel_y,
-                             quad_width, quad_height);
-    *(list + 2) = make_block(block->rel_x, block->rel_y + quad_height,
-                             quad_width, quad_height);
-    *(list + 3) =
-        make_block(block->rel_x + quad_width, block->rel_y + quad_height,
-                   quad_width, quad_height);
-}
-
-typedef double (*rtd_func_type)(const struct image_t *rotated_domain_block,
-                                const struct image_t *range_block);
-
-double rtd_simd(const struct image_t *domain_block,
-                const struct image_t *range_block) {
-    assert(domain_block->size == range_block->size);
-
-    int dbs = domain_block->size;
+double rtd_simd(const double *domain_block, const double *range_block,
+                const int size) {
     __m256d v_rtd_sum_0 = _mm256_setzero_pd();
     __m256d v_rtd_sum_1 = _mm256_setzero_pd();
     __m256d v_rtd_sum_2 = _mm256_setzero_pd();
     __m256d v_rtd_sum_3 = _mm256_setzero_pd();
 
-    for (int i = 0; i < dbs; i += 4) {
-        for (int j = 0; j < dbs; j += 4) {
-            double *ri_start = range_block->data + j;
-            double *di_start = domain_block->data + j;
+    for (int i = 0; i < size; i += 4) {
+        for (int j = 0; j < size; j += 4) {
+            const double *ri_start = range_block + j;
+            const double *di_start = domain_block + j;
 
-            __m256d v_ri_0 = _mm256_loadu_pd(ri_start + i * dbs);
-            __m256d v_di_0 = _mm256_loadu_pd(di_start + i * dbs);
+            __m256d v_ri_0 = _mm256_loadu_pd(ri_start + i * size);
+            __m256d v_di_0 = _mm256_loadu_pd(di_start + i * size);
             v_rtd_sum_0 = _mm256_fmadd_pd(v_ri_0, v_di_0, v_rtd_sum_0);
 
-            __m256d v_ri_1 = _mm256_loadu_pd(ri_start + (i + 1) * dbs);
-            __m256d v_di_1 = _mm256_loadu_pd(di_start + (i + 1) * dbs);
+            __m256d v_ri_1 = _mm256_loadu_pd(ri_start + (i + 1) * size);
+            __m256d v_di_1 = _mm256_loadu_pd(di_start + (i + 1) * size);
             v_rtd_sum_1 = _mm256_fmadd_pd(v_ri_1, v_di_1, v_rtd_sum_1);
 
-            __m256d v_ri_2 = _mm256_loadu_pd(ri_start + (i + 2) * dbs);
-            __m256d v_di_2 = _mm256_loadu_pd(di_start + (i + 2) * dbs);
+            __m256d v_ri_2 = _mm256_loadu_pd(ri_start + (i + 2) * size);
+            __m256d v_di_2 = _mm256_loadu_pd(di_start + (i + 2) * size);
             v_rtd_sum_2 = _mm256_fmadd_pd(v_ri_2, v_di_2, v_rtd_sum_2);
 
-            __m256d v_ri_3 = _mm256_loadu_pd(ri_start + (i + 3) * dbs);
-            __m256d v_di_3 = _mm256_loadu_pd(di_start + (i + 3) * dbs);
+            __m256d v_ri_3 = _mm256_loadu_pd(ri_start + (i + 3) * size);
+            __m256d v_di_3 = _mm256_loadu_pd(di_start + (i + 3) * size);
             v_rtd_sum_3 = _mm256_fmadd_pd(v_ri_3, v_di_3, v_rtd_sum_3);
         }
     }
@@ -202,55 +218,49 @@ double rtd_simd(const struct image_t *domain_block,
     v_rtd = _mm256_hadd_pd(v_rtd, v_rtd);
     double rtd = v_rtd[0] + v_rtd[2];
 
-    __record_double_flops(dbs * dbs * 2 + 2 + 16);
+    __record_double_flops(size * size * 2 + 2 + 16);
     return rtd;
 }
 
-double rtd_generic_2x2(const struct image_t *domain_block,
-                       const struct image_t *range_block) {
-    assert(domain_block->size == range_block->size);
-    const int dbs = domain_block->size;
-    assert(dbs == 2);
+double rtd_generic_2x2(const double *domain_block, const double *range_block,
+                       const int size) {
+    assert(size == 2);
 
     double tmp1 = 0;
     double tmp2 = 0;
-    tmp1 = fma(range_block->data[0], domain_block->data[0], tmp1);
-    tmp1 = fma(range_block->data[1], domain_block->data[1], tmp1);
-    tmp2 = fma(range_block->data[2], domain_block->data[2], tmp2);
-    tmp2 = fma(range_block->data[3], domain_block->data[3], tmp2);
+    tmp1 = fma(range_block[0], domain_block[0], tmp1);
+    tmp1 = fma(range_block[1], domain_block[1], tmp1);
+    tmp2 = fma(range_block[2], domain_block[2], tmp2);
+    tmp2 = fma(range_block[3], domain_block[3], tmp2);
 
     double rtd = tmp1 + tmp2;
     __record_double_flops(9);
     return rtd;
 }
 
-double rtd_simd_2x2(const struct image_t *domain_block,
-                    const struct image_t *range_block) {
-    assert(domain_block->size == range_block->size);
-    assert(range_block->size == 2);
+double rtd_simd_2x2(const double *domain_block, const double *range_block,
+                    const int size) {
+    assert(size == 2);
 
-    __m256d di = _mm256_loadu_pd(domain_block->data);
-    __m256d ri = _mm256_loadu_pd(range_block->data);
+    __m256d di = _mm256_loadu_pd(domain_block);
+    __m256d ri = _mm256_loadu_pd(range_block);
     __m256d tmp1 = _mm256_mul_pd(di, ri);
     double rtd = tmp1[0] + tmp1[1] + tmp1[2] + tmp1[3];
     __record_double_flops(7);
     return rtd;
 }
 
-double rtd_generic(const struct image_t *domain_block,
-                   const struct image_t *range_block) {
-    assert(domain_block->size == range_block->size);
-    int dbs = domain_block->size;
-
+double rtd_generic(const double *domain_block, const double *range_block,
+                   const int size) {
     double rtd = 0;
-    for (int i = 0; i < dbs; i++) {
-        for (int j = 0; j < dbs; ++j) {
-            double ri = range_block->data[i * dbs + j];
-            double di = domain_block->data[i * dbs + j];
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; ++j) {
+            double ri = range_block[i * size + j];
+            double di = domain_block[i * size + j];
             rtd = fma(ri, di, rtd);
         }
     }
-    __record_double_flops(dbs * dbs * 2);
+    __record_double_flops(size * size * 2);
     return rtd;
 }
 
@@ -259,24 +269,23 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         image->size / (int)pow(2.0, (double)MIN_QUADTREE_DEPTH);
     const int initial_range_block_size = initial_domain_block_size / 2;
 
-    struct block_t *initial_range_blocks =
-        create_squared_blocks(image->size, initial_range_block_size, 0, 0);
     const size_t initial_range_blocks_length =
         (image->size / initial_range_block_size) *
         (image->size / initial_range_block_size);
+    int *initial_range_block_idxs =
+        malloc(sizeof(int) * initial_range_blocks_length);
+    for (int i = 0; i < initial_range_blocks_length; ++i) {
+        initial_range_block_idxs[i] = i;
+    }
 
     // Forward declarations
-    struct block_t *domain_blocks;
     size_t domain_blocks_length = -1;
     int domain_block_size_current_iteration = -1;
-    struct image_t *prep_domain_blocks_0;
-    struct image_t *prep_domain_blocks_90;
-    struct image_t *prep_domain_blocks_180;
-    struct image_t *prep_domain_blocks_270;
-    struct image_t *prep_range_blocks;
+    double *prep_domain_blocks_0;
+    double *prep_domain_blocks_90;
+    double *prep_domain_blocks_180;
+    double *prep_domain_blocks_270;
     rtd_func_type rtd_func;
-    double *range_block_sums;
-    double *range_block_sums_squared;
     double *domain_block_sums;
     double *domain_block_sums_squared;
     int num_pixels;
@@ -288,13 +297,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     *transformations = make_queue();
 
     int current_quadtree_depth = MIN_QUADTREE_DEPTH - 1;
-    struct block_t *range_blocks_curr_iteration = NULL;
+    int *range_blocks_idx_curr_iteration = NULL;
     int range_blocks_length_current_iteration = -1;
     int range_blocks_size_current_iteration = -1;
 
     int range_blocks_length_next_iteration = initial_range_blocks_length;
     int range_blocks_size_next_iteration = initial_range_block_size;
-    struct block_t *range_blocks_next_iteration = initial_range_blocks;
+    int *range_blocks_idx_next_iteration = initial_range_block_idxs;
     bool has_remaining_range_blocks = true;
 
     while (has_remaining_range_blocks) {
@@ -306,7 +315,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         {
             range_blocks_length_current_iteration =
                 range_blocks_length_next_iteration;
-            range_blocks_curr_iteration = range_blocks_next_iteration;
+            range_blocks_idx_curr_iteration = range_blocks_idx_next_iteration;
             range_blocks_size_current_iteration =
                 range_blocks_size_next_iteration;
             num_pixels = range_blocks_size_current_iteration *
@@ -326,9 +335,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             range_blocks_length_next_iteration = 0;
             range_blocks_size_next_iteration /= 2;
-            range_blocks_next_iteration = (struct block_t *)malloc(
-                4 * range_blocks_length_current_iteration *
-                sizeof(struct block_t));
+            range_blocks_idx_next_iteration =
+                malloc(4 * range_blocks_length_current_iteration * sizeof(int));
 
             __record_double_flops(2);
         }
@@ -338,20 +346,22 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             domain_block_size_current_iteration =
                 2 * range_blocks_size_current_iteration;
             assert(domain_block_size_current_iteration >= 2);
-            domain_blocks = create_squared_blocks(
-                image->size, domain_block_size_current_iteration, 0, 0);
             domain_blocks_length =
                 (image->size / domain_block_size_current_iteration) *
                 (image->size / domain_block_size_current_iteration);
 
-            prep_domain_blocks_0 = (struct image_t *)malloc(
-                domain_blocks_length * sizeof(struct image_t));
-            prep_domain_blocks_90 = (struct image_t *)malloc(
-                domain_blocks_length * sizeof(struct image_t));
-            prep_domain_blocks_180 = (struct image_t *)malloc(
-                domain_blocks_length * sizeof(struct image_t));
-            prep_domain_blocks_270 = (struct image_t *)malloc(
-                domain_blocks_length * sizeof(struct image_t));
+            prep_domain_blocks_0 = malloc(
+                domain_blocks_length * range_blocks_size_current_iteration *
+                range_blocks_size_current_iteration * sizeof(double));
+            prep_domain_blocks_90 = malloc(
+                domain_blocks_length * range_blocks_size_current_iteration *
+                range_blocks_size_current_iteration * sizeof(double));
+            prep_domain_blocks_180 = malloc(
+                domain_blocks_length * range_blocks_size_current_iteration *
+                range_blocks_size_current_iteration * sizeof(double));
+            prep_domain_blocks_270 = malloc(
+                domain_blocks_length * range_blocks_size_current_iteration *
+                range_blocks_size_current_iteration * sizeof(double));
 
             domain_block_sums =
                 (double *)malloc(sizeof(double) * domain_blocks_length);
@@ -360,116 +370,106 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             prepare_domain_blocks_norotation(
                 prep_domain_blocks_0, domain_block_sums,
-                domain_block_sums_squared, image, domain_blocks,
-                domain_blocks_length, range_blocks_size_current_iteration);
+                domain_block_sums_squared, image,
+                domain_block_size_current_iteration, domain_blocks_length,
+                range_blocks_size_current_iteration);
 
             for (int i = 0; i < domain_blocks_length; ++i) {
-                const struct image_t *prep_db_rot_0 = prep_domain_blocks_0 + i;
+                const double *prep_db_rot_0 =
+                    prep_domain_blocks_0 +
+                    i * range_blocks_size_current_iteration *
+                    range_blocks_size_current_iteration;
 
-                struct image_t db_rot_90 =
-                    make_image(domain_block_size_current_iteration, false);
-                rotate(&db_rot_90, prep_db_rot_0, 90);
-                *(prep_domain_blocks_90 + i) = db_rot_90;
+                rotate_raw(prep_domain_blocks_90 +
+                           i * range_blocks_size_current_iteration *
+                           range_blocks_size_current_iteration,
+                           prep_db_rot_0, range_blocks_size_current_iteration,
+                           90);
 
-                struct image_t db_rot_180 =
-                    make_image(domain_block_size_current_iteration, false);
-                rotate(&db_rot_180, prep_db_rot_0, 180);
-                *(prep_domain_blocks_180 + i) = db_rot_180;
+                rotate_raw(prep_domain_blocks_180 +
+                           i * range_blocks_size_current_iteration *
+                           range_blocks_size_current_iteration,
+                           prep_db_rot_0, range_blocks_size_current_iteration,
+                           180);
 
-                struct image_t db_rot_270 =
-                    make_image(domain_block_size_current_iteration, false);
-                rotate(&db_rot_270, prep_db_rot_0, 270);
-                *(prep_domain_blocks_270 + i) = db_rot_270;
+                rotate_raw(prep_domain_blocks_270 +
+                           i * range_blocks_size_current_iteration *
+                           range_blocks_size_current_iteration,
+                           prep_db_rot_0, range_blocks_size_current_iteration,
+                           270);
             }
 
             __record_double_flops(4);
         }
 
-        // Precomputations on domain / range blocks
-        {
-            range_block_sums = (double *)malloc(
-                sizeof(double) * range_blocks_length_current_iteration);
-            assert(range_block_sums != NULL);
-            range_block_sums_squared = (double *)malloc(
-                sizeof(double) * range_blocks_length_current_iteration);
-            assert(range_block_sums_squared != NULL);
-            precompute_sums(range_block_sums, range_block_sums_squared,
-                            range_blocks_curr_iteration,
-                            range_blocks_length_current_iteration, image);
-        }
-
-        // Prepare range blocks can probably be optimized
-        prep_range_blocks = malloc(sizeof(struct image_t) *
-                                   range_blocks_length_current_iteration);
-        for (size_t idx_rb = 0; idx_rb < range_blocks_length_current_iteration;
-             ++idx_rb) {
-            struct block_t *rb = range_blocks_curr_iteration + idx_rb;
-            struct image_t rb_image =
-                make_image(range_blocks_size_current_iteration, false);
-            int idx = 0;
-            for (int i = 0; i < range_blocks_size_current_iteration; ++i) {
-                for (int j = 0; j < range_blocks_size_current_iteration; ++j) {
-                    int idx_image = get_index_in_image(rb, i, j, image);
-                    double val = image->data[idx_image];
-                    rb_image.data[idx] = val;
-                    idx++;
-                }
-            }
-            prep_range_blocks[idx_rb] = rb_image;
-        }
-
         // Process each range block
         for (size_t idx_rb = 0; idx_rb < range_blocks_length_current_iteration;
              ++idx_rb) {
-            struct block_t *range_block = range_blocks_curr_iteration + idx_rb;
+            int curr_relative_rb_idx = range_blocks_idx_curr_iteration[idx_rb];
+            double range_sum, range_sum_squared;
+            double *prepared_range_block =
+                malloc(sizeof(double) * range_blocks_size_current_iteration *
+                       range_blocks_size_current_iteration);
+            load_block(prepared_range_block, &range_sum, &range_sum_squared,
+                       curr_relative_rb_idx,
+                       range_blocks_size_current_iteration, image);
 
             double best_error = DBL_MAX;
 
-            int best_range_block_rel_x = -1;
-            int best_range_block_rel_y = -1;
+            int best_range_block_idx = -1;
             int best_domain_block_idx = -1;
             double best_contrast = -1;
             double best_brightness = -1;
             int best_angle = -1;
 
-            const double range_sum = range_block_sums[idx_rb];
-            const double range_sum_squared = range_block_sums_squared[idx_rb];
             const double sr_x_2 = 2 * range_sum;
             __record_double_flops(1);
 
             double *rtd_rot_0 = malloc(domain_blocks_length * sizeof(double));
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
-                struct image_t *prep_db_rot_0 = prep_domain_blocks_0 + idx_db;
+                double *prep_db_rot_0 =
+                    prep_domain_blocks_0 +
+                    idx_db * range_blocks_size_current_iteration *
+                    range_blocks_size_current_iteration;
                 rtd_rot_0[idx_db] =
-                    rtd_func(prep_db_rot_0, prep_range_blocks + idx_rb);
+                    rtd_func(prep_db_rot_0, prepared_range_block,
+                             range_blocks_size_current_iteration);
             }
 
             double *rtd_rot_90 = malloc(domain_blocks_length * sizeof(double));
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
-                struct image_t *prep_db_rot_90 = prep_domain_blocks_90 + idx_db;
+                double *prep_db_rot_90 =
+                    prep_domain_blocks_90 +
+                    idx_db * range_blocks_size_current_iteration *
+                    range_blocks_size_current_iteration;
                 rtd_rot_90[idx_db] =
-                    rtd_func(prep_db_rot_90, prep_range_blocks + idx_rb);
+                    rtd_func(prep_db_rot_90, prepared_range_block,
+                             range_blocks_size_current_iteration);
             }
 
             double *rtd_rot_180 = malloc(domain_blocks_length * sizeof(double));
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
-                struct image_t *prep_db_rot_180 =
-                    prep_domain_blocks_180 + idx_db;
+                double *prep_db_rot_180 =
+                    prep_domain_blocks_180 +
+                    idx_db * range_blocks_size_current_iteration *
+                    range_blocks_size_current_iteration;
                 rtd_rot_180[idx_db] =
-                    rtd_func(prep_db_rot_180, prep_range_blocks + idx_rb);
+                    rtd_func(prep_db_rot_180, prepared_range_block,
+                             range_blocks_size_current_iteration);
             }
 
             double *rtd_rot_270 = malloc(domain_blocks_length * sizeof(double));
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
-                struct image_t *prep_db_rot_270 =
-                    prep_domain_blocks_270 + idx_db;
+                double *prep_db_rot_270 =
+                    prep_domain_blocks_270 +
+                    idx_db * range_blocks_size_current_iteration *
+                    range_blocks_size_current_iteration;
                 rtd_rot_270[idx_db] =
-                    rtd_func(prep_db_rot_270, prep_range_blocks + idx_rb);
+                    rtd_func(prep_db_rot_270, prepared_range_block,
+                             range_blocks_size_current_iteration);
             }
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
-                assert(domain_blocks[idx_db].width == 2 * range_block->width);
-
                 const double domain_sum = domain_block_sums[idx_db];
                 const double domain_sum_squared =
                     domain_block_sums_squared[idx_db];
@@ -496,8 +496,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db;
-                        best_range_block_rel_x = range_block->rel_x;
-                        best_range_block_rel_y = range_block->rel_y;
+                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = 0.0;
                         best_brightness = brightness;
                         best_angle = 0;
@@ -576,8 +575,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 if (min_error < best_error) {
                     best_error = min_error;
                     best_domain_block_idx = idx_db;
-                    best_range_block_rel_x = range_block->rel_x;
-                    best_range_block_rel_y = range_block->rel_y;
+                    best_range_block_idx = curr_relative_rb_idx;
                     best_contrast = v_contrast[min_index];
                     best_brightness = v_brightness[min_index];
                     best_angle = 90 * min_index;
@@ -588,27 +586,45 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             free(rtd_rot_90);
             free(rtd_rot_180);
             free(rtd_rot_270);
+            free(prepared_range_block);
 
             if (best_error > error_threshold &&
                 current_quadtree_depth < MAX_QUADTREE_DEPTH &&
                 range_blocks_size_next_iteration % 2 == 0) {
-                assert(range_block->width >= 2);
-                assert(range_block->height >= 2);
+                assert(range_blocks_size_current_iteration >= 2);
 
-                quad2(range_block, range_blocks_next_iteration +
-                                       range_blocks_length_next_iteration);
+                quad3(range_blocks_idx_next_iteration +
+                      range_blocks_length_next_iteration,
+                      curr_relative_rb_idx, range_blocks_size_current_iteration,
+                      image->size);
+
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
                 struct transformation_t *best_transformation =
                     (struct transformation_t *)malloc(
                         sizeof(struct transformation_t));
-                best_transformation->range_block =
-                    make_block(best_range_block_rel_x, best_range_block_rel_y,
-                               range_blocks_size_current_iteration,
-                               range_blocks_size_current_iteration);
-                best_transformation->domain_block =
-                    domain_blocks[best_domain_block_idx];
+
+                int rb_rel_x = BLOCK_CORD_REL_X(
+                                   best_range_block_idx, range_blocks_size_current_iteration,
+                                   image->size);
+                int rb_rel_y = BLOCK_CORD_REL_Y(
+                    best_range_block_idx, range_blocks_size_current_iteration,
+                    image->size);
+
+                best_transformation->range_block = make_block(
+                    rb_rel_x, rb_rel_y, range_blocks_size_current_iteration,
+                    range_blocks_size_current_iteration);
+
+                int db_rel_x = BLOCK_CORD_REL_X(
+                                   best_domain_block_idx, domain_block_size_current_iteration,
+                                   image->size);
+                int db_rel_y = BLOCK_CORD_REL_Y(
+                    best_domain_block_idx, domain_block_size_current_iteration,
+                    image->size);
+                best_transformation->domain_block = make_block(
+                    db_rel_x, db_rel_y, domain_block_size_current_iteration,
+                    domain_block_size_current_iteration);
                 best_transformation->brightness = best_brightness;
                 best_transformation->contrast = best_contrast;
                 best_transformation->angle = best_angle;
@@ -617,18 +633,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         }
 
         // Cleanups
-        free(range_blocks_curr_iteration);
-        free(range_block_sums);
-        free(range_block_sums_squared);
+        free(range_blocks_idx_curr_iteration);
         free(domain_block_sums);
         free(domain_block_sums_squared);
-        free(domain_blocks);
-        free_prepared_blocks(prep_domain_blocks_0, domain_blocks_length);
-        free_prepared_blocks(prep_domain_blocks_90, domain_blocks_length);
-        free_prepared_blocks(prep_domain_blocks_180, domain_blocks_length);
-        free_prepared_blocks(prep_domain_blocks_270, domain_blocks_length);
-        free_prepared_blocks(prep_range_blocks,
-                             range_blocks_length_current_iteration);
+        free(prep_domain_blocks_0);
+        free(prep_domain_blocks_90);
+        free(prep_domain_blocks_180);
+        free(prep_domain_blocks_270);
     }
 
     return transformations;
@@ -639,15 +650,19 @@ void apply_transformation(struct image_t *image,
     assert(t->domain_block.width == t->domain_block.height);
     assert(t->range_block.width == t->range_block.height);
 
-    struct image_t scaled_domain_block = scale_block(
-        image, &t->domain_block, t->range_block.width, t->range_block.height);
-    struct image_t rotated_domain_block = make_image(t->range_block.height, 0);
-    rotate(&rotated_domain_block, &scaled_domain_block, t->angle);
+    double *scaled_domain_block =
+        malloc(sizeof(double) * t->range_block.width * t->range_block.height);
+    scale_block(scaled_domain_block, image->data, image->size,
+                t->domain_block.rel_x, t->domain_block.rel_y,
+                t->domain_block.height);
+    double *rotated_domain_block =
+        malloc(sizeof(double) * t->range_block.height * t->range_block.height);
+    rotate_raw(rotated_domain_block, scaled_domain_block, t->range_block.height,
+               t->angle);
 
     for (int i = 0; i < t->range_block.height; ++i) {
         for (int j = 0; j < t->range_block.width; ++j) {
-            double value =
-                rotated_domain_block.data[i * rotated_domain_block.size + j];
+            double value = rotated_domain_block[i * t->range_block.height + j];
             int idx = get_index_in_image(&t->range_block, i, j, image);
             int new_pixel_value = value * t->contrast + t->brightness;
             if (new_pixel_value < 0) new_pixel_value = 0;
@@ -657,8 +672,8 @@ void apply_transformation(struct image_t *image,
         }
     }
 
-    free_image_data(&scaled_domain_block);
-    free_image_data(&rotated_domain_block);
+    free(scaled_domain_block);
+    free(rotated_domain_block);
 }
 
 void decompress(struct image_t *decompressed_image,
@@ -676,6 +691,6 @@ void decompress(struct image_t *decompressed_image,
 
 struct func_suite_t register_suite(void) {
     struct func_suite_t suite = {.compress_func = &compress,
-                                 .decompress_func = &decompress};
+        .decompress_func = &decompress};
     return suite;
 }
