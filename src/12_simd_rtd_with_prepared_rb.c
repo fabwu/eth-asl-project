@@ -82,8 +82,7 @@ struct image_t scale_block(const struct image_t *image,
     return scaled_image;
 }
 
-void free_prepared_blocks(struct image_t *prepared_blocks,
-                          const int length) {
+void free_prepared_blocks(struct image_t *prepared_blocks, const int length) {
     for (size_t i = 0; i < length; ++i) {
         free((prepared_blocks + i)->data);
     }
@@ -228,16 +227,13 @@ double rtd_generic_2x2(const struct image_t *domain_block,
 double rtd_simd_2x2(const struct image_t *domain_block,
                     const struct image_t *range_block) {
     assert(domain_block->size == range_block->size);
-    const int dbs = domain_block->size;
     assert(dbs == 2);
 
-    __m256d di = _mm256_load_pd(domain_block->data);
-    __m256d ri = _mm256_set_pd(range_block->data[0], range_block->data[1],
-                               range_block->data[2], range_block->data[3]);
+    __m256d di = _mm256_loadu_pd(domain_block->data);
+    __m256d ri = _mm256_loadu_pd(range_block->data);
     __m256d tmp1 = _mm256_mul_pd(di, ri);
-    __m256d tmp2 = _mm256_hadd_pd(tmp1, tmp1);
-    double rtd = tmp2[0] + tmp2[2];
-    __record_double_flops(9);
+    double rtd = tmp1[0] + tmp1[1] + tmp1[2] + tmp1[3];
+    __record_double_flops(7);
     return rtd;
 }
 
@@ -322,8 +318,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 range_blocks_size_current_iteration % 4 == 0) {
                 rtd_func = &rtd_simd;
             } else if (range_blocks_size_current_iteration == 2) {
-                rtd_func = &rtd_generic_2x2;
-                //                rtd_func = &rtd_simd_2x2;
+                //                rtd_func = &rtd_generic_2x2;
+                rtd_func = &rtd_simd_2x2;
             } else {
                 rtd_func = &rtd_generic;
             }
@@ -600,7 +596,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 assert(range_block->height >= 2);
 
                 quad2(range_block, range_blocks_next_iteration +
-                                   range_blocks_length_next_iteration);
+                                       range_blocks_length_next_iteration);
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
@@ -680,6 +676,6 @@ void decompress(struct image_t *decompressed_image,
 
 struct func_suite_t register_suite(void) {
     struct func_suite_t suite = {.compress_func = &compress,
-        .decompress_func = &decompress};
+                                 .decompress_func = &decompress};
     return suite;
 }
