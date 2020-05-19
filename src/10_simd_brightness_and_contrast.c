@@ -335,92 +335,35 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 int dbs = downsampled_db->size;
                 int dbs_dbs = dbs * dbs;
 
-                //                double rtd_sum_0_1 = 0;
-                //                double rtd_sum_0_2 = 0;
-                //                double rtd_sum_90_1 = 0;
-                //                double rtd_sum_90_2 = 0;
-                //                double rtd_sum_180_1 = 0;
-                //                double rtd_sum_180_2 = 0;
-                //                double rtd_sum_270_1 = 0;
-                //                double rtd_sum_270_2 = 0;
-
-                __m256d v_rtd_sum_1 = _mm256_setzero_pd();
-                __m256d v_rtd_sum_2 = _mm256_setzero_pd();
-                int dbs_i = 0;
+                __m256d v_rtd = _mm256_setzero_pd();
                 for (int i = 0; i < dbs; i++) {
-                    int dbs_j = 0;
-                    for (int j = 0; j < dbs; j += 2) {
-                        int idx_0_db1 = dbs_i + j;
-                        int idx_0_db2 = idx_0_db1 + 1;
-                        int idx_90_db1 = dbs_dbs - dbs_j - dbs + i;
-                        int idx_90_db2 = idx_90_db1 - dbs;
-                        int idx_180_db1 = dbs_dbs - dbs_i - j - 1;
-                        int idx_180_db2 = idx_180_db1 - 1;
-                        int idx_270_db1 = dbs_j + dbs - i - 1;
-                        int idx_270_db2 = idx_270_db1 + dbs;
+                    for (int j = 0; j < dbs; ++j) {
+                        int idx_db_0 = i*dbs + j;
+                        int idx_db_90 = dbs_dbs - j*dbs - dbs + i;
+                        int idx_db_180 = dbs_dbs - i*dbs - j - 1;
+                        int idx_db_270 = j*dbs + dbs - i - 1;
 
-                        __m256d di_1 = _mm256_setzero_pd();
-                        __m256d di_2 = _mm256_setzero_pd();
-                        // DO THIS (worse)
-                        //                        const __m256i offset_db_1 =
-                        //                        _mm256_set_epi64x(
-                        //                            idx_270_db1, idx_180_db1,
-                        //                            idx_90_db1, idx_0_db1);
-                        //                        di_1 =
-                        //                        _mm256_i64gather_pd(downsampled_db->data,
-                        //                                                   offset_db_1,
-                        //                                                   8);
-                        //
-                        //                        const __m256i offset_db_2 =
-                        //                        _mm256_set_epi64x(
-                        //                            idx_270_db2, idx_180_db2,
-                        //                            idx_90_db2, idx_0_db2);
-                        //                        di_2 =
-                        //                        _mm256_i64gather_pd(downsampled_db->data,
-                        //                                                   offset_db_2,
-                        //                                                   8);
+                        const __m256i offset_db = _mm256_set_epi64x(
+                            idx_db_270, idx_db_180, idx_db_90, idx_db_0);
+                        __m256d v_di = _mm256_i64gather_pd(downsampled_db->data,
+                                                           offset_db, 8);
 
-                        // OR THIS (better)
-                        di_1[0] = downsampled_db->data[idx_0_db1];
-                        di_2[0] = downsampled_db->data[idx_0_db2];
-                        di_1[1] = downsampled_db->data[idx_90_db1];
-                        di_2[1] = downsampled_db->data[idx_90_db2];
-                        di_1[2] = downsampled_db->data[idx_180_db1];
-                        di_2[2] = downsampled_db->data[idx_180_db2];
-                        di_1[3] = downsampled_db->data[idx_270_db1];
-                        di_2[3] = downsampled_db->data[idx_270_db2];
+//                        __m256d v_di;
+//                        v_di[0] = downsampled_db->data[idx_db_0];
+//                        v_di[1] = downsampled_db->data[idx_db_90];
+//                        v_di[2] = downsampled_db->data[idx_db_180];
+//                        v_di[3] = downsampled_db->data[idx_db_270];
 
-                        int idx_rb2 = rtd_idx_rb + 1;
+                        double ri = image->data[rtd_idx_rb];
+                        const __m256d v_ri = _mm256_set1_pd(ri);
 
-                        double ri1 = image->data[rtd_idx_rb];
-                        double ri2 = image->data[idx_rb2];
+                        v_rtd = _mm256_fmadd_pd(v_ri, v_di, v_rtd);
 
-                        const __m256d v_ri1 = _mm256_set1_pd(ri1);
-                        const __m256d v_ri2 = _mm256_set1_pd(ri2);
-
-                        __m256d a = _mm256_mul_pd(v_ri1, di_1);
-                        v_rtd_sum_1 = _mm256_add_pd(v_rtd_sum_1, a);
-
-                        __m256d b = _mm256_mul_pd(v_ri2, di_2);
-                        v_rtd_sum_2 = _mm256_add_pd(v_rtd_sum_2, b);
-
-                        rtd_idx_rb += 2;
-                        dbs_j = dbs_j + dbs + dbs;
+                        rtd_idx_rb += 1;
                     }
                     rtd_idx_rb += image->size - dbs;
-                    dbs_i += dbs;
                 }
-
                 __record_double_flops(dbs * dbs * 8);
-
-                __m256d v_rtd = _mm256_add_pd(v_rtd_sum_1, v_rtd_sum_2);
-                //                double rtd_0 = rtd_sum_0_1 + rtd_sum_0_2;
-                //                double rtd_90 = rtd_sum_90_1 + rtd_sum_90_2;
-                //                double rtd_180 = rtd_sum_180_1 +
-                //                rtd_sum_180_2; double rtd_270 = rtd_sum_270_1
-                //                + rtd_sum_270_2;
-
-                __record_double_flops(4);
 
                 /************************ END precompute rtd
                  * *************************/

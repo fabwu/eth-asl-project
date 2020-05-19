@@ -82,12 +82,12 @@ struct image_t scale_block(const struct image_t *image,
     return scaled_image;
 }
 
-void free_prepared_blocks(struct image_t *prepared_domain_blocks,
+void free_prepared_blocks(struct image_t *prepared_blocks,
                           const int length) {
     for (size_t i = 0; i < length; ++i) {
-        free((prepared_domain_blocks + i)->data);
+        free((prepared_blocks + i)->data);
     }
-    free(prepared_domain_blocks);
+    free(prepared_blocks);
 }
 
 void prepare_domain_blocks_norotation(struct image_t *prepared_domain_blocks,
@@ -160,13 +160,13 @@ void quad2(const struct block_t *block, struct block_t *list) {
                    quad_width, quad_height);
 }
 
-typedef double (*rtd_func_type)(const struct image_t *image,
-                                const struct image_t *rotated_domain_block,
-                                const struct block_t *range_block);
+typedef double (*rtd_func_type)(const struct image_t *rotated_domain_block,
+                                const struct image_t *range_block);
 
-double rtd_simd(const struct image_t *image, const struct image_t *domain_block,
-                const struct block_t *range_block) {
-    int rtd_start_rb = range_block->rel_y * image->size + range_block->rel_x;
+double rtd_simd(const struct image_t *domain_block,
+                const struct image_t *range_block) {
+    assert(domain_block->size == range_block->size);
+
     int dbs = domain_block->size;
     __m256d v_rtd_sum_0 = _mm256_setzero_pd();
     __m256d v_rtd_sum_1 = _mm256_setzero_pd();
@@ -175,22 +175,22 @@ double rtd_simd(const struct image_t *image, const struct image_t *domain_block,
 
     for (int i = 0; i < dbs; i += 4) {
         for (int j = 0; j < dbs; j += 4) {
-            double *ri_start = image->data + rtd_start_rb + j;
+            double *ri_start = range_block->data + j;
             double *di_start = domain_block->data + j;
 
-            __m256d v_ri_0 = _mm256_loadu_pd(ri_start + i * image->size);
+            __m256d v_ri_0 = _mm256_loadu_pd(ri_start + i * dbs);
             __m256d v_di_0 = _mm256_loadu_pd(di_start + i * dbs);
             v_rtd_sum_0 = _mm256_fmadd_pd(v_ri_0, v_di_0, v_rtd_sum_0);
 
-            __m256d v_ri_1 = _mm256_loadu_pd(ri_start + (i + 1) * image->size);
+            __m256d v_ri_1 = _mm256_loadu_pd(ri_start + (i + 1) * dbs);
             __m256d v_di_1 = _mm256_loadu_pd(di_start + (i + 1) * dbs);
             v_rtd_sum_1 = _mm256_fmadd_pd(v_ri_1, v_di_1, v_rtd_sum_1);
 
-            __m256d v_ri_2 = _mm256_loadu_pd(ri_start + (i + 2) * image->size);
+            __m256d v_ri_2 = _mm256_loadu_pd(ri_start + (i + 2) * dbs);
             __m256d v_di_2 = _mm256_loadu_pd(di_start + (i + 2) * dbs);
             v_rtd_sum_2 = _mm256_fmadd_pd(v_ri_2, v_di_2, v_rtd_sum_2);
 
-            __m256d v_ri_3 = _mm256_loadu_pd(ri_start + (i + 3) * image->size);
+            __m256d v_ri_3 = _mm256_loadu_pd(ri_start + (i + 3) * dbs);
             __m256d v_di_3 = _mm256_loadu_pd(di_start + (i + 3) * dbs);
             v_rtd_sum_3 = _mm256_fmadd_pd(v_ri_3, v_di_3, v_rtd_sum_3);
         }
@@ -207,39 +207,33 @@ double rtd_simd(const struct image_t *image, const struct image_t *domain_block,
     return rtd;
 }
 
-double rtd_generic_2x2(const struct image_t *image,
-                       const struct image_t *domain_block,
-                       const struct block_t *range_block) {
-    const int rtd_start_rb =
-        range_block->rel_y * image->size + range_block->rel_x;
+double rtd_generic_2x2(const struct image_t *domain_block,
+                       const struct image_t *range_block) {
+    assert(domain_block->size == range_block->size);
     const int dbs = domain_block->size;
     assert(dbs == 2);
 
     double tmp1 = 0;
     double tmp2 = 0;
-    tmp1 = fma(image->data[rtd_start_rb + 0],domain_block->data[0], tmp1);
-    tmp1 = fma(image->data[rtd_start_rb + 1],domain_block->data[1], tmp1);
-    tmp2 = fma(image->data[rtd_start_rb + image->size + 0],domain_block->data[2], tmp2);
-    tmp2 = fma(image->data[rtd_start_rb + image->size + 1],domain_block->data[3], tmp2);
+    tmp1 = fma(range_block->data[0], domain_block->data[0], tmp1);
+    tmp1 = fma(range_block->data[1], domain_block->data[1], tmp1);
+    tmp2 = fma(range_block->data[2], domain_block->data[2], tmp2);
+    tmp2 = fma(range_block->data[3], domain_block->data[3], tmp2);
 
-    double rtd = tmp1+tmp2;
+    double rtd = tmp1 + tmp2;
     __record_double_flops(9);
     return rtd;
 }
 
-double rtd_simd_2x2(const struct image_t *image,
-                       const struct image_t *domain_block,
-                       const struct block_t *range_block) {
-    const int rtd_start_rb =
-        range_block->rel_y * image->size + range_block->rel_x;
+double rtd_simd_2x2(const struct image_t *domain_block,
+                    const struct image_t *range_block) {
+    assert(domain_block->size == range_block->size);
     const int dbs = domain_block->size;
     assert(dbs == 2);
 
     __m256d di = _mm256_load_pd(domain_block->data);
-    __m256d ri = _mm256_set_pd(image->data[rtd_start_rb + image->size + 1],
-                               image->data[rtd_start_rb + image->size + 0],
-                               image->data[rtd_start_rb + 1],
-                               image->data[rtd_start_rb + 0]);
+    __m256d ri = _mm256_set_pd(range_block->data[0], range_block->data[1],
+                               range_block->data[2], range_block->data[3]);
     __m256d tmp1 = _mm256_mul_pd(di, ri);
     __m256d tmp2 = _mm256_hadd_pd(tmp1, tmp1);
     double rtd = tmp2[0] + tmp2[2];
@@ -247,15 +241,15 @@ double rtd_simd_2x2(const struct image_t *image,
     return rtd;
 }
 
-double rtd_generic(const struct image_t *image,
-                   const struct image_t *domain_block,
-                   const struct block_t *range_block) {
-    int rtd_start_rb = range_block->rel_y * image->size + range_block->rel_x;
+double rtd_generic(const struct image_t *domain_block,
+                   const struct image_t *range_block) {
+    assert(domain_block->size == range_block->size);
     int dbs = domain_block->size;
+
     double rtd = 0;
     for (int i = 0; i < dbs; i++) {
         for (int j = 0; j < dbs; ++j) {
-            double ri = image->data[rtd_start_rb + i * image->size + j];
+            double ri = range_block->data[i * dbs + j];
             double di = domain_block->data[i * dbs + j];
             rtd = fma(ri, di, rtd);
         }
@@ -283,6 +277,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     struct image_t *prep_domain_blocks_90;
     struct image_t *prep_domain_blocks_180;
     struct image_t *prep_domain_blocks_270;
+    struct image_t *prep_range_blocks;
     rtd_func_type rtd_func;
     double *range_block_sums;
     double *range_block_sums_squared;
@@ -321,12 +316,14 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             num_pixels = range_blocks_size_current_iteration *
                          range_blocks_size_current_iteration;
             num_pixels_of_blocks_inv = 1.0 / num_pixels;
+
+            // MARKER: register
             if (range_blocks_size_current_iteration >= 4 &&
                 range_blocks_size_current_iteration % 4 == 0) {
                 rtd_func = &rtd_simd;
             } else if (range_blocks_size_current_iteration == 2) {
                 rtd_func = &rtd_generic_2x2;
-//                rtd_func = &rtd_simd_2x2;
+                //                rtd_func = &rtd_simd_2x2;
             } else {
                 rtd_func = &rtd_generic;
             }
@@ -405,6 +402,26 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                             range_blocks_length_current_iteration, image);
         }
 
+        // Prepare range blocks can probably be optimized
+        prep_range_blocks = malloc(sizeof(struct image_t) *
+                                   range_blocks_length_current_iteration);
+        for (size_t idx_rb = 0; idx_rb < range_blocks_length_current_iteration;
+             ++idx_rb) {
+            struct block_t *rb = range_blocks_curr_iteration + idx_rb;
+            struct image_t rb_image =
+                make_image(range_blocks_size_current_iteration, false);
+            int idx = 0;
+            for (int i = 0; i < range_blocks_size_current_iteration; ++i) {
+                for (int j = 0; j < range_blocks_size_current_iteration; ++j) {
+                    int idx_image = get_index_in_image(rb, i, j, image);
+                    double val = image->data[idx_image];
+                    rb_image.data[idx] = val;
+                    idx++;
+                }
+            }
+            prep_range_blocks[idx_rb] = rb_image;
+        }
+
         // Process each range block
         for (size_t idx_rb = 0; idx_rb < range_blocks_length_current_iteration;
              ++idx_rb) {
@@ -427,14 +444,15 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             double *rtd_rot_0 = malloc(domain_blocks_length * sizeof(double));
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 struct image_t *prep_db_rot_0 = prep_domain_blocks_0 + idx_db;
-                rtd_rot_0[idx_db] = rtd_func(image, prep_db_rot_0, range_block);
+                rtd_rot_0[idx_db] =
+                    rtd_func(prep_db_rot_0, prep_range_blocks + idx_rb);
             }
 
             double *rtd_rot_90 = malloc(domain_blocks_length * sizeof(double));
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 struct image_t *prep_db_rot_90 = prep_domain_blocks_90 + idx_db;
                 rtd_rot_90[idx_db] =
-                    rtd_func(image, prep_db_rot_90, range_block);
+                    rtd_func(prep_db_rot_90, prep_range_blocks + idx_rb);
             }
 
             double *rtd_rot_180 = malloc(domain_blocks_length * sizeof(double));
@@ -442,7 +460,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 struct image_t *prep_db_rot_180 =
                     prep_domain_blocks_180 + idx_db;
                 rtd_rot_180[idx_db] =
-                    rtd_func(image, prep_db_rot_180, range_block);
+                    rtd_func(prep_db_rot_180, prep_range_blocks + idx_rb);
             }
 
             double *rtd_rot_270 = malloc(domain_blocks_length * sizeof(double));
@@ -450,18 +468,11 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 struct image_t *prep_db_rot_270 =
                     prep_domain_blocks_270 + idx_db;
                 rtd_rot_270[idx_db] =
-                    rtd_func(image, prep_db_rot_270, range_block);
+                    rtd_func(prep_db_rot_270, prep_range_blocks + idx_rb);
             }
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 assert(domain_blocks[idx_db].width == 2 * range_block->width);
-                //                struct image_t *prep_db_rot_0 =
-                //                prep_domain_blocks_0 + idx_db; struct image_t
-                //                *prep_db_rot_90 = prep_domain_blocks_90 +
-                //                idx_db; struct image_t *prep_db_rot_180 =
-                //                    prep_domain_blocks_180 + idx_db;
-                //                struct image_t *prep_db_rot_270 =
-                //                    prep_domain_blocks_270 + idx_db;
 
                 const double domain_sum = domain_block_sums[idx_db];
                 const double domain_sum_squared =
@@ -589,7 +600,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 assert(range_block->height >= 2);
 
                 quad2(range_block, range_blocks_next_iteration +
-                                       range_blocks_length_next_iteration);
+                                   range_blocks_length_next_iteration);
                 range_blocks_length_next_iteration += 4;
                 has_remaining_range_blocks = true;
             } else {
@@ -620,6 +631,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         free_prepared_blocks(prep_domain_blocks_90, domain_blocks_length);
         free_prepared_blocks(prep_domain_blocks_180, domain_blocks_length);
         free_prepared_blocks(prep_domain_blocks_270, domain_blocks_length);
+        free_prepared_blocks(prep_range_blocks,
+                             range_blocks_length_current_iteration);
     }
 
     return transformations;
@@ -667,6 +680,6 @@ void decompress(struct image_t *decompressed_image,
 
 struct func_suite_t register_suite(void) {
     struct func_suite_t suite = {.compress_func = &compress,
-                                 .decompress_func = &decompress};
+        .decompress_func = &decompress};
     return suite;
 }
