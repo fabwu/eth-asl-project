@@ -77,20 +77,28 @@ void scale_block(double *out, const double *image, const int image_size,
                  const int block_rel_x, const int block_rel_y,
                  const int block_size) {
     assert(out != NULL);
+    assert(image_size >= 4);
+    assert(image_size % 4 == 0);
 
     size_t scaled_image_idx = 0;
     size_t original_image_idx = block_rel_y * image_size + block_rel_x;
+
+    __m256d v_row1, v_row2, v_one_fourth;
+    v_one_fourth = _mm256_set1_pd(0.25);
     for (int y = 0; y < block_size; y += 2) {
-        for (int x = 0; x < block_size; x += 2) {
-            double val = 0.0;
-            val += image[original_image_idx];
-            val += image[original_image_idx + 1];
-            val += image[original_image_idx + image_size];
-            val += image[original_image_idx + image_size + 1];
-            out[scaled_image_idx] = val * 0.25;
-            scaled_image_idx++;
-            original_image_idx += 2;
-            __record_double_flops(5);
+        for (int x = 0; x < block_size; x += 4) {
+            v_row1 = _mm256_loadu_pd(image + original_image_idx);
+            v_row2 = _mm256_loadu_pd(image + original_image_idx + image_size);
+            v_row2 = _mm256_hadd_pd(v_row1, v_row2);
+            v_row2 = _mm256_mul_pd(v_row2, v_one_fourth);
+
+            out[scaled_image_idx] = v_row2[0] + v_row2[1];
+            out[scaled_image_idx + 1] = v_row2[2] + v_row2[3];
+
+            scaled_image_idx += 2;
+            original_image_idx += 4;
+
+            __record_double_flops(10);
         }
         original_image_idx += image_size;
     }
