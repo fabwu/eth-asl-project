@@ -59,8 +59,8 @@ struct image_t scale_block(const struct image_t *image,
     assert(width == height);                // just for simplicity
     assert(block->width == 2 * width);
     assert(block->height == 2 * height);
-    assert(image_size >= 4);
-    assert(image_size % 4 == 0);
+    assert(image->size >= 4);
+    assert(image->size % 4 == 0);
 
     struct image_t scaled_image = make_image(width, 0);
     size_t scaled_image_idx = 0;
