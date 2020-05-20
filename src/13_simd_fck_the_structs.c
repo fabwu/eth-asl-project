@@ -26,51 +26,48 @@
 #define MIN_QUADTREE_DEPTH 1
 #define MAX_QUADTREE_DEPTH 7
 
-void rotate_raw(double *out, const double *in, int size, int angle) {
+static inline void rotate_raw_0(double *out, const double *in, int size) {
     int m = size;
     int n = size;
-
-    if (angle == 0) {
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                out[i * n + j] = in[i * n + j];
-            }
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            out[i * n + j] = in[i * n + j];
         }
-        return;
     }
+}
 
-    if (angle == 90) {
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                // first row has to be last column
-                // (too be honest it was trial and error)
-                out[j * n + (m - i - 1)] = in[i * n + j];
-            }
+static inline void rotate_raw_90(double *out, const double *in, int size) {
+    int m = size;
+    int n = size;
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            // first row has to be last column
+            // (too be honest it was trial and error)
+            out[j * n + (m - i - 1)] = in[i * n + j];
         }
-        return;
     }
+}
 
-    if (angle == 180) {
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                // first row has to be last row reversed
-                out[(m - i - 1) * n + (n - j - 1)] = in[i * n + j];
-            }
+static inline void rotate_raw_180(double *out, const double *in, int size) {
+    int m = size;
+    int n = size;
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            // first row has to be last row reversed
+            out[(m - i - 1) * n + (n - j - 1)] = in[i * n + j];
         }
-        return;
     }
+}
 
-    if (angle == 270) {
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                // first row has to be first column reversed
-                out[(m - j - 1) * n + i] = in[i * n + j];
-            }
+static inline void rotate_raw_270(double *out, const double *in, int size) {
+    int m = size;
+    int n = size;
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            // first row has to be first column reversed
+            out[(m - j - 1) * n + i] = in[i * n + j];
         }
-        return;
     }
-
-    assert(0);
 }
 
 void scale_block(double *out, const double *image, const int image_size,
@@ -386,25 +383,25 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 const double *prep_db_rot_0 =
                     prep_domain_blocks_0 +
                     i * range_blocks_size_current_iteration *
-                    range_blocks_size_current_iteration;
+                        range_blocks_size_current_iteration;
 
-                rotate_raw(prep_domain_blocks_90 +
-                           i * range_blocks_size_current_iteration *
-                           range_blocks_size_current_iteration,
-                           prep_db_rot_0, range_blocks_size_current_iteration,
-                           90);
+                rotate_raw_90(prep_domain_blocks_90 +
+                                  i * range_blocks_size_current_iteration *
+                                      range_blocks_size_current_iteration,
+                              prep_db_rot_0,
+                              range_blocks_size_current_iteration);
 
-                rotate_raw(prep_domain_blocks_180 +
-                           i * range_blocks_size_current_iteration *
-                           range_blocks_size_current_iteration,
-                           prep_db_rot_0, range_blocks_size_current_iteration,
-                           180);
+                rotate_raw_180(prep_domain_blocks_180 +
+                                   i * range_blocks_size_current_iteration *
+                                       range_blocks_size_current_iteration,
+                               prep_db_rot_0,
+                               range_blocks_size_current_iteration);
 
-                rotate_raw(prep_domain_blocks_270 +
-                           i * range_blocks_size_current_iteration *
-                           range_blocks_size_current_iteration,
-                           prep_db_rot_0, range_blocks_size_current_iteration,
-                           270);
+                rotate_raw_270(prep_domain_blocks_270 +
+                                   i * range_blocks_size_current_iteration *
+                                       range_blocks_size_current_iteration,
+                               prep_db_rot_0,
+                               range_blocks_size_current_iteration);
             }
 
             __record_double_flops(4);
@@ -665,8 +662,28 @@ void apply_transformation(struct image_t *image,
                 t->domain_block.height);
     double *rotated_domain_block =
         malloc(sizeof(double) * t->range_block.height * t->range_block.height);
-    rotate_raw(rotated_domain_block, scaled_domain_block, t->range_block.height,
-               t->angle);
+
+    switch (t->angle) {
+        case 0:
+            rotate_raw_0(rotated_domain_block, scaled_domain_block,
+                         t->range_block.height);
+            break;
+        case 90:
+            rotate_raw_90(rotated_domain_block, scaled_domain_block,
+                          t->range_block.height);
+            break;
+        case 180:
+            rotate_raw_180(rotated_domain_block, scaled_domain_block,
+                           t->range_block.height);
+            break;
+        case 270:
+            rotate_raw_270(rotated_domain_block, scaled_domain_block,
+                           t->range_block.height);
+            break;
+        default:
+            assert(false);
+            break;
+    }
 
     for (int i = 0; i < t->range_block.height; ++i) {
         for (int j = 0; j < t->range_block.width; ++j) {
