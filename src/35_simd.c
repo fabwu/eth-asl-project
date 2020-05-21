@@ -62,7 +62,7 @@ static inline void rotate_raw_270(double *out, const double *in, int size) {
     }
 }
 
-void load_block(double *ret_out, double *ret_sum, double *ret_sum_squared,
+static void load_block(double *ret_out, double *ret_sum, double *ret_sum_squared,
                 const int id, const int block_size, const double *image,
                 const int image_size) {
     int block_rel_x = BLOCK_CORD_REL_X(id, block_size, image_size);
@@ -91,7 +91,7 @@ void load_block(double *ret_out, double *ret_sum, double *ret_sum_squared,
     *ret_sum_squared = sum_squared;
 }
 
-void scale_block(double *out, const double *image, const int image_size,
+static void scale_block(double *out, const double *image, const int image_size,
                  const int block_rel_x, const int block_rel_y,
                  const int block_size) {
     assert(out != NULL);
@@ -122,7 +122,7 @@ void scale_block(double *out, const double *image, const int image_size,
     }
 }
 
-void prepare_domain_blocks_norotation(double *prepared_domain_blocks,
+static void prepare_domain_blocks_norotation(double *prepared_domain_blocks,
                                       double *sums, double *sums_squared,
                                       const double *image, const int image_size,
                                       const int domain_block_size,
@@ -150,7 +150,7 @@ void prepare_domain_blocks_norotation(double *prepared_domain_blocks,
     }
 }
 
-void quad3(int *list, const int id, const int curr_block_size,
+static void quad3(int *list, const int id, const int curr_block_size,
            const int image_size) {
     const int blocks_per_row = image_size / curr_block_size;
     int rel_x = BLOCK_CORD_X(id, curr_block_size, image_size);
@@ -166,7 +166,7 @@ void quad3(int *list, const int id, const int curr_block_size,
     *(list + 3) = next_id_4;
 }
 
-struct queue *compress(const struct image_t *image, const int error_threshold) {
+static struct queue *compress(const struct image_t *image, const int error_threshold) {
     const int initial_domain_block_size =
         image->size / (int)pow(2.0, (double)MIN_QUADTREE_DEPTH);
     const int initial_range_block_size = initial_domain_block_size / 2;
@@ -558,7 +558,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     return transformations;
 }
 
-void apply_transformation(struct image_t *image,
+static void apply_transformation(struct image_t *image,
                           const struct transformation_t *t) {
     assert(t->domain_block.width == t->domain_block.height);
     assert(t->range_block.width == t->range_block.height);
@@ -609,7 +609,7 @@ void apply_transformation(struct image_t *image,
     free(rotated_domain_block);
 }
 
-void decompress(struct image_t *decompressed_image,
+static void decompress(struct image_t *decompressed_image,
                 const struct queue *transformations, const int num_iterations) {
     for (int iter = 0; iter < num_iterations; ++iter) {
         const struct queue_node *current = transformations->front;
