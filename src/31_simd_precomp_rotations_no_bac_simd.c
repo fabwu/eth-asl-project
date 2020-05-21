@@ -18,6 +18,16 @@
 #define MAX_QUADTREE_DEPTH 8
 #define MIN_RANGE_BLOCK_SIZE 4
 
+#define ALLOCATE(size) (aligned_alloc(32, size))
+#define BLOCK_CORD_REL_X(block_id, block_size, image_size) \
+    (block_id % (image_size / block_size)) * block_size
+#define BLOCK_CORD_REL_Y(block_id, block_size, image_size) \
+    ((int)(block_id / (image_size / block_size))) * block_size
+#define BLOCK_CORD_X(block_id, block_size, image_size) \
+    (block_id % (image_size / block_size))
+#define BLOCK_CORD_Y(block_id, block_size, image_size) \
+    ((int)(block_id / (image_size / block_size)))
+
 static inline void rotate_raw_0(double *out, const double *in, int size) {
     int m = size;
     int n = size;
@@ -92,15 +102,6 @@ void scale_block(double *out, const double *image, const int image_size,
         original_image_idx += image_size;
     }
 }
-
-#define BLOCK_CORD_REL_X(block_id, block_size, image_size) \
-    (block_id % (image_size / block_size)) * block_size
-#define BLOCK_CORD_REL_Y(block_id, block_size, image_size) \
-    ((int)(block_id / (image_size / block_size))) * block_size;
-#define BLOCK_CORD_X(block_id, block_size, image_size) \
-    (block_id % (image_size / block_size))
-#define BLOCK_CORD_Y(block_id, block_size, image_size) \
-    ((int)(block_id / (image_size / block_size)));
 
 void prepare_domain_blocks_norotation(double *prepared_domain_blocks,
                                       double *sums, double *sums_squared,
@@ -226,8 +227,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         (image->size / initial_range_block_size);
 
     // Forward declarations
-    size_t domain_blocks_length = -1;
-    int domain_block_size_current_iteration = -1;
+    size_t domain_blocks_length;
+    int domain_block_size_current_iteration;
     int num_pixels;
     double num_pixels_of_blocks_inv;
 
@@ -597,8 +598,8 @@ void apply_transformation(struct image_t *image,
     scale_block(scaled_domain_block, image->data, image->size,
                 t->domain_block.rel_x, t->domain_block.rel_y,
                 t->domain_block.height);
-    double *rotated_domain_block =
-        ALLOCATE(sizeof(double) * t->range_block.height * t->range_block.height);
+    double *rotated_domain_block = ALLOCATE(
+        sizeof(double) * t->range_block.height * t->range_block.height);
 
     switch (t->angle) {
         case 0:
