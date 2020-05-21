@@ -2,6 +2,7 @@
 extern "C" {
 #include "performance.h"
 }
+#include "common.hpp"
 
 #include <cassert>
 #include <fstream>
@@ -52,7 +53,7 @@ double *read_grayscale_file(const string &filename, int *height, int *width) {
 
     // read image data
     auto grayscale_image =
-        (double *)malloc((*width) * (*height) * sizeof(double));
+        (double *)ALLOCATE((*width) * (*height) * sizeof(double));
     while (fin >> line) {
         stringstream s(line);
         while (getline(s, word, ';')) {

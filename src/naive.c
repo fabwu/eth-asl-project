@@ -22,7 +22,7 @@ static struct block_t *create_squared_blocks(const int image_size,
     const int num_blocks =
         (image_size / block_size) * (image_size / block_size);
     struct block_t *blocks =
-        (struct block_t *)malloc(num_blocks * sizeof(struct block_t));
+        (struct block_t *)ALLOCATE(num_blocks * sizeof(struct block_t));
     int index = 0;
     for (int i = 0; i < image_size; i += block_size) {
         for (int j = 0; j < image_size; j += block_size) {
@@ -196,7 +196,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     // size(range_block) in order to compare difference! That means that a
     // square of n pixels need to be compressed to one pixel
     struct prepared_block_t *prepared_domain_blocks =
-        (struct prepared_block_t *)malloc(domain_blocks_length *
+        (struct prepared_block_t *)ALLOCATE(domain_blocks_length *
                                           sizeof(struct prepared_block_t));
     prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks,
                           domain_blocks_length, initial_range_block_size);
@@ -211,7 +211,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     // That is, find a domain block for every range block, such that their
     // difference is minimal
     struct queue *transformations =
-        (struct queue *)malloc(sizeof(struct queue));
+        (struct queue *)ALLOCATE(sizeof(struct queue));
     *transformations = make_queue();
     int current_range_block_size = initial_range_block_size;
     while (!queue_empty(&remaining_range_blocks)) {
@@ -233,7 +233,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             domain_blocks_length = (image->size / current_domain_block_size) *
                                    (image->size / current_domain_block_size);
 
-            prepared_domain_blocks = (struct prepared_block_t *)malloc(
+            prepared_domain_blocks = (struct prepared_block_t *)ALLOCATE(
                 domain_blocks_length * sizeof(struct prepared_block_t));
             prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks,
                                   domain_blocks_length, range_block->width);
@@ -243,7 +243,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
         double best_error = DBL_MAX;
         struct transformation_t *best_transformation =
-            (struct transformation_t *)malloc(sizeof(struct transformation_t));
+            (struct transformation_t *)ALLOCATE(sizeof(struct transformation_t));
 
         for (size_t i = 0; i < domain_blocks_length; ++i) {
             struct prepared_block_t *prepared_domain_block =

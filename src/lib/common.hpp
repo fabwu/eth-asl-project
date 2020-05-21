@@ -24,6 +24,8 @@ extern "C" {
 #define SMALL_IMAGE_SIZE 1024
 #define WARMUP_CYCLES_REQUIRED 1e8
 
+#define ALLOCATE(size) (aligned_alloc(32, size));
+
 extern "C" struct func_suite_t register_suite();
 
 class params_t {
