@@ -275,8 +275,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     for (int current_quadtree_depth = MIN_QUADTREE_DEPTH;
          current_quadtree_depth <= MAX_QUADTREE_DEPTH;
          ++current_quadtree_depth) {
-        // Init current iteration over range blocks
-        // Prepare for next run
+        if (range_blocks_length_next_iteration == 0) break;
 
         range_blocks_length_current_iteration =
             range_blocks_length_next_iteration;
