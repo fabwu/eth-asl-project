@@ -7,6 +7,8 @@
 
 #include "queue.h"
 
+#define ALLOCATE(size) (aligned_alloc(32, size));
+
 struct image_t {
     double *data;
     int size;

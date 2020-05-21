@@ -28,7 +28,7 @@ static struct block_t *create_squared_blocks(const int image_size,
     const int num_blocks =
         (image_size / block_size) * (image_size / block_size);
     struct block_t *blocks =
-        (struct block_t *)malloc(num_blocks * sizeof(struct block_t));
+        (struct block_t *)ALLOCATE(num_blocks * sizeof(struct block_t));
     int index = 0;
     for (int i = 0; i < image_size; i += block_size) {
         for (int j = 0; j < image_size; j += block_size) {
@@ -177,7 +177,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
     // Queue for saving transformations
     struct queue *transformations =
-        (struct queue *)malloc(sizeof(struct queue));
+        (struct queue *)ALLOCATE(sizeof(struct queue));
     *transformations = make_queue();
 
     int current_quadtree_depth = MIN_QUADTREE_DEPTH - 1;
@@ -208,7 +208,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
             range_blocks_length_next_iteration = 0;
             range_blocks_size_next_iteration /= 2;
-            range_blocks_next_iteration = (struct block_t *)malloc(
+            range_blocks_next_iteration = (struct block_t *)ALLOCATE(
                 4 * range_blocks_length_current_iteration *
                 sizeof(struct block_t));
 
@@ -226,13 +226,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 (image->size / domain_block_size_current_iteration) *
                 (image->size / domain_block_size_current_iteration);
 
-            downsampled_domain_blocks = (struct image_t *)malloc(
+            downsampled_domain_blocks = (struct image_t *)ALLOCATE(
                 domain_blocks_length * sizeof(struct image_t));
 
             domain_block_sums =
-                (double *)malloc(sizeof(double) * domain_blocks_length);
+                (double *)ALLOCATE(sizeof(double) * domain_blocks_length);
             domain_block_sums_squared =
-                (double *)malloc(sizeof(double) * domain_blocks_length);
+                (double *)ALLOCATE(sizeof(double) * domain_blocks_length);
 
             prepare_domain_blocks_norotation(
                 downsampled_domain_blocks, domain_block_sums,
@@ -244,10 +244,10 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
         // Precomputations on domain / range blocks
         {
-            range_block_sums = (double *)malloc(
+            range_block_sums = (double *)ALLOCATE(
                 sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums != NULL);
-            range_block_sums_squared = (double *)malloc(
+            range_block_sums_squared = (double *)ALLOCATE(
                 sizeof(double) * range_blocks_length_current_iteration);
             assert(range_block_sums_squared != NULL);
             precompute_sums(range_block_sums, range_block_sums_squared,
@@ -518,7 +518,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 has_remaining_range_blocks = true;
             } else {
                 struct transformation_t *best_transformation =
-                    (struct transformation_t *)malloc(
+                    (struct transformation_t *)ALLOCATE(
                         sizeof(struct transformation_t));
                 best_transformation->range_block =
                     make_block(best_range_block_rel_x, best_range_block_rel_y,

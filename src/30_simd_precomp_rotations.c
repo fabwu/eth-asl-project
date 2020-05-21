@@ -233,7 +233,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
     // Queue for saving transformations
     struct queue *transformations =
-        (struct queue *)malloc(sizeof(struct queue));
+        (struct queue *)ALLOCATE(sizeof(struct queue));
     *transformations = make_queue();
 
     int range_blocks_length_current_iteration = -1;
@@ -245,32 +245,32 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     const int upper_bound_domain_blocks = (int)pow(4.0, MAX_QUADTREE_DEPTH);
     const int upper_bound_range_blocks = (int)pow(4.0, MAX_QUADTREE_DEPTH + 1);
 
-    double *rtd_rot = malloc(4 * upper_bound_domain_blocks * sizeof(double));
+    double *rtd_rot = ALLOCATE(4 * upper_bound_domain_blocks * sizeof(double));
 
     double *prep_domain_blocks_0 =
-        malloc(image->size * image->size * sizeof(double));
+        ALLOCATE(image->size * image->size * sizeof(double));
     double *prep_domain_blocks_90 =
-        malloc(image->size * image->size * sizeof(double));
+        ALLOCATE(image->size * image->size * sizeof(double));
     double *prep_domain_blocks_180 =
-        malloc(image->size * image->size * sizeof(double));
+        ALLOCATE(image->size * image->size * sizeof(double));
     double *prep_domain_blocks_270 =
-        malloc(image->size * image->size * sizeof(double));
+        ALLOCATE(image->size * image->size * sizeof(double));
 
     double *domain_block_sums =
-        malloc(sizeof(double) * upper_bound_domain_blocks);
+        ALLOCATE(sizeof(double) * upper_bound_domain_blocks);
     double *domain_block_sums_squared =
-        malloc(sizeof(double) * upper_bound_domain_blocks);
+        ALLOCATE(sizeof(double) * upper_bound_domain_blocks);
 
     int *range_blocks_idx_curr_iteration =
-        malloc(upper_bound_range_blocks * sizeof(int));
+        ALLOCATE(upper_bound_range_blocks * sizeof(int));
     int *range_blocks_idx_next_iteration =
-        malloc(upper_bound_range_blocks * sizeof(int));
+        ALLOCATE(upper_bound_range_blocks * sizeof(int));
     for (int i = 0; i < initial_range_blocks_length; ++i) {
         range_blocks_idx_next_iteration[i] = i;
     }
 
     double *prepared_range_block =
-        malloc(sizeof(double) * image->size * image->size / 4);
+        ALLOCATE(sizeof(double) * image->size * image->size / 4);
 
     for (int current_quadtree_depth = MIN_QUADTREE_DEPTH;
          current_quadtree_depth <= MAX_QUADTREE_DEPTH;
@@ -475,7 +475,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 range_blocks_length_next_iteration += 4;
             } else {
                 struct transformation_t *best_transformation =
-                    (struct transformation_t *)malloc(
+                    (struct transformation_t *)ALLOCATE(
                         sizeof(struct transformation_t));
 
                 int rb_rel_x = BLOCK_CORD_REL_X(
@@ -526,12 +526,12 @@ void apply_transformation(struct image_t *image,
     assert(t->range_block.width == t->range_block.height);
 
     double *scaled_domain_block =
-        malloc(sizeof(double) * t->range_block.width * t->range_block.height);
+        ALLOCATE(sizeof(double) * t->range_block.width * t->range_block.height);
     scale_block(scaled_domain_block, image->data, image->size,
                 t->domain_block.rel_x, t->domain_block.rel_y,
                 t->domain_block.height);
     double *rotated_domain_block =
-        malloc(sizeof(double) * t->range_block.height * t->range_block.height);
+        ALLOCATE(sizeof(double) * t->range_block.height * t->range_block.height);
 
     switch (t->angle) {
         case 0:

@@ -7,7 +7,7 @@
 struct image_t make_image(int size, int randomize_data) {
     struct image_t image;
     image.size = size;
-    image.data = (double *)malloc(size * size * sizeof(double));
+    image.data = (double *)ALLOCATE(size * size * sizeof(double));
     if (randomize_data) {
         for (int i = 0; i < size * size; ++i) image.data[i] = rand() % 256;
     }
@@ -53,23 +53,23 @@ void quad(const struct block_t *block, struct queue *q) {
     const int quad_width = block->width / 2;
     const int quad_height = block->height / 2;
 
-    // Has to be 4 different malloc calls, because we want to free them
+    // Has to be 4 different ALLOCATE calls, because we want to free them
     // independently later on
-    struct block_t *block_0 = (struct block_t *)malloc(sizeof(struct block_t));
+    struct block_t *block_0 = (struct block_t *)ALLOCATE(sizeof(struct block_t));
     *block_0 = make_block(block->rel_x, block->rel_y, quad_width, quad_height);
     enqueue(q, block_0);
 
-    struct block_t *block_1 = (struct block_t *)malloc(sizeof(struct block_t));
+    struct block_t *block_1 = (struct block_t *)ALLOCATE(sizeof(struct block_t));
     *block_1 = make_block(block->rel_x + quad_width, block->rel_y, quad_width,
                           quad_height);
     enqueue(q, block_1);
 
-    struct block_t *block_2 = (struct block_t *)malloc(sizeof(struct block_t));
+    struct block_t *block_2 = (struct block_t *)ALLOCATE(sizeof(struct block_t));
     *block_2 = make_block(block->rel_x, block->rel_y + quad_height, quad_width,
                           quad_height);
     enqueue(q, block_2);
 
-    struct block_t *block_3 = (struct block_t *)malloc(sizeof(struct block_t));
+    struct block_t *block_3 = (struct block_t *)ALLOCATE(sizeof(struct block_t));
     *block_3 = make_block(block->rel_x + quad_width, block->rel_y + quad_height,
                           quad_width, quad_height);
     enqueue(q, block_3);
