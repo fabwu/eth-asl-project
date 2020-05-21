@@ -17,16 +17,6 @@
 #define MAX_QUADTREE_DEPTH 7
 #define MIN_RANGE_BLOCK_SIZE 4
 
-#define ALLOCATE(size) (aligned_alloc(32, size))
-#define BLOCK_CORD_REL_X(block_id, block_size, image_size) \
-    (block_id % (image_size / block_size)) * block_size
-#define BLOCK_CORD_REL_Y(block_id, block_size, image_size) \
-    ((int)(block_id / (image_size / block_size))) * block_size
-#define BLOCK_CORD_X(block_id, block_size, image_size) \
-    (block_id % (image_size / block_size))
-#define BLOCK_CORD_Y(block_id, block_size, image_size) \
-    ((int)(block_id / (image_size / block_size)))
-
 static inline void rotate_raw_0(double *out, const double *in, int size) {
     int m = size;
     int n = size;
