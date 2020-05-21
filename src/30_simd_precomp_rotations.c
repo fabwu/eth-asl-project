@@ -76,8 +76,8 @@ void scale_block(double *out, const double *image, const int image_size,
     v_one_fourth = _mm256_set1_pd(0.25);
     for (int y = 0; y < block_size; y += 2) {
         for (int x = 0; x < block_size; x += 4) {
-            v_row1 = _mm256_loadu_pd(image + original_image_idx);
-            v_row2 = _mm256_loadu_pd(image + original_image_idx + image_size);
+            v_row1 = _mm256_load_pd(image + original_image_idx);
+            v_row2 = _mm256_load_pd(image + original_image_idx + image_size);
             v_row2 = _mm256_hadd_pd(v_row1, v_row2);
             v_row2 = _mm256_mul_pd(v_row2, v_one_fourth);
 
@@ -187,20 +187,20 @@ double rtd_simd(const double *domain_block, const double *range_block,
             const double *ri_start = range_block + j;
             const double *di_start = domain_block + j;
 
-            __m256d v_ri_0 = _mm256_loadu_pd(ri_start + i * size);
-            __m256d v_di_0 = _mm256_loadu_pd(di_start + i * size);
+            __m256d v_ri_0 = _mm256_load_pd(ri_start + i * size);
+            __m256d v_di_0 = _mm256_load_pd(di_start + i * size);
             v_rtd_sum_0 = _mm256_fmadd_pd(v_ri_0, v_di_0, v_rtd_sum_0);
 
-            __m256d v_ri_1 = _mm256_loadu_pd(ri_start + (i + 1) * size);
-            __m256d v_di_1 = _mm256_loadu_pd(di_start + (i + 1) * size);
+            __m256d v_ri_1 = _mm256_load_pd(ri_start + (i + 1) * size);
+            __m256d v_di_1 = _mm256_load_pd(di_start + (i + 1) * size);
             v_rtd_sum_1 = _mm256_fmadd_pd(v_ri_1, v_di_1, v_rtd_sum_1);
 
-            __m256d v_ri_2 = _mm256_loadu_pd(ri_start + (i + 2) * size);
-            __m256d v_di_2 = _mm256_loadu_pd(di_start + (i + 2) * size);
+            __m256d v_ri_2 = _mm256_load_pd(ri_start + (i + 2) * size);
+            __m256d v_di_2 = _mm256_load_pd(di_start + (i + 2) * size);
             v_rtd_sum_2 = _mm256_fmadd_pd(v_ri_2, v_di_2, v_rtd_sum_2);
 
-            __m256d v_ri_3 = _mm256_loadu_pd(ri_start + (i + 3) * size);
-            __m256d v_di_3 = _mm256_loadu_pd(di_start + (i + 3) * size);
+            __m256d v_ri_3 = _mm256_load_pd(ri_start + (i + 3) * size);
+            __m256d v_di_3 = _mm256_load_pd(di_start + (i + 3) * size);
             v_rtd_sum_3 = _mm256_fmadd_pd(v_ri_3, v_di_3, v_rtd_sum_3);
         }
     }
@@ -392,7 +392,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     v_rtd, v_num_pixels_of_blocks_inv, v_a1, v_a2, v_a3, v_a4,
                     v_a5, v_minus_sr_x_2, v_range_sum_squared;
 
-                v_rtd = _mm256_loadu_pd(rtd_rot + 4 * idx_db);
+                v_rtd = _mm256_load_pd(rtd_rot + 4 * idx_db);
 
                 if (denominator == 0) {
                     assert(0);
