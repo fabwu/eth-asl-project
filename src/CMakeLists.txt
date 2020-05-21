@@ -36,7 +36,7 @@ add_library(lib_35 35_simd.c)
 ##################################################################################
 
 add_executable(test_rotate exec/test_rotate.cpp)
-add_executable(baseline exec/fic.cpp)
+add_executable(0_baseline exec/fic.cpp)
 add_executable(fic exec/fic.cpp)
 add_executable(01_precompute_indices exec/fic.cpp)
 # 2 has to be fixed for large images (see 5)
@@ -61,8 +61,7 @@ add_executable(35_simd exec/fic.cpp)
 
 target_link_libraries(lib_commons PRIVATE lib_types lib_queue)
 target_link_libraries(lib_rotate PRIVATE lib_types)
-target_link_libraries(lib_naive PRIVATE lib_types lib_commons lib_queue lib_rotate)
-target_link_libraries(lib_fast PRIVATE lib_types lib_commons lib_queue lib_rotate)
+
 target_link_libraries(lib_01_precompute_indices PRIVATE lib_types lib_commons lib_queue lib_rotate)
 target_link_libraries(lib_02_precomputations PRIVATE lib_types lib_commons lib_queue lib_rotate)
 # target_link_libraries(lib_03_jonas PRIVATE lib_types lib_commons lib_queue lib_rotate)
@@ -77,6 +76,8 @@ target_link_libraries(lib_11_simd_rtd PRIVATE lib_types lib_commons lib_queue li
 target_link_libraries(lib_12_simd_rtd_with_prepared_rb PRIVATE lib_types lib_commons lib_queue lib_rotate)
 target_link_libraries(lib_13_simd_fck_the_structs PRIVATE lib_types lib_commons lib_queue lib_rotate)
 
+target_link_libraries(lib_naive PRIVATE lib_types lib_commons lib_queue lib_rotate)
+target_link_libraries(lib_fast PRIVATE lib_types lib_commons lib_queue lib_rotate)
 target_link_libraries(lib_25 PRIVATE lib_types lib_commons lib_queue lib_rotate)
 target_link_libraries(lib_30 PRIVATE lib_types lib_commons lib_queue)
 target_link_libraries(lib_31 PRIVATE lib_types lib_commons lib_queue)
@@ -85,7 +86,7 @@ target_link_libraries(lib_35 PRIVATE lib_types lib_commons lib_queue)
 ##################################################################################
 
 target_link_libraries(test_rotate PUBLIC lib_rotate)
-target_link_libraries(baseline PUBLIC lib_types lib_queue lib_commons lib_rotate lib_naive ${Boost_LIBRARIES})
+
 target_link_libraries(fic PUBLIC lib_types lib_queue lib_commons lib_rotate lib_fast ${Boost_LIBRARIES})
 target_link_libraries(01_precompute_indices PUBLIC lib_types lib_queue lib_commons lib_rotate lib_01_precompute_indices ${Boost_LIBRARIES})
 target_link_libraries(02_precomputations PUBLIC lib_types lib_queue lib_commons lib_rotate lib_02_precomputations ${Boost_LIBRARIES})
@@ -101,6 +102,7 @@ target_link_libraries(11_simd_rtd PUBLIC lib_types lib_queue lib_commons lib_rot
 target_link_libraries(12_simd_rtd_with_prepared_rb PUBLIC lib_types lib_queue lib_commons lib_rotate lib_12_simd_rtd_with_prepared_rb ${Boost_LIBRARIES})
 target_link_libraries(13_simd_fck_the_structs PUBLIC lib_types lib_queue lib_commons lib_rotate lib_13_simd_fck_the_structs ${Boost_LIBRARIES})
 
+target_link_libraries(0_baseline PUBLIC lib_types lib_queue lib_commons lib_rotate lib_naive ${Boost_LIBRARIES})
 target_link_libraries(25_ilp PUBLIC lib_25 ${Boost_LIBRARIES})
 target_link_libraries(30_simd_precomp_rotations PUBLIC lib_30 ${Boost_LIBRARIES})
 target_link_libraries(31_simd_precomp_rotations_no_bac_simd PUBLIC lib_31 ${Boost_LIBRARIES})

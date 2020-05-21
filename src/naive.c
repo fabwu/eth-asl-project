@@ -2,7 +2,7 @@
 // #define NDEBUG
 #include <assert.h>
 #include <float.h>
-#include <stdint.h>
+#include <math.h>
 #include <stdlib.h>
 
 #include "lib/performance.h"
@@ -12,6 +12,9 @@
 
 #define ALL_ANGLES_LENGTH 4
 static const int ALL_ANGLES[] = {0, 90, 180, 270};
+#define MIN_QUADTREE_DEPTH 1
+#define MAX_QUADTREE_DEPTH 7
+#define MIN_RANGE_BLOCK_SIZE 4
 
 static struct block_t *create_squared_blocks(const int image_size,
                                              const int block_size,
@@ -182,8 +185,10 @@ void prepare_domain_blocks(struct prepared_block_t *prepared_domain_blocks,
 }
 
 struct queue *compress(const struct image_t *image, const int error_threshold) {
-    int current_domain_block_size = image->size;
+    int current_domain_block_size =
+        image->size / (int)pow(2.0, (double)MIN_QUADTREE_DEPTH-1);
     const int initial_range_block_size = current_domain_block_size / 2;
+    int current_quadtree_depth = 0;
 
     struct block_t *initial_range_blocks =
         create_squared_blocks(image->size, initial_range_block_size, 0, 0);
@@ -197,7 +202,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
     // square of n pixels need to be compressed to one pixel
     struct prepared_block_t *prepared_domain_blocks =
         (struct prepared_block_t *)ALLOCATE(domain_blocks_length *
-                                          sizeof(struct prepared_block_t));
+                                            sizeof(struct prepared_block_t));
     prepare_domain_blocks(prepared_domain_blocks, image, domain_blocks,
                           domain_blocks_length, initial_range_block_size);
 
@@ -239,11 +244,13 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                                   domain_blocks_length, range_block->width);
 
             current_range_block_size = range_block->width;
+            current_quadtree_depth++;
         }
 
         double best_error = DBL_MAX;
         struct transformation_t *best_transformation =
-            (struct transformation_t *)ALLOCATE(sizeof(struct transformation_t));
+            (struct transformation_t *)ALLOCATE(
+                sizeof(struct transformation_t));
 
         for (size_t i = 0; i < domain_blocks_length; ++i) {
             struct prepared_block_t *prepared_domain_block =
@@ -274,7 +281,9 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
             }
         }
 
-        if (best_error > error_threshold) {
+        if (best_error > error_threshold &&
+            current_quadtree_depth <= MAX_QUADTREE_DEPTH &&
+            range_block->width / 2 >= MIN_RANGE_BLOCK_SIZE) {
             assert(range_block->width >= 2);
             assert(range_block->height >= 2);
 

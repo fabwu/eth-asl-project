@@ -196,8 +196,8 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
         (struct queue *)malloc(sizeof(struct queue));
     *transformations = make_queue();
 
-    int range_blocks_length_current_iteration = -1;
-    int range_blocks_size_current_iteration = -1;
+    int range_blocks_length_current_iteration;
+    int range_blocks_size_current_iteration;
 
     int range_blocks_length_next_iteration = initial_range_blocks_length;
     int range_blocks_size_next_iteration = initial_range_block_size;
