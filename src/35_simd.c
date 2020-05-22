@@ -199,8 +199,19 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
     double *prepared_range_block = ALLOCATE(sizeof(double) * image->size * image->size / 4);
 
+    // BEGIN constant vectors
+    __m256d v_sign_bit = _mm256_set1_pd(-0.0f);
+
     __m256d v_zeros = _mm256_set1_pd(0.0);
     __m256d v_ones = _mm256_set1_pd(1.0);
+    __m256d v_fours = _mm256_set1_pd(4.0);
+
+    __m256d v_deg_0 = _mm256_set1_pd(0);
+    __m256d v_deg_90 = _mm256_set1_pd(90);
+    __m256d v_deg_180 = _mm256_set1_pd(180);
+    __m256d v_deg_270 = _mm256_set1_pd(270);
+    // END constant vectors
+
     for (int current_quadtree_depth = MIN_QUADTREE_DEPTH; current_quadtree_depth <= MAX_QUADTREE_DEPTH;
          ++current_quadtree_depth) {
         if (range_blocks_length_next_iteration == 0) break;
@@ -244,19 +255,16 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
             __m256d v_range_sum_sqr = _mm256_set1_pd(range_sum_squared);
 
-            double best_error = DBL_MAX;
-
-            size_t best_domain_block_idx = -1;
-            double best_contrast = -1;
-            double best_brightness = -1;
-            int best_angle = -1;
-
-            const double sr_x_2 = 2 * range_sum;
-            __record_double_flops(1);
-
             int a = BLOCK_CORD_REL_Y(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
             int b = BLOCK_CORD_REL_X(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
             int rtd_start_rb = a * image->size + b;
+
+            __m256d v_best_err = _mm256_set1_pd(DBL_MAX);
+            __m256d v_best_contrast;
+            __m256d v_best_bright;
+            __m256d v_best_idx;
+            __m256d v_best_angle;
+            __m256d v_idx_db = _mm256_set_pd(3, 2, 1, 0);
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; idx_db += 4) {
                 double *prep_domain_block_0 = prep_domain_blocks + idx_db *
@@ -285,93 +293,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                 __m256d v_denominator = _mm256_sub_pd(v_num_pixels_x_dss, v_ds_x_ds);
                 __record_double_flops(4 * 3);
-
-                double denom[4] __attribute__((aligned(32)));
-                _mm256_store_pd(denom, v_denominator);
-
-                if (denom[0] == 0) {
-                    double brightness = range_sum * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
-                    double error;
-                    if (num_pixels == 1) {
-                        error = 0.0;
-                    } else {
-                        error = (range_sum_squared + brightness * (num_pixels * brightness - sr_x_2)) *
-                                num_pixels_of_blocks_inv;
-                        __record_double_flops(5);
-                    }
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_contrast = 0.0;
-                        best_brightness = brightness;
-                        best_angle = 0;
-                    }
-                }
-
-                if (denom[1] == 0) {
-                    double brightness = range_sum * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
-                    double error;
-                    if (num_pixels == 1) {
-                        error = 0.0;
-                    } else {
-                        error = (range_sum_squared + brightness * (num_pixels * brightness - sr_x_2)) *
-                                num_pixels_of_blocks_inv;
-                        __record_double_flops(5);
-                    }
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db + 1;
-                        best_contrast = 0.0;
-                        best_brightness = brightness;
-                        best_angle = 0;
-                    }
-                }
-
-                if (denom[2] == 0) {
-                    double brightness = range_sum * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
-                    double error;
-                    if (num_pixels == 1) {
-                        error = 0.0;
-                    } else {
-                        error = (range_sum_squared + brightness * (num_pixels * brightness - sr_x_2)) *
-                                num_pixels_of_blocks_inv;
-                        __record_double_flops(5);
-                    }
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db + 2;
-                        best_contrast = 0.0;
-                        best_brightness = brightness;
-                        best_angle = 0;
-                    }
-                }
-
-                if (denom[3] == 0) {
-                    double brightness = range_sum * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
-                    double error;
-                    if (num_pixels == 1) {
-                        error = 0.0;
-                    } else {
-                        error = (range_sum_squared + brightness * (num_pixels * brightness - sr_x_2)) *
-                                num_pixels_of_blocks_inv;
-                        __record_double_flops(5);
-                    }
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db + 3;
-                        best_contrast = 0.0;
-                        best_brightness = brightness;
-                        best_angle = 0;
-                    }
-                }
 
                 __m256d v_nrs_x_ds = _mm256_mul_pd(v_neg_range_sum, v_domain_sum);
                 __m256d v_denominator_inv = _mm256_div_pd(v_ones, v_denominator);
@@ -544,19 +465,19 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                 __record_double_flops(4 * 18);
 
-                for (int i = 0; i < 4; ++i) {
-                    double contrast = v_contrast_0[i];
-                    double brightness = v_bright_0[i];
-                    double error = v_error_0[i];
+                // ROATATION 0 ERROR SELECTION
+                // abs trick from https://stackoverflow.com/a/52415852/4143128
+                __m256d v_contrast_abs_0 = _mm256_andnot_pd(v_sign_bit, v_contrast_0);
+                __m256d v_con_lt_one_0 = _mm256_cmp_pd(v_contrast_abs_0, v_ones, _CMP_LT_OQ);
+                __m256d v_better_err_0 = _mm256_cmp_pd(v_error_0, v_best_err, _CMP_LT_OQ);
 
-                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db + i;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 0;
-                    }
-                }
+                __m256d v_mask_0 = _mm256_and_pd(v_better_err_0, v_con_lt_one_0);
+
+                v_best_err = _mm256_blendv_pd(v_best_err, v_error_0, v_mask_0);
+                v_best_contrast = _mm256_blendv_pd(v_best_contrast, v_contrast_0, v_mask_0);
+                v_best_bright = _mm256_blendv_pd(v_best_bright, v_bright_0, v_mask_0);
+                v_best_idx = _mm256_blendv_pd(v_best_idx, v_idx_db, v_mask_0);
+                v_best_angle = _mm256_blendv_pd(v_best_angle, v_deg_0, v_mask_0);
 
                 // ROTATION 90
                 __m256d v_neg_rtd_90 = _mm256_sub_pd(v_zeros, v_rtd_90);
@@ -577,19 +498,18 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                 __record_double_flops(4 * 18);
 
-                for (int i = 0; i < 4; ++i) {
-                    double contrast = v_contrast_90[i];
-                    double brightness = v_bright_90[i];
-                    double error = v_error_90[i];
+                // ROATATION 90 ERROR SELECTION
+                __m256d v_contrast_abs_90 = _mm256_andnot_pd(v_sign_bit, v_contrast_90);
+                __m256d v_con_lt_one_90 = _mm256_cmp_pd(v_contrast_abs_90, v_ones, _CMP_LT_OQ);
+                __m256d v_better_err_90 = _mm256_cmp_pd(v_error_90, v_best_err, _CMP_LT_OQ);
 
-                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db + i;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 90;
-                    }
-                }
+                __m256d v_mask_90 = _mm256_and_pd(v_better_err_90, v_con_lt_one_90);
+
+                v_best_err = _mm256_blendv_pd(v_best_err, v_error_90, v_mask_90);
+                v_best_contrast = _mm256_blendv_pd(v_best_contrast, v_contrast_90, v_mask_90);
+                v_best_bright = _mm256_blendv_pd(v_best_bright, v_bright_90, v_mask_90);
+                v_best_idx = _mm256_blendv_pd(v_best_idx, v_idx_db, v_mask_90);
+                v_best_angle = _mm256_blendv_pd(v_best_angle, v_deg_90, v_mask_90);
 
                 // ROTATION 180
                 __m256d v_neg_rtd_180 = _mm256_sub_pd(v_zeros, v_rtd_180);
@@ -610,19 +530,18 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                 __record_double_flops(4 * 18);
 
-                for (int i = 0; i < 4; ++i) {
-                    double contrast = v_contrast_180[i];
-                    double brightness = v_bright_180[i];
-                    double error = v_error_180[i];
+                // ROATATION 180 ERROR SELECTION
+                __m256d v_contrast_abs_180 = _mm256_andnot_pd(v_sign_bit, v_contrast_180);
+                __m256d v_con_lt_one_180 = _mm256_cmp_pd(v_contrast_abs_180, v_ones, _CMP_LT_OQ);
+                __m256d v_better_err_180 = _mm256_cmp_pd(v_error_180, v_best_err, _CMP_LT_OQ);
 
-                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db + i;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 180;
-                    }
-                }
+                __m256d v_mask_180 = _mm256_and_pd(v_better_err_180, v_con_lt_one_180);
+
+                v_best_err = _mm256_blendv_pd(v_best_err, v_error_180, v_mask_180);
+                v_best_contrast = _mm256_blendv_pd(v_best_contrast, v_contrast_180, v_mask_180);
+                v_best_bright = _mm256_blendv_pd(v_best_bright, v_bright_180, v_mask_180);
+                v_best_idx = _mm256_blendv_pd(v_best_idx, v_idx_db, v_mask_180);
+                v_best_angle = _mm256_blendv_pd(v_best_angle, v_deg_180, v_mask_180);
 
                 // ROTATION 270
                 __m256d v_neg_rtd_270 = _mm256_sub_pd(v_zeros, v_rtd_270);
@@ -643,18 +562,30 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                 __record_double_flops(4 * 18);
 
-                for (int i = 0; i < 4; ++i) {
-                    double contrast = v_contrast_270[i];
-                    double brightness = v_bright_270[i];
-                    double error = v_error_270[i];
+                // ROATATION 270 ERROR SELECTION
+                __m256d v_contrast_abs_270 = _mm256_andnot_pd(v_sign_bit, v_contrast_270);
+                __m256d v_con_lt_one_270 = _mm256_cmp_pd(v_contrast_abs_270, v_ones, _CMP_LT_OQ);
+                __m256d v_better_err_270 = _mm256_cmp_pd(v_error_270, v_best_err, _CMP_LT_OQ);
 
-                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db + i;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 270;
-                    }
+                __m256d v_mask_270 = _mm256_and_pd(v_better_err_270, v_con_lt_one_270);
+
+                v_best_err = _mm256_blendv_pd(v_best_err, v_error_270, v_mask_270);
+                v_best_contrast = _mm256_blendv_pd(v_best_contrast, v_contrast_270, v_mask_270);
+                v_best_bright = _mm256_blendv_pd(v_best_bright, v_bright_270, v_mask_270);
+                v_best_idx = _mm256_blendv_pd(v_best_idx, v_idx_db, v_mask_270);
+                v_best_angle = _mm256_blendv_pd(v_best_angle, v_deg_270, v_mask_270);
+
+                v_idx_db = _mm256_add_pd(v_idx_db, v_fours);
+            }
+
+            double best_error = v_best_err[0];
+            int best_db_idx = 0;
+            for (int i = 1; i < 4; i++) {
+                double error = v_best_err[i];
+
+                if (error < best_error) {
+                    best_error = error;
+                    best_db_idx = i;
                 }
             }
 
@@ -678,18 +609,17 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     make_block(rb_rel_x, rb_rel_y, range_blocks_size_current_iteration,
                                range_blocks_size_current_iteration);
 
-                int db_rel_x =
-                    BLOCK_CORD_REL_X(best_domain_block_idx, domain_block_size_current_iteration, image->size);
-                int db_rel_y =
-                    BLOCK_CORD_REL_Y(best_domain_block_idx, domain_block_size_current_iteration, image->size);
+                int best_idx = v_best_idx[best_db_idx];
+                int db_rel_x = BLOCK_CORD_REL_X(best_idx, domain_block_size_current_iteration, image->size);
+                int db_rel_y = BLOCK_CORD_REL_Y(best_idx, domain_block_size_current_iteration, image->size);
 
                 best_transformation->domain_block =
                     make_block(db_rel_x, db_rel_y, domain_block_size_current_iteration,
                                domain_block_size_current_iteration);
 
-                best_transformation->brightness = best_brightness;
-                best_transformation->contrast = best_contrast;
-                best_transformation->angle = best_angle;
+                best_transformation->brightness = v_best_bright[best_db_idx];
+                best_transformation->contrast = v_best_contrast[best_db_idx];
+                best_transformation->angle = v_best_angle[best_db_idx];
                 enqueue(transformations, best_transformation);
             }
         }
