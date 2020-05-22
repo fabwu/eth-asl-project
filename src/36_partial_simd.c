@@ -326,12 +326,7 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                     }
                 }
 
-                const double sd_x_sr = range_sum * domain_sum;
-                const double denominator_inv = 1.0 / denominator;
-                const double sd_x_2 = 2 * domain_sum;
-                __record_double_flops(3);
-
-                // BEGIN precompute rtd
+                // BEGIN RANGE TIMES DOMAIN
 
                 /* rtd result */
                 __m256d v_sum_0 = _mm256_setzero_pd();
@@ -403,106 +398,66 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
                 double rtd_270 = v_sum_270[0] + v_sum_270[1] + v_sum_270[2] + v_sum_270[3];
                 __record_double_flops(12);
 
-                // ROTATION 0
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_0, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_0);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_0);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
+                // END RANGE TIMES DOMAIN
 
-                    if (error < best_error && (contrast <= 1.0 && contrast >= -1.0)) {
-                        if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_idx = curr_relative_rb_idx;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 0;
+                // BEGIN BRIGHTNESS AND CONTRAST
+
+                // compute contrast
+                __m256d v_denominator_inv = _mm256_set1_pd(1.0 / denominator);
+                __m256d v_num_pixels = _mm256_set1_pd(num_pixels);
+                __m256d v_rtd = _mm256_set_pd(rtd_270, rtd_180, rtd_90, rtd_0);
+                __m256d v_neg_sd_x_sr = _mm256_set1_pd(-range_sum * domain_sum);
+                __m256d v_contrast = _mm256_fmadd_pd(v_num_pixels, v_rtd, v_neg_sd_x_sr);
+                v_contrast = _mm256_mul_pd(v_contrast, v_denominator_inv);
+                __record_double_flops(5);
+
+                // compute brightness
+                __m256d v_neg_domain_sum = _mm256_set1_pd(-domain_sum);
+                __m256d v_range_sum = _mm256_set1_pd(range_sum);
+                __m256d v_num_pixels_of_blocks_inv = _mm256_set1_pd(num_pixels_of_blocks_inv);
+                __m256d v_brightness = _mm256_fmadd_pd(v_contrast, v_neg_domain_sum, v_range_sum);
+                v_brightness = _mm256_mul_pd(v_brightness, v_num_pixels_of_blocks_inv);
+                __record_double_flops(8);
+
+                // compute error
+                __m256d v_minus_sr_x_2 = _mm256_set1_pd(-sr_x_2);
+                __m256d v_minus_rtd = _mm256_sub_pd(_mm256_setzero_pd(), v_rtd);
+                __m256d v_sd_x_2 = _mm256_set1_pd(2 * domain_sum);
+                __record_double_flops(1);
+                __m256d v_domain_sum_squared = _mm256_set1_pd(domain_sum_squared);
+                __m256d v_range_sum_squared = _mm256_set1_pd(range_sum_squared);
+                __m256d v_a1 = _mm256_fmadd_pd(v_num_pixels, v_brightness, v_minus_sr_x_2);
+                __m256d v_a2 = _mm256_fmadd_pd(v_brightness, v_a1, v_range_sum_squared);
+                __m256d v_a3 = _mm256_fmadd_pd(v_brightness, v_sd_x_2, v_minus_rtd);
+                __m256d v_a4 = _mm256_fmadd_pd(v_contrast, v_domain_sum_squared, v_minus_rtd);
+                __m256d v_a5 = _mm256_add_pd(v_a3, v_a4);
+                __m256d v_error = _mm256_fmadd_pd(v_a5, v_contrast, v_a2);
+                v_error = _mm256_mul_pd(v_error, v_num_pixels_of_blocks_inv);
+                __record_double_flops(48);
+
+                // find index of smallest error
+                int min_index = -1;
+                double min_error = DBL_MAX;
+                for (int i = 0; i < 4; i++) {
+                    if (v_error[i] < min_error && v_contrast[i] < 1.0 &&
+                        v_contrast[i] > -1.0) {
+                        min_index = i;
+                        min_error = v_error[i];
                     }
                 }
 
-                // ROTATION 90
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_90, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_90);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_90);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
-
-                    if (error < best_error && (contrast <= 1.0 && contrast >= -1.0)) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_idx = curr_relative_rb_idx;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 90;
-                    }
+                // check if smallest error is new best error
+                if (min_error < best_error) {
+                    best_error = min_error;
+                    best_domain_block_idx = idx_db;
+                    best_range_block_idx = curr_relative_rb_idx;
+                    best_contrast = v_contrast[min_index];
+                    best_brightness = v_brightness[min_index];
+                    best_angle = 90 * min_index;
                 }
 
-                // ROTATION 180
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_180, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_180);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_180);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
 
-                    if (error < best_error && (contrast <= 1.0 && contrast >= -1.0)) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_idx = curr_relative_rb_idx;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 180;
-                    }
-                }
-
-                // ROTATION 270
-                {
-                    double contrast =
-                        fma(num_pixels, rtd_270, -sd_x_sr) * denominator_inv;
-                    double brightness = fma(contrast, -domain_sum, range_sum) *
-                                        num_pixels_of_blocks_inv;
-                    double a1 = fma(num_pixels, brightness, -sr_x_2);
-                    double a2 = fma(brightness, a1, range_sum_squared);
-                    double a3 = fma(brightness, sd_x_2, -rtd_270);
-                    double a4 = fma(contrast, domain_sum_squared, -rtd_270);
-                    double a5 = a3 + a4;
-                    double error = fma(a5, contrast, a2);
-                    error *= num_pixels_of_blocks_inv;
-                    __record_double_flops(18);
-
-                    if (error < best_error && (contrast <= 1.0 && contrast >= -1.0)) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_idx = curr_relative_rb_idx;
-                        best_contrast = contrast;
-                        best_brightness = brightness;
-                        best_angle = 270;
-                    }
-                }
+                // END BRIGHTNESS AND CONTRAST
             }
 
             if (best_error > error_threshold &&
