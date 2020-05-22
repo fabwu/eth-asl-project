@@ -187,17 +187,17 @@ static struct queue *compress(const struct image_t *image, const int error_thres
     const int upper_bound_domain_blocks = (int)pow(4.0, MAX_QUADTREE_DEPTH);
     const int upper_bound_range_blocks = (int)pow(4.0, MAX_QUADTREE_DEPTH + 1);
 
-    double *prep_domain_blocks = malloc(sizeof(double) * image->size * image->size / 4);
+    double *prep_domain_blocks = ALLOCATE(sizeof(double) * image->size * image->size / 4);
 
     double *domain_block_sums = ALLOCATE(sizeof(double) * upper_bound_domain_blocks);
     double *domain_block_sums_squared = ALLOCATE(sizeof(double) * upper_bound_domain_blocks);
-    int *range_blocks_idx_curr_iteration = malloc(upper_bound_range_blocks * sizeof(int));
-    int *range_blocks_idx_next_iteration = malloc(upper_bound_range_blocks * sizeof(int));
+    int *range_blocks_idx_curr_iteration = ALLOCATE(upper_bound_range_blocks * sizeof(int));
+    int *range_blocks_idx_next_iteration = ALLOCATE(upper_bound_range_blocks * sizeof(int));
     for (int i = 0; i < initial_range_blocks_length; ++i) {
         range_blocks_idx_next_iteration[i] = i;
     }
 
-    double *prepared_range_block = malloc(sizeof(double) * image->size * image->size / 4);
+    double *prepared_range_block = ALLOCATE(sizeof(double) * image->size * image->size / 4);
 
     __m256d v_zeros = _mm256_set1_pd(0.0);
     __m256d v_ones = _mm256_set1_pd(1.0);
@@ -246,7 +246,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
             double best_error = DBL_MAX;
 
-            int best_domain_block_idx = -1;
+            size_t best_domain_block_idx = -1;
             double best_contrast = -1;
             double best_brightness = -1;
             int best_angle = -1;
@@ -260,19 +260,19 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; idx_db += 4) {
                 double *prep_domain_block_0 = prep_domain_blocks + idx_db *
-                                                                       range_blocks_size_current_iteration *
-                                                                       range_blocks_size_current_iteration;
+                                                                   range_blocks_size_current_iteration *
+                                                                   range_blocks_size_current_iteration;
                 double *prep_domain_block_1 = prep_domain_blocks + (idx_db + 1) *
-                                                                       range_blocks_size_current_iteration *
-                                                                       range_blocks_size_current_iteration;
+                                                                   range_blocks_size_current_iteration *
+                                                                   range_blocks_size_current_iteration;
 
                 double *prep_domain_block_2 = prep_domain_blocks + (idx_db + 2) *
-                                                                       range_blocks_size_current_iteration *
-                                                                       range_blocks_size_current_iteration;
+                                                                   range_blocks_size_current_iteration *
+                                                                   range_blocks_size_current_iteration;
 
                 double *prep_domain_block_3 = prep_domain_blocks + (idx_db + 3) *
-                                                                       range_blocks_size_current_iteration *
-                                                                       range_blocks_size_current_iteration;
+                                                                   range_blocks_size_current_iteration *
+                                                                   range_blocks_size_current_iteration;
 
                 __m256d v_domain_sum = _mm256_load_pd(domain_block_sums + idx_db);
                 __m256d v_neg_domain_sum = _mm256_sub_pd(v_zeros, v_domain_sum);
@@ -286,7 +286,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 __m256d v_denominator = _mm256_sub_pd(v_num_pixels_x_dss, v_ds_x_ds);
                 __record_double_flops(4 * 3);
 
-                double denom[4] __attribute__ ((aligned (32)));
+                double denom[4] __attribute__((aligned(32)));
                 _mm256_store_pd(denom, v_denominator);
 
                 if (denom[0] == 0) {
@@ -379,170 +379,153 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 __record_double_flops(4 * 3);
 
                 // BEGIN precompute rtd
+                const int dbs = range_blocks_size_current_iteration;
+                const int dbs_dbs = dbs * dbs;
+
+                /* rtd result */
+                __m256d v_sum_0_0 = _mm256_setzero_pd();
+                __m256d v_sum_90_0 = _mm256_setzero_pd();
+                __m256d v_sum_180_0 = _mm256_setzero_pd();
+                __m256d v_sum_270_0 = _mm256_setzero_pd();
+                __m256d v_sum_0_1 = _mm256_setzero_pd();
+                __m256d v_sum_90_1 = _mm256_setzero_pd();
+                __m256d v_sum_180_1 = _mm256_setzero_pd();
+                __m256d v_sum_270_1 = _mm256_setzero_pd();
+                __m256d v_sum_0_2 = _mm256_setzero_pd();
+                __m256d v_sum_90_2 = _mm256_setzero_pd();
+                __m256d v_sum_180_2 = _mm256_setzero_pd();
+                __m256d v_sum_270_2 = _mm256_setzero_pd();
+                __m256d v_sum_0_3 = _mm256_setzero_pd();
+                __m256d v_sum_90_3 = _mm256_setzero_pd();
+                __m256d v_sum_180_3 = _mm256_setzero_pd();
+                __m256d v_sum_270_3 = _mm256_setzero_pd();
+
+                /* domain block data */
+                __m256d v_db_0_0;
+                __m256d v_d_90_0;
+                __m256d v_db_180_0;
+                __m256d v_d_270_0;
+
+                __m256d v_db_0_1;
+                __m256d v_d_90_1;
+                __m256d v_db_180_1;
+                __m256d v_d_270_1;
+
+                __m256d v_db_0_2;
+                __m256d v_d_90_2;
+                __m256d v_db_180_2;
+                __m256d v_d_270_2;
+
+                __m256d v_db_0_3;
+                __m256d v_d_90_3;
+                __m256d v_db_180_3;
+                __m256d v_d_270_3;
+
+                /* range block data */
+                __m256d v_rb;
+
                 int rtd_idx_rb = rtd_start_rb;
-                int dbs = range_blocks_size_current_iteration;
-                int dbs_dbs = dbs * dbs;
 
-                double rtd_sum_0_1_0 = 0;
-                double rtd_sum_0_2_0 = 0;
-                double rtd_sum_90_1_0 = 0;
-                double rtd_sum_90_2_0 = 0;
-                double rtd_sum_180_1_0 = 0;
-                double rtd_sum_180_2_0 = 0;
-                double rtd_sum_270_1_0 = 0;
-                double rtd_sum_270_2_0 = 0;
-
-                double rtd_sum_0_1_1 = 0;
-                double rtd_sum_0_2_1 = 0;
-                double rtd_sum_90_1_1 = 0;
-                double rtd_sum_90_2_1 = 0;
-                double rtd_sum_180_1_1 = 0;
-                double rtd_sum_180_2_1 = 0;
-                double rtd_sum_270_1_1 = 0;
-                double rtd_sum_270_2_1 = 0;
-
-                double rtd_sum_0_1_2 = 0;
-                double rtd_sum_0_2_2 = 0;
-                double rtd_sum_90_1_2 = 0;
-                double rtd_sum_90_2_2 = 0;
-                double rtd_sum_180_1_2 = 0;
-                double rtd_sum_180_2_2 = 0;
-                double rtd_sum_270_1_2 = 0;
-                double rtd_sum_270_2_2 = 0;
-
-                double rtd_sum_0_1_3 = 0;
-                double rtd_sum_0_2_3 = 0;
-                double rtd_sum_90_1_3 = 0;
-                double rtd_sum_90_2_3 = 0;
-                double rtd_sum_180_1_3 = 0;
-                double rtd_sum_180_2_3 = 0;
-                double rtd_sum_270_1_3 = 0;
-                double rtd_sum_270_2_3 = 0;
+                const __m256i dbs_offset = _mm256_set_epi64x(0, dbs, dbs + dbs, dbs + dbs + dbs);
 
                 int dbs_i = 0;
                 for (int i = 0; i < dbs; i++) {
                     int dbs_j = 0;
-                    for (int j = 0; j < dbs; j += 2) {
-                        int idx_0_db1 = dbs_i + j;
-                        int idx_0_db2 = idx_0_db1 + 1;
-                        int idx_90_db1 = dbs_dbs - dbs_j - dbs + i;
-                        int idx_90_db2 = idx_90_db1 - dbs;
-                        int idx_180_db1 = dbs_dbs - dbs_i - j - 1;
-                        int idx_180_db2 = idx_180_db1 - 1;
-                        int idx_270_db1 = dbs_j + dbs - i - 1;
-                        int idx_270_db2 = idx_270_db1 + dbs;
+                    for (int j = 0; j < dbs; j += 4) {
+                        /* get range block data */
+                        v_rb = _mm256_load_pd(image->data + rtd_idx_rb);
+                        rtd_idx_rb += 4;
 
-                        int idx_rb2 = rtd_idx_rb + 1;
+                        /* compute indices for domain blocks */
 
-                        double ri1 = image->data[rtd_idx_rb];
-                        double ri2 = image->data[idx_rb2];
+                        int idx_0 = i * dbs + j;
+                        int idx_180 = dbs_dbs - (idx_0 + 4);
+                        int idx_90 = dbs_dbs - dbs - dbs_j + i - 3 * dbs;
+                        int idx_270 = dbs_j + dbs - i - 1;
+                        dbs_j = dbs_j + 4 * dbs;
 
-                        double di_0_1_0 = prep_domain_block_0[idx_0_db1];
-                        double di_0_2_0 = prep_domain_block_0[idx_0_db2];
-                        double di_90_1_0 = prep_domain_block_0[idx_90_db1];
-                        double di_90_2_0 = prep_domain_block_0[idx_90_db2];
-                        double di_180_1_0 = prep_domain_block_0[idx_180_db1];
-                        double di_180_2_0 = prep_domain_block_0[idx_180_db2];
-                        double di_270_1_0 = prep_domain_block_0[idx_270_db1];
-                        double di_270_2_0 = prep_domain_block_0[idx_270_db2];
+                        /* get domain block data */
 
-                        double di_0_1_1 = prep_domain_block_1[idx_0_db1];
-                        double di_0_2_1 = prep_domain_block_1[idx_0_db2];
-                        double di_90_1_1 = prep_domain_block_1[idx_90_db1];
-                        double di_90_2_1 = prep_domain_block_1[idx_90_db2];
-                        double di_180_1_1 = prep_domain_block_1[idx_180_db1];
-                        double di_180_2_1 = prep_domain_block_1[idx_180_db2];
-                        double di_270_1_1 = prep_domain_block_1[idx_270_db1];
-                        double di_270_2_1 = prep_domain_block_1[idx_270_db2];
+                        v_db_0_0 = _mm256_load_pd(prep_domain_block_0 + idx_0);
+                        v_db_180_0 = _mm256_load_pd(prep_domain_block_0 + idx_180);
+                        v_db_180_0 = _mm256_permute4x64_pd(v_db_180_0, _MM_SHUFFLE(0, 1, 2, 3));
 
-                        double di_0_1_2 = prep_domain_block_2[idx_0_db1];
-                        double di_0_2_2 = prep_domain_block_2[idx_0_db2];
-                        double di_90_1_2 = prep_domain_block_2[idx_90_db1];
-                        double di_90_2_2 = prep_domain_block_2[idx_90_db2];
-                        double di_180_1_2 = prep_domain_block_2[idx_180_db1];
-                        double di_180_2_2 = prep_domain_block_2[idx_180_db2];
-                        double di_270_1_2 = prep_domain_block_2[idx_270_db1];
-                        double di_270_2_2 = prep_domain_block_2[idx_270_db2];
+                        v_d_90_0 = _mm256_i64gather_pd(prep_domain_block_0 + idx_90, dbs_offset, 8);
+                        v_d_270_0 = _mm256_i64gather_pd(prep_domain_block_0 + idx_270, dbs_offset, 8);
+                        v_d_270_0 = _mm256_permute4x64_pd(v_d_270_0, _MM_SHUFFLE(0, 1, 2, 3));
 
-                        double di_0_1_3 = prep_domain_block_3[idx_0_db1];
-                        double di_0_2_3 = prep_domain_block_3[idx_0_db2];
-                        double di_90_1_3 = prep_domain_block_3[idx_90_db1];
-                        double di_90_2_3 = prep_domain_block_3[idx_90_db2];
-                        double di_180_1_3 = prep_domain_block_3[idx_180_db1];
-                        double di_180_2_3 = prep_domain_block_3[idx_180_db2];
-                        double di_270_1_3 = prep_domain_block_3[idx_270_db1];
-                        double di_270_2_3 = prep_domain_block_3[idx_270_db2];
+                        v_db_0_1 = _mm256_load_pd(prep_domain_block_1 + idx_0);
+                        v_db_180_1 = _mm256_load_pd(prep_domain_block_1 + idx_180);
+                        v_db_180_1 = _mm256_permute4x64_pd(v_db_180_1, _MM_SHUFFLE(0, 1, 2, 3));
 
-                        rtd_sum_0_1_0 += ri1 * di_0_1_0;
-                        rtd_sum_0_2_0 += ri2 * di_0_2_0;
-                        rtd_sum_90_1_0 += ri1 * di_90_1_0;
-                        rtd_sum_90_2_0 += ri2 * di_90_2_0;
-                        rtd_sum_180_1_0 += ri1 * di_180_1_0;
-                        rtd_sum_180_2_0 += ri2 * di_180_2_0;
-                        rtd_sum_270_1_0 += ri1 * di_270_1_0;
-                        rtd_sum_270_2_0 += ri2 * di_270_2_0;
+                        v_d_90_1 = _mm256_i64gather_pd(prep_domain_block_1 + idx_90, dbs_offset, 8);
+                        v_d_270_1 = _mm256_i64gather_pd(prep_domain_block_1 + idx_270, dbs_offset, 8);
+                        v_d_270_1 = _mm256_permute4x64_pd(v_d_270_1, _MM_SHUFFLE(0, 1, 2, 3));
 
-                        rtd_sum_0_1_1 += ri1 * di_0_1_1;
-                        rtd_sum_0_2_1 += ri2 * di_0_2_1;
-                        rtd_sum_90_1_1 += ri1 * di_90_1_1;
-                        rtd_sum_90_2_1 += ri2 * di_90_2_1;
-                        rtd_sum_180_1_1 += ri1 * di_180_1_1;
-                        rtd_sum_180_2_1 += ri2 * di_180_2_1;
-                        rtd_sum_270_1_1 += ri1 * di_270_1_1;
-                        rtd_sum_270_2_1 += ri2 * di_270_2_1;
+                        v_db_0_2 = _mm256_load_pd(prep_domain_block_2 + idx_0);
+                        v_db_180_2 = _mm256_load_pd(prep_domain_block_2 + idx_180);
+                        v_db_180_2 = _mm256_permute4x64_pd(v_db_180_2, _MM_SHUFFLE(0, 1, 2, 3));
 
-                        rtd_sum_0_1_2 += ri1 * di_0_1_2;
-                        rtd_sum_0_2_2 += ri2 * di_0_2_2;
-                        rtd_sum_90_1_2 += ri1 * di_90_1_2;
-                        rtd_sum_90_2_2 += ri2 * di_90_2_2;
-                        rtd_sum_180_1_2 += ri1 * di_180_1_2;
-                        rtd_sum_180_2_2 += ri2 * di_180_2_2;
-                        rtd_sum_270_1_2 += ri1 * di_270_1_2;
-                        rtd_sum_270_2_2 += ri2 * di_270_2_2;
+                        v_d_90_2 = _mm256_i64gather_pd(prep_domain_block_2 + idx_90, dbs_offset, 8);
+                        v_d_270_2 = _mm256_i64gather_pd(prep_domain_block_2 + idx_270, dbs_offset, 8);
+                        v_d_270_2 = _mm256_permute4x64_pd(v_d_270_2, _MM_SHUFFLE(0, 1, 2, 3));
 
-                        rtd_sum_0_1_3 += ri1 * di_0_1_3;
-                        rtd_sum_0_2_3 += ri2 * di_0_2_3;
-                        rtd_sum_90_1_3 += ri1 * di_90_1_3;
-                        rtd_sum_90_2_3 += ri2 * di_90_2_3;
-                        rtd_sum_180_1_3 += ri1 * di_180_1_3;
-                        rtd_sum_180_2_3 += ri2 * di_180_2_3;
-                        rtd_sum_270_1_3 += ri1 * di_270_1_3;
-                        rtd_sum_270_2_3 += ri2 * di_270_2_3;
+                        v_db_0_3 = _mm256_load_pd(prep_domain_block_3 + idx_0);
+                        v_db_180_3 = _mm256_load_pd(prep_domain_block_3 + idx_180);
+                        v_db_180_3 = _mm256_permute4x64_pd(v_db_180_3, _MM_SHUFFLE(0, 1, 2, 3));
 
-                        rtd_idx_rb += 2;
-                        dbs_j = dbs_j + dbs + dbs;
+                        v_d_90_3 = _mm256_i64gather_pd(prep_domain_block_3 + idx_90, dbs_offset, 8);
+                        v_d_270_3 = _mm256_i64gather_pd(prep_domain_block_3 + idx_270, dbs_offset, 8);
+                        v_d_270_3 = _mm256_permute4x64_pd(v_d_270_3, _MM_SHUFFLE(0, 1, 2, 3));
+
+                        /* update rtd sum */
+
+                        v_sum_0_0 = _mm256_fmadd_pd(v_rb, v_db_0_0, v_sum_0_0);
+                        v_sum_90_0 = _mm256_fmadd_pd(v_rb, v_d_90_0, v_sum_90_0);
+                        v_sum_180_0 = _mm256_fmadd_pd(v_rb, v_db_180_0, v_sum_180_0);
+                        v_sum_270_0 = _mm256_fmadd_pd(v_rb, v_d_270_0, v_sum_270_0);
+
+                        v_sum_0_1 = _mm256_fmadd_pd(v_rb, v_db_0_1, v_sum_0_1);
+                        v_sum_90_1 = _mm256_fmadd_pd(v_rb, v_d_90_1, v_sum_90_1);
+                        v_sum_180_1 = _mm256_fmadd_pd(v_rb, v_db_180_1, v_sum_180_1);
+                        v_sum_270_1 = _mm256_fmadd_pd(v_rb, v_d_270_1, v_sum_270_1);
+
+                        v_sum_0_2 = _mm256_fmadd_pd(v_rb, v_db_0_2, v_sum_0_2);
+                        v_sum_90_2 = _mm256_fmadd_pd(v_rb, v_d_90_2, v_sum_90_2);
+                        v_sum_180_2 = _mm256_fmadd_pd(v_rb, v_db_180_2, v_sum_180_2);
+                        v_sum_270_2 = _mm256_fmadd_pd(v_rb, v_d_270_2, v_sum_270_2);
+
+                        v_sum_0_3 = _mm256_fmadd_pd(v_rb, v_db_0_3, v_sum_0_3);
+                        v_sum_90_3 = _mm256_fmadd_pd(v_rb, v_d_90_3, v_sum_90_3);
+                        v_sum_180_3 = _mm256_fmadd_pd(v_rb, v_db_180_3, v_sum_180_3);
+                        v_sum_270_3 = _mm256_fmadd_pd(v_rb, v_d_270_3, v_sum_270_3);
                     }
                     rtd_idx_rb += image->size - dbs;
                     dbs_i += dbs;
                 }
+                __record_double_flops(dbs * dbs * 32);
 
-                __record_double_flops(4 * dbs * dbs * 8);
-
-                double rtd_0_0 = rtd_sum_0_1_0 + rtd_sum_0_2_0;
-                double rtd_90_0 = rtd_sum_90_1_0 + rtd_sum_90_2_0;
-                double rtd_180_0 = rtd_sum_180_1_0 + rtd_sum_180_2_0;
-                double rtd_270_0 = rtd_sum_270_1_0 + rtd_sum_270_2_0;
-
-                double rtd_0_1 = rtd_sum_0_1_1 + rtd_sum_0_2_1;
-                double rtd_90_1 = rtd_sum_90_1_1 + rtd_sum_90_2_1;
-                double rtd_180_1 = rtd_sum_180_1_1 + rtd_sum_180_2_1;
-                double rtd_270_1 = rtd_sum_270_1_1 + rtd_sum_270_2_1;
-
-                double rtd_0_2 = rtd_sum_0_1_2 + rtd_sum_0_2_2;
-                double rtd_90_2 = rtd_sum_90_1_2 + rtd_sum_90_2_2;
-                double rtd_180_2 = rtd_sum_180_1_2 + rtd_sum_180_2_2;
-                double rtd_270_2 = rtd_sum_270_1_2 + rtd_sum_270_2_2;
-
-                double rtd_0_3 = rtd_sum_0_1_3 + rtd_sum_0_2_3;
-                double rtd_90_3 = rtd_sum_90_1_3 + rtd_sum_90_2_3;
-                double rtd_180_3 = rtd_sum_180_1_3 + rtd_sum_180_2_3;
-                double rtd_270_3 = rtd_sum_270_1_3 + rtd_sum_270_2_3;
-
-                __record_double_flops(4 * 4);
+                /* range x domain results */
+                __m256d v_rtd_0 = _mm256_set_pd(v_sum_0_3[0] + v_sum_0_3[1] + v_sum_0_3[2] + v_sum_0_3[3],
+                                                v_sum_0_2[0] + v_sum_0_2[1] + v_sum_0_2[2] + v_sum_0_2[3],
+                                                v_sum_0_1[0] + v_sum_0_1[1] + v_sum_0_1[2] + v_sum_0_1[3],
+                                                v_sum_0_0[0] + v_sum_0_0[1] + v_sum_0_0[2] + v_sum_0_0[3]);
+                __m256d v_rtd_90 = _mm256_set_pd(v_sum_90_3[0] + v_sum_90_3[1] + v_sum_90_3[2] + v_sum_90_3[3],
+                                                 v_sum_90_2[0] + v_sum_90_2[1] + v_sum_90_2[2] + v_sum_90_2[3],
+                                                 v_sum_90_1[0] + v_sum_90_1[1] + v_sum_90_1[2] + v_sum_90_1[3],
+                                                 v_sum_90_0[0] + v_sum_90_0[1] + v_sum_90_0[2] + v_sum_90_0[3]);
+                __m256d v_rtd_180 = _mm256_set_pd(v_sum_180_3[0] + v_sum_180_3[1] + v_sum_180_3[2] + v_sum_180_3[3],
+                                                  v_sum_180_2[0] + v_sum_180_2[1] + v_sum_180_2[2] + v_sum_180_2[3],
+                                                  v_sum_180_1[0] + v_sum_180_1[1] + v_sum_180_1[2] + v_sum_180_1[3],
+                                                  v_sum_180_0[0] + v_sum_180_0[1] + v_sum_180_0[2] + v_sum_180_0[3]);
+                __m256d v_rtd_270 = _mm256_set_pd(v_sum_270_3[0] + v_sum_270_3[1] + v_sum_270_3[2] + v_sum_270_3[3],
+                                                  v_sum_270_2[0] + v_sum_270_2[1] + v_sum_270_2[2] + v_sum_270_2[3],
+                                                  v_sum_270_1[0] + v_sum_270_1[1] + v_sum_270_1[2] + v_sum_270_1[3],
+                                                  v_sum_270_0[0] + v_sum_270_0[1] + v_sum_270_0[2] + v_sum_270_0[3]);
+                __record_double_flops(48);
                 // END precompute rtd
 
                 // ROTATION 0
-                __m256d v_rtd_0 = _mm256_set_pd(rtd_0_3, rtd_0_2, rtd_0_1, rtd_0_0);
                 __m256d v_neg_rtd_0 = _mm256_sub_pd(v_zeros, v_rtd_0);
                 __m256d v_contrast_0 = _mm256_fmadd_pd(v_num_pixels, v_rtd_0, v_nrs_x_ds);
                 v_contrast_0 = _mm256_mul_pd(v_contrast_0, v_denominator_inv);
@@ -566,9 +549,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     double brightness = v_bright_0[i];
                     double error = v_error_0[i];
 
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
-                    if (error < best_error) {
+                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
                         best_contrast = contrast;
@@ -578,7 +559,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 }
 
                 // ROTATION 90
-                __m256d v_rtd_90 = _mm256_set_pd(rtd_90_3, rtd_90_2, rtd_90_1, rtd_90_0);
                 __m256d v_neg_rtd_90 = _mm256_sub_pd(v_zeros, v_rtd_90);
                 __m256d v_contrast_90 = _mm256_fmadd_pd(v_num_pixels, v_rtd_90, v_nrs_x_ds);
                 v_contrast_90 = _mm256_mul_pd(v_contrast_90, v_denominator_inv);
@@ -602,9 +582,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     double brightness = v_bright_90[i];
                     double error = v_error_90[i];
 
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
-                    if (error < best_error) {
+                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
                         best_contrast = contrast;
@@ -614,7 +592,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 }
 
                 // ROTATION 180
-                __m256d v_rtd_180 = _mm256_set_pd(rtd_180_3, rtd_180_2, rtd_180_1, rtd_180_0);
                 __m256d v_neg_rtd_180 = _mm256_sub_pd(v_zeros, v_rtd_180);
                 __m256d v_contrast_180 = _mm256_fmadd_pd(v_num_pixels, v_rtd_180, v_nrs_x_ds);
                 v_contrast_180 = _mm256_mul_pd(v_contrast_180, v_denominator_inv);
@@ -638,9 +615,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     double brightness = v_bright_180[i];
                     double error = v_error_180[i];
 
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
-                    if (error < best_error) {
+                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
                         best_contrast = contrast;
@@ -650,7 +625,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 }
 
                 // ROTATION 270
-                __m256d v_rtd_270 = _mm256_set_pd(rtd_270_3, rtd_270_2, rtd_270_1, rtd_270_0);
                 __m256d v_neg_rtd_270 = _mm256_sub_pd(v_zeros, v_rtd_270);
                 __m256d v_contrast_270 = _mm256_fmadd_pd(v_num_pixels, v_rtd_270, v_nrs_x_ds);
                 v_contrast_270 = _mm256_mul_pd(v_contrast_270, v_denominator_inv);
@@ -674,9 +648,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     double brightness = v_bright_270[i];
                     double error = v_error_270[i];
 
-                    if (contrast > 1.0 || contrast < -1.0) error = DBL_MAX;
-
-                    if (error < best_error) {
+                    if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
                         best_contrast = contrast;
@@ -689,7 +661,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             if (best_error > error_threshold && current_quadtree_depth < MAX_QUADTREE_DEPTH &&
                 range_blocks_size_next_iteration >= MIN_RANGE_BLOCK_SIZE &&
                 range_blocks_size_next_iteration % 2 == 0) {
-
                 quad3(range_blocks_idx_next_iteration + range_blocks_length_next_iteration,
                       curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
 
@@ -738,10 +709,10 @@ static void apply_transformation(struct image_t *image, const struct transformat
     assert(t->domain_block.width == t->domain_block.height);
     assert(t->range_block.width == t->range_block.height);
 
-    double *scaled_domain_block = malloc(sizeof(double) * t->range_block.width * t->range_block.height);
+    double *scaled_domain_block = ALLOCATE(sizeof(double) * t->range_block.width * t->range_block.height);
     scale_block(scaled_domain_block, image->data, image->size, t->domain_block.rel_x, t->domain_block.rel_y,
                 t->domain_block.height);
-    double *rotated_domain_block = malloc(sizeof(double) * t->range_block.height * t->range_block.height);
+    double *rotated_domain_block = ALLOCATE(sizeof(double) * t->range_block.height * t->range_block.height);
 
     switch (t->angle) {
         case 0:
