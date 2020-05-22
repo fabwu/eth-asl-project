@@ -248,28 +248,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 const double denominator = num_pixels_x_dss - ds_x_ds;
                 __record_double_flops(3);
 
-                if (denominator == 0) {
-                    double brightness = range_sum * num_pixels_of_blocks_inv;
-                    __record_double_flops(1);
-                    double error;
-                    if (num_pixels == 1) {
-                        error = 0.0;
-                    } else {
-                        error = (range_sum_squared + brightness * (num_pixels * brightness - sr_x_2)) *
-                                num_pixels_of_blocks_inv;
-                        __record_double_flops(5);
-                    }
-
-                    if (error < best_error) {
-                        best_error = error;
-                        best_domain_block_idx = idx_db;
-                        best_range_block_idx = curr_relative_rb_idx;
-                        best_contrast = 0.0;
-                        best_brightness = brightness;
-                        best_angle = 0;
-                    }
-                }
-
                 const double sd_x_sr = range_sum * domain_sum;
                 const double denominator_inv = 1.0 / denominator;
                 const double sd_x_2 = 2 * domain_sum;
