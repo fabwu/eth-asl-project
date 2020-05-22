@@ -20,6 +20,8 @@ add_library(lib_31 31_simd_precomp_rotations_no_bac_simd.c)
 add_library(lib_35 35_simd.c)
 add_library(lib_36 36_partial_simd.c)
 add_library(lib_37 37_full_simd.c)
+add_library(lib_40 40_ilp_norot_90_270.c)
+add_library(lib_41 41_simd_norot_90_270.c)
 
 ##################################################################################
 
@@ -32,6 +34,8 @@ add_executable(31_simd_precomp_rotations_no_bac_simd exec/fic.cpp)
 add_executable(35_simd exec/fic.cpp)
 add_executable(36_partial_simd exec/fic.cpp)
 add_executable(37_full_simd exec/fic.cpp)
+add_executable(40_ilp_norot_90_270 exec/fic.cpp)
+add_executable(41_simd_norot_90_270 exec/fic.cpp)
 
 ##################################################################################
 
@@ -45,6 +49,8 @@ target_link_libraries(lib_31 PRIVATE lib_types lib_commons lib_queue)
 target_link_libraries(lib_35 PRIVATE lib_types lib_commons lib_queue)
 target_link_libraries(lib_36 PRIVATE lib_types lib_commons lib_queue)
 target_link_libraries(lib_37 PRIVATE lib_types lib_commons lib_queue)
+target_link_libraries(lib_40 PRIVATE lib_types lib_commons lib_queue)
+target_link_libraries(lib_41 PRIVATE lib_types lib_commons lib_queue)
 
 ##################################################################################
 
@@ -58,3 +64,5 @@ target_link_libraries(31_simd_precomp_rotations_no_bac_simd PUBLIC lib_31 ${Boos
 target_link_libraries(35_simd PUBLIC lib_35 ${Boost_LIBRARIES})
 target_link_libraries(36_partial_simd PUBLIC lib_36 ${Boost_LIBRARIES})
 target_link_libraries(37_full_simd PUBLIC lib_37 ${Boost_LIBRARIES})
+target_link_libraries(40_ilp_norot_90_270 PUBLIC lib_40 ${Boost_LIBRARIES})
+target_link_libraries(41_simd_norot_90_270 PUBLIC lib_41 ${Boost_LIBRARIES})
