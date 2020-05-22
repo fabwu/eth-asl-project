@@ -246,7 +246,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
             double best_error = DBL_MAX;
 
-            int best_range_block_idx = -1;
             int best_domain_block_idx = -1;
             double best_contrast = -1;
             double best_brightness = -1;
@@ -260,11 +259,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             int rtd_start_rb = a * image->size + b;
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; idx_db += 4) {
-                assert(domain_blocks[idx_db].width == 2 * range_block->width);
-                assert(domain_blocks[idx_db + 1].width == 2 * range_block->width);
-                assert(domain_blocks[idx_db + 2].width == 2 * range_block->width);
-                assert(domain_blocks[idx_db + 3].width == 2 * range_block->width);
-
                 double *prep_domain_block_0 = prep_domain_blocks + idx_db *
                                                                        range_blocks_size_current_iteration *
                                                                        range_blocks_size_current_iteration;
@@ -282,37 +276,20 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                 __m256d v_domain_sum = _mm256_load_pd(domain_block_sums + idx_db);
                 __m256d v_neg_domain_sum = _mm256_sub_pd(v_zeros, v_domain_sum);
-                const double domain_sum_0 = domain_block_sums[idx_db];
-                const double domain_sum_1 = domain_block_sums[idx_db + 1];
-                const double domain_sum_2 = domain_block_sums[idx_db + 2];
-                const double domain_sum_3 = domain_block_sums[idx_db + 3];
 
                 __m256d v_domain_sum_sqr = _mm256_load_pd(domain_block_sums_squared + idx_db);
-                const double domain_sum_squared_0 = domain_block_sums_squared[idx_db];
-                const double domain_sum_squared_1 = domain_block_sums_squared[idx_db + 1];
-                const double domain_sum_squared_2 = domain_block_sums_squared[idx_db + 2];
-                const double domain_sum_squared_3 = domain_block_sums_squared[idx_db + 3];
 
                 __m256d v_ds_x_ds = _mm256_mul_pd(v_domain_sum, v_domain_sum);
-                const double ds_x_ds_0 = domain_sum_0 * domain_sum_0;
-                const double ds_x_ds_1 = domain_sum_1 * domain_sum_1;
-                const double ds_x_ds_2 = domain_sum_2 * domain_sum_2;
-                const double ds_x_ds_3 = domain_sum_3 * domain_sum_3;
 
                 __m256d v_num_pixels_x_dss = _mm256_mul_pd(v_num_pixels, v_domain_sum_sqr);
-                const double num_pixels_x_dss_0 = num_pixels * domain_sum_squared_0;
-                const double num_pixels_x_dss_1 = num_pixels * domain_sum_squared_1;
-                const double num_pixels_x_dss_2 = num_pixels * domain_sum_squared_2;
-                const double num_pixels_x_dss_3 = num_pixels * domain_sum_squared_3;
 
                 __m256d v_denominator = _mm256_sub_pd(v_num_pixels_x_dss, v_ds_x_ds);
-                const double denominator_0 = num_pixels_x_dss_0 - ds_x_ds_0;
-                const double denominator_1 = num_pixels_x_dss_1 - ds_x_ds_1;
-                const double denominator_2 = num_pixels_x_dss_2 - ds_x_ds_2;
-                const double denominator_3 = num_pixels_x_dss_3 - ds_x_ds_3;
                 __record_double_flops(4 * 3);
 
-                if (denominator_0 == 0) {
+                double denom[4] __attribute__ ((aligned (32)));
+                _mm256_store_pd(denom, v_denominator);
+
+                if (denom[0] == 0) {
                     double brightness = range_sum * num_pixels_of_blocks_inv;
                     __record_double_flops(1);
                     double error;
@@ -327,14 +304,13 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = 0.0;
                         best_brightness = brightness;
                         best_angle = 0;
                     }
                 }
 
-                if (denominator_1 == 0) {
+                if (denom[1] == 0) {
                     double brightness = range_sum * num_pixels_of_blocks_inv;
                     __record_double_flops(1);
                     double error;
@@ -349,14 +325,13 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db + 1;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = 0.0;
                         best_brightness = brightness;
                         best_angle = 0;
                     }
                 }
 
-                if (denominator_2 == 0) {
+                if (denom[2] == 0) {
                     double brightness = range_sum * num_pixels_of_blocks_inv;
                     __record_double_flops(1);
                     double error;
@@ -371,14 +346,13 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db + 2;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = 0.0;
                         best_brightness = brightness;
                         best_angle = 0;
                     }
                 }
 
-                if (denominator_3 == 0) {
+                if (denom[3] == 0) {
                     double brightness = range_sum * num_pixels_of_blocks_inv;
                     __record_double_flops(1);
                     double error;
@@ -393,7 +367,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db + 3;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = 0.0;
                         best_brightness = brightness;
                         best_angle = 0;
@@ -598,7 +571,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = contrast;
                         best_brightness = brightness;
                         best_angle = 0;
@@ -635,7 +607,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = contrast;
                         best_brightness = brightness;
                         best_angle = 90;
@@ -672,7 +643,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = contrast;
                         best_brightness = brightness;
                         best_angle = 180;
@@ -709,7 +679,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     if (error < best_error) {
                         best_error = error;
                         best_domain_block_idx = idx_db + i;
-                        best_range_block_idx = curr_relative_rb_idx;
                         best_contrast = contrast;
                         best_brightness = brightness;
                         best_angle = 270;
@@ -720,8 +689,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             if (best_error > error_threshold && current_quadtree_depth < MAX_QUADTREE_DEPTH &&
                 range_blocks_size_next_iteration >= MIN_RANGE_BLOCK_SIZE &&
                 range_blocks_size_next_iteration % 2 == 0) {
-                assert(range_block->width >= 2);
-                assert(range_block->height >= 2);
 
                 quad3(range_blocks_idx_next_iteration + range_blocks_length_next_iteration,
                       curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
@@ -732,9 +699,9 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     (struct transformation_t *)malloc(sizeof(struct transformation_t));
 
                 int rb_rel_x =
-                    BLOCK_CORD_REL_X(best_range_block_idx, range_blocks_size_current_iteration, image->size);
+                    BLOCK_CORD_REL_X(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
                 int rb_rel_y =
-                    BLOCK_CORD_REL_Y(best_range_block_idx, range_blocks_size_current_iteration, image->size);
+                    BLOCK_CORD_REL_Y(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
 
                 best_transformation->range_block =
                     make_block(rb_rel_x, rb_rel_y, range_blocks_size_current_iteration,
