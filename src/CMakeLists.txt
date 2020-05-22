@@ -18,7 +18,8 @@ add_library(lib_25 25_ilp.c)
 add_library(lib_30 30_simd_precomp_rotations.c)
 add_library(lib_31 31_simd_precomp_rotations_no_bac_simd.c)
 add_library(lib_35 35_simd.c)
-add_library(lib_36 36_pascal.c)
+add_library(lib_36 36_partial_simd.c)
+add_library(lib_37 37_full_simd.c)
 
 ##################################################################################
 
@@ -56,4 +57,4 @@ target_link_libraries(30_simd_precomp_rotations PUBLIC lib_30 ${Boost_LIBRARIES}
 target_link_libraries(31_simd_precomp_rotations_no_bac_simd PUBLIC lib_31 ${Boost_LIBRARIES})
 target_link_libraries(35_simd PUBLIC lib_35 ${Boost_LIBRARIES})
 target_link_libraries(36_partial_simd PUBLIC lib_36 ${Boost_LIBRARIES})
-target_link_libraries(36_full_simd PUBLIC lib_36 ${Boost_LIBRARIES})
+target_link_libraries(37_full_simd PUBLIC lib_36 ${Boost_LIBRARIES})
