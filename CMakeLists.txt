@@ -10,14 +10,55 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}) # place binaries in buil
 # default flags (they get extended by options)
 #
 set(DEFAULT_FLAGS "-Wall -lboost_program_options -mavx2 -mfma")
-set(RELEASE_FLAGS "-O3 -DNDEBUG -fno-tree-vectorize")
+set(RELEASE_FLAGS "-DNDEBUG")
 set(DEBUG_FLAGS "-g -O0")
 
 option(OPT_ARCH "optimize for arch" ON)
+option(OPT_O1 "O1" OFF)
+option(OPT_O2 "O2" OFF)
+option(OPT_O3 "O3" ON)
+option(OPT_OFAST "OFast" OFF)
+option(OPT_VEC "vecorize" ON)
+option(OPT_UNSAFE_MATH "unsafe math" OFF)
+option(OPT_UNROLL_LOOPS "unroll loops" ON)
+option(OPT_FAST_MATH "fast math" OFF)
 
 if (OPT_ARCH)
     set(RELEASE_FLAGS "${RELEASE_FLAGS} -march=native")
 endif ()
+
+if (OPT_O1)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -O1")
+endif()
+
+if (OPT_O2)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -O2")
+endif()
+
+if (OPT_O3)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -O3")
+endif()
+
+if (OPT_OFAST)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -Ofast")
+endif()
+
+if (OPT_VEC)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -ftree-vectorize")
+endif()
+
+if (OPT_UNSAFE_MATH)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -funsafe-math-optimizations")
+endif()
+
+if (OPT_UNROLL_LOOPS)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -funroll-all-loops")
+endif()
+
+if (OPT_FAST_MATH)
+    set(RELEASE_FLAGS "${RELEASE_FLAGS} -ffast-math")
+endif()
+
 
 #
 # override cmake flags (gives us full control)
