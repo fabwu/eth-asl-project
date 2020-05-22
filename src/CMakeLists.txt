@@ -57,4 +57,4 @@ target_link_libraries(30_simd_precomp_rotations PUBLIC lib_30 ${Boost_LIBRARIES}
 target_link_libraries(31_simd_precomp_rotations_no_bac_simd PUBLIC lib_31 ${Boost_LIBRARIES})
 target_link_libraries(35_simd PUBLIC lib_35 ${Boost_LIBRARIES})
 target_link_libraries(36_partial_simd PUBLIC lib_36 ${Boost_LIBRARIES})
-target_link_libraries(37_full_simd PUBLIC lib_36 ${Boost_LIBRARIES})
+target_link_libraries(37_full_simd PUBLIC lib_37 ${Boost_LIBRARIES})
