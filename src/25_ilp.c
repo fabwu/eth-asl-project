@@ -236,7 +236,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             int rtd_start_rb = a * image->size + b;
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
-                assert(domain_blocks[idx_db].width == 2 * range_block->width);
                 double *prep_domain_block = prep_domain_blocks + idx_db *
                                                                      range_blocks_size_current_iteration *
                                                                      range_blocks_size_current_iteration;
@@ -442,8 +441,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             if (best_error > error_threshold && current_quadtree_depth < MAX_QUADTREE_DEPTH &&
                 range_blocks_size_next_iteration >= MIN_RANGE_BLOCK_SIZE &&
                 range_blocks_size_next_iteration % 2 == 0) {
-                assert(range_block->width >= 2);
-                assert(range_block->height >= 2);
 
                 quad3(range_blocks_idx_next_iteration + range_blocks_length_next_iteration,
                       curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
