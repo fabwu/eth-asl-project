@@ -15,7 +15,7 @@
  * blocks is divisible by 2.
  */
 #define MIN_QUADTREE_DEPTH 1
-#define MAX_QUADTREE_DEPTH 10
+#define MAX_QUADTREE_DEPTH 8
 #define MIN_RANGE_BLOCK_SIZE 4
 
 static inline void rotate_raw_0(double *out, const double *in, int size) {
@@ -88,12 +88,12 @@ static void load_block(double *ret_out, double *ret_sum, double *ret_sum_squared
 }
 
 static inline void scale_block_with_sums(double *out, double *ret_sum, double *ret_sum_squared,
-                                         const double *image, const int image_size, const int block_rel_x,
-                                         const int block_rel_y, const int block_size) {
+                                         const double *image, const int image_size,
+                                         const int idx_db_start_in_image, const int block_size) {
     double sum = 0;
     double sum_squared = 0;
     size_t scaled_image_idx = 0;
-    size_t original_image_idx = block_rel_y * image_size + block_rel_x;
+    size_t original_image_idx = idx_db_start_in_image;
 
     for (int y = 0; y < block_size; y += 2) {
         for (int x = 0; x < block_size; x += 2) {
@@ -106,6 +106,7 @@ static inline void scale_block_with_sums(double *out, double *ret_sum, double *r
             out[scaled_image_idx] = val;
             sum += val;
             sum_squared += val * val;
+
             scaled_image_idx++;
             original_image_idx += 2;
             __record_double_flops(8);
@@ -117,65 +118,32 @@ static inline void scale_block_with_sums(double *out, double *ret_sum, double *r
     *ret_sum_squared = sum_squared;
 }
 
-static inline void scale_block(double *out, const double *image, const int image_size, const int block_rel_x,
-                               const int block_rel_y, const int block_size) {
-    size_t scaled_image_idx = 0;
-    size_t original_image_idx = block_rel_y * image_size + block_rel_x;
-
-    for (int y = 0; y < block_size; y += 2) {
-        for (int x = 0; x < block_size; x += 2) {
-            double val = 0.0;
-            val += image[original_image_idx];
-            val += image[original_image_idx + 1];
-            val += image[original_image_idx + image_size];
-            val += image[original_image_idx + image_size + 1];
-            out[scaled_image_idx] = val * 0.25;
-            scaled_image_idx++;
-            original_image_idx += 2;
-            __record_double_flops(5);
-        }
-        original_image_idx += image_size;
-    }
-}
-
-static void prepare_domain_blocks_norotation(double *prepared_domain_blocks, double *sums,
-                                             double *sums_squared, const double *image, const int image_size,
-                                             const int domain_block_size, const int domain_blocks_length,
-                                             const int range_block_size) {
-    for (size_t i = 0; i < domain_blocks_length; ++i) {
-        const int db_x = BLOCK_CORD_REL_X(i, domain_block_size, image_size);
-        const int db_y = BLOCK_CORD_REL_Y(i, domain_block_size, image_size);
-        scale_block(prepared_domain_blocks + i * range_block_size * range_block_size, image, image_size, db_x,
-                    db_y, domain_block_size);
-
-        double sum = 0;
-        double sum_squared = 0;
-        for (size_t j = 0; j < range_block_size * range_block_size; j++) {
-            double val = *(prepared_domain_blocks + i * range_block_size * range_block_size + j);
-            sum += val;
-            sum_squared += val * val;
-        }
-        __record_double_flops(range_block_size * range_block_size * 3);
-
-        sums[i] = sum;
-        sums_squared[i] = sum_squared;
-    }
-}
-
-static bool match_block(struct queue *transformations, const int range_block_idx, const int range_block_size,
-                        const double *image, const int image_size, const int error_threshold,
-                        const int current_quadtree_depth) {
+static void match_block(struct queue *transformations, const unsigned int range_block_idx,
+                        const unsigned int range_block_size, const double *image, const int image_size,
+                        const unsigned int error_threshold, const int unsigned current_quadtree_depth) {
     const int num_pixels = range_block_size * range_block_size;
     const double num_pixels_of_blocks_inv = 1.0 / num_pixels;
     __record_double_flops(1);
 
     const int rb_rel_y = BLOCK_CORD_REL_Y(range_block_idx, range_block_size, image_size);
     const int rb_rel_x = BLOCK_CORD_REL_X(range_block_idx, range_block_size, image_size);
+    const int rb_start_in_image = rb_rel_y * image_size + rb_rel_x;
 
-    double range_sum, range_sum_squared;
-    double *range_block = ALLOCATE(sizeof(double) * range_block_size * range_block_size);
-    load_block(range_block, &range_sum, &range_sum_squared, rb_rel_y, rb_rel_x, range_block_size, image,
-               image_size);
+    double range_sum = 0;
+    double range_sum_squared = 0;
+    {  // RANGE SUM, RANGE SUM SQUARED
+        int idx = rb_start_in_image;
+        for (size_t i = 0; i < range_block_size; ++i) {
+            for (int j = 0; j < range_block_size; ++j) {
+                double val = image[idx];
+                range_sum += val;
+                range_sum_squared = fma(val, val, range_sum_squared);
+                idx++;
+            }
+            idx += image_size - range_block_size;
+        }
+        __record_double_flops(3 * range_block_size * range_block_size);
+    }
 
     const double sr_x_2 = 2 * range_sum;
     __record_double_flops(1);
@@ -193,9 +161,11 @@ static bool match_block(struct queue *transformations, const int range_block_idx
         double domain_sum, domain_sum_squared;
         double *domain_block = ALLOCATE(sizeof(double) * range_block_size * range_block_size);
         const int db_rel_x = BLOCK_CORD_REL_X(idx_db, domain_block_size, image_size);
-        const int db_rel_y = BLOCK_CORD_REL_X(idx_db, domain_block_size, image_size);
-        scale_block_with_sums(domain_block, &domain_sum, &domain_sum_squared, image, image_size, db_rel_x,
-                              db_rel_y, domain_block_size);
+        const int db_rel_y = BLOCK_CORD_REL_Y(idx_db, domain_block_size, image_size);
+        const int db_start_in_image = db_rel_y * image_size + db_rel_x;
+
+        scale_block_with_sums(domain_block, &domain_sum, &domain_sum_squared, image, image_size,
+                              db_start_in_image, domain_block_size);
 
         const double ds_x_ds = domain_sum * domain_sum;
         const double num_pixels_x_dss = num_pixels * domain_sum_squared;
@@ -229,8 +199,7 @@ static bool match_block(struct queue *transformations, const int range_block_idx
         __record_double_flops(3);
 
         // BEGIN precompute rtd
-        int rtd_start_rb = rb_rel_y * image_size + rb_rel_x;
-        int rtd_idx_rb = rtd_start_rb;
+        int rtd_idx_rb = rb_start_in_image;
         int dbs = range_block_size;
         int dbs_dbs = dbs * dbs;
 
@@ -294,8 +263,8 @@ static bool match_block(struct queue *transformations, const int range_block_idx
         double rtd_90 = rtd_sum_90_1 + rtd_sum_90_2;
         double rtd_180 = rtd_sum_180_1 + rtd_sum_180_2;
         double rtd_270 = rtd_sum_270_1 + rtd_sum_270_2;
-
         __record_double_flops(4);
+
         // END precompute rtd
 
         // ROTATION 0
@@ -311,7 +280,7 @@ static bool match_block(struct queue *transformations, const int range_block_idx
             error *= num_pixels_of_blocks_inv;
             __record_double_flops(18);
 
-            if (error < best_error && contrast <= 1.0 && contrast >= -1.0) {
+            if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                 best_error = error;
                 best_domain_block_idx = idx_db;
                 best_contrast = contrast;
@@ -333,7 +302,7 @@ static bool match_block(struct queue *transformations, const int range_block_idx
             error *= num_pixels_of_blocks_inv;
             __record_double_flops(18);
 
-            if (error < best_error && contrast <= 1.0 && contrast >= -1.0) {
+            if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                 best_error = error;
                 best_domain_block_idx = idx_db;
                 best_contrast = contrast;
@@ -355,7 +324,7 @@ static bool match_block(struct queue *transformations, const int range_block_idx
             error *= num_pixels_of_blocks_inv;
             __record_double_flops(18);
 
-            if (error < best_error && contrast <= 1.0 && contrast >= -1.0) {
+            if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                 best_error = error;
                 best_domain_block_idx = idx_db;
                 best_contrast = contrast;
@@ -377,7 +346,7 @@ static bool match_block(struct queue *transformations, const int range_block_idx
             error *= num_pixels_of_blocks_inv;
             __record_double_flops(18);
 
-            if (error < best_error && contrast <= 1.0 && contrast >= -1.0) {
+            if (error < best_error && contrast < 1.0 && contrast > -1.0) {
                 best_error = error;
                 best_domain_block_idx = idx_db;
                 best_contrast = contrast;
@@ -389,9 +358,9 @@ static bool match_block(struct queue *transformations, const int range_block_idx
         free(domain_block);
     }
 
-    // todo optimize int divs
+    int next_range_block_size = range_block_size >> 1;
     if (best_error > error_threshold && current_quadtree_depth < MAX_QUADTREE_DEPTH &&
-        range_block_size / 2 >= MIN_RANGE_BLOCK_SIZE && range_block_size % 2 == 0) {
+        next_range_block_size >= MIN_RANGE_BLOCK_SIZE && range_block_size % 2 == 0) {
         const int rb_y = BLOCK_CORD_Y(range_block_idx, range_block_size, image_size);
         const int rb_x = BLOCK_CORD_X(range_block_idx, range_block_size, image_size);
         const int blocks_per_row = image_size / range_block_size;
@@ -400,13 +369,13 @@ static bool match_block(struct queue *transformations, const int range_block_idx
         int next_id_3 = next_id_1 + 2 * blocks_per_row;
         int next_id_4 = next_id_3 + 1;
 
-        match_block(transformations, next_id_1, range_block_size / 2, image, image_size, error_threshold,
+        match_block(transformations, next_id_1, next_range_block_size, image, image_size, error_threshold,
                     current_quadtree_depth + 1);
-        match_block(transformations, next_id_2, range_block_size / 2, image, image_size, error_threshold,
+        match_block(transformations, next_id_2, next_range_block_size, image, image_size, error_threshold,
                     current_quadtree_depth + 1);
-        match_block(transformations, next_id_3, range_block_size / 2, image, image_size, error_threshold,
+        match_block(transformations, next_id_3, next_range_block_size, image, image_size, error_threshold,
                     current_quadtree_depth + 1);
-        match_block(transformations, next_id_4, range_block_size / 2, image, image_size, error_threshold,
+        match_block(transformations, next_id_4, next_range_block_size, image, image_size, error_threshold,
                     current_quadtree_depth + 1);
     } else {
         struct transformation_t *best_transformation = malloc(sizeof(struct transformation_t));
@@ -424,8 +393,6 @@ static bool match_block(struct queue *transformations, const int range_block_idx
         best_transformation->angle = best_angle;
         enqueue(transformations, best_transformation);
     }
-
-    free(range_block);
 }
 
 static struct queue *compress(const struct image_t *image, const int error_threshold) {
@@ -435,81 +402,37 @@ static struct queue *compress(const struct image_t *image, const int error_thres
     const size_t initial_range_blocks_length =
         (image->size / initial_range_block_size) * (image->size / initial_range_block_size);
 
-    // Forward declarations
-    size_t domain_blocks_length;
-    int domain_block_size_current_iteration;
-    int num_pixels;
-    double num_pixels_of_blocks_inv;
-
     // Queue for saving transformations
     struct queue *transformations = (struct queue *)ALLOCATE(sizeof(struct queue));
     *transformations = make_queue();
-
-    int range_blocks_length_current_iteration = -1;
-    int range_blocks_size_current_iteration = -1;
-
-    int range_blocks_length_next_iteration = initial_range_blocks_length;
-    int range_blocks_size_next_iteration = initial_range_block_size;
-
-    // Allocate memory
-    const int upper_bound_domain_blocks = (int)pow(4.0, MAX_QUADTREE_DEPTH);
-    const int upper_bound_range_blocks = (int)pow(4.0, MAX_QUADTREE_DEPTH + 1);
-
-    //    double *prep_domain_blocks = ALLOCATE(sizeof(double) * image->size * image->size / 4);
-
-    //    double *domain_block_sums = ALLOCATE(sizeof(double) * upper_bound_domain_blocks);
-    //    double *domain_block_sums_squared = ALLOCATE(sizeof(double) * upper_bound_domain_blocks);
-    //    int *range_blocks_idx_curr_iteration = ALLOCATE(upper_bound_range_blocks * sizeof(int));
-    //    int *range_blocks_idx_next_iteration = ALLOCATE(upper_bound_range_blocks * sizeof(int));
-    //    for (int i = 0; i < initial_range_blocks_length; ++i) {
-    //        range_blocks_idx_next_iteration[i] = i;
-    //    }
 
     for (size_t idx_rb = 0; idx_rb < initial_range_blocks_length; ++idx_rb) {
         match_block(transformations, idx_rb, initial_range_block_size, image->data, image->size,
                     error_threshold, 1);
     }
 
-    //    double *prepared_range_block = ALLOCATE(sizeof(double) * image->size * image->size / 4);
-    //
-    //    for (int current_quadtree_depth = MIN_QUADTREE_DEPTH; current_quadtree_depth <= MAX_QUADTREE_DEPTH;
-    //         ++current_quadtree_depth) {
-    //        if (range_blocks_length_next_iteration == 0) break;
-    //
-    //        range_blocks_length_current_iteration = range_blocks_length_next_iteration;
-    //        memcpy(range_blocks_idx_curr_iteration, range_blocks_idx_next_iteration,
-    //               sizeof(int) * range_blocks_length_next_iteration);
-    //        range_blocks_size_current_iteration = range_blocks_size_next_iteration;
-    //        num_pixels = range_blocks_size_current_iteration * range_blocks_size_current_iteration;
-    //        num_pixels_of_blocks_inv = 1.0 / num_pixels;
-    //
-    //        range_blocks_length_next_iteration = 0;
-    //        range_blocks_size_next_iteration /= 2;
-    //
-    //        __record_double_flops(2);
-    //
-    //        domain_block_size_current_iteration = 2 * range_blocks_size_current_iteration;
-    //        assert(domain_block_size_current_iteration >= 2);
-    //        domain_blocks_length = (image->size / domain_block_size_current_iteration) *
-    //                               (image->size / domain_block_size_current_iteration);
-    //        prepare_domain_blocks_norotation(prep_domain_blocks, domain_block_sums,
-    //        domain_block_sums_squared,
-    //                                         image->data, image->size, domain_block_size_current_iteration,
-    //                                         domain_blocks_length, range_blocks_size_current_iteration);
-    //        __record_double_flops(4);
-    //
-    //        // Process each range block
-    //
-    //    }
-
-    //    free(prep_domain_blocks);
-    //    free(domain_block_sums);
-    //    free(domain_block_sums_squared);
-    //    free(range_blocks_idx_curr_iteration);
-    //    free(range_blocks_idx_next_iteration);
-    //    free(prepared_range_block);
-
     return transformations;
+}
+
+static void scale_block(double *out, const double *image, const int image_size, const int block_rel_x,
+                        const int block_rel_y, const int block_size) {
+    size_t scaled_image_idx = 0;
+    size_t original_image_idx = block_rel_y * image_size + block_rel_x;
+
+    for (int y = 0; y < block_size; y += 2) {
+        for (int x = 0; x < block_size; x += 2) {
+            double val = 0.0;
+            val += image[original_image_idx];
+            val += image[original_image_idx + 1];
+            val += image[original_image_idx + image_size];
+            val += image[original_image_idx + image_size + 1];
+            out[scaled_image_idx] = val * 0.25;
+            scaled_image_idx++;
+            original_image_idx += 2;
+            __record_double_flops(5);
+        }
+        original_image_idx += image_size;
+    }
 }
 
 static void apply_transformation(struct image_t *image, const struct transformation_t *t) {
