@@ -305,49 +305,31 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                 /* rtd result */
                 __m256d v_sum_0_0 = _mm256_setzero_pd();
-//                __m256d v_sum_90_0 = _mm256_setzero_pd();
                 __m256d v_sum_180_0 = _mm256_setzero_pd();
-//                __m256d v_sum_270_0 = _mm256_setzero_pd();
                 __m256d v_sum_0_1 = _mm256_setzero_pd();
-//                __m256d v_sum_90_1 = _mm256_setzero_pd();
                 __m256d v_sum_180_1 = _mm256_setzero_pd();
-//                __m256d v_sum_270_1 = _mm256_setzero_pd();
                 __m256d v_sum_0_2 = _mm256_setzero_pd();
-//                __m256d v_sum_90_2 = _mm256_setzero_pd();
                 __m256d v_sum_180_2 = _mm256_setzero_pd();
-//                __m256d v_sum_270_2 = _mm256_setzero_pd();
                 __m256d v_sum_0_3 = _mm256_setzero_pd();
-//                __m256d v_sum_90_3 = _mm256_setzero_pd();
                 __m256d v_sum_180_3 = _mm256_setzero_pd();
-//                __m256d v_sum_270_3 = _mm256_setzero_pd();
 
                 /* domain block data */
                 __m256d v_db_0_0;
-//                __m256d v_d_90_0;
                 __m256d v_db_180_0;
-//                __m256d v_d_270_0;
 
                 __m256d v_db_0_1;
-//                __m256d v_d_90_1;
                 __m256d v_db_180_1;
-//                __m256d v_d_270_1;
 
                 __m256d v_db_0_2;
-//                __m256d v_d_90_2;
                 __m256d v_db_180_2;
-//                __m256d v_d_270_2;
 
                 __m256d v_db_0_3;
-//                __m256d v_d_90_3;
                 __m256d v_db_180_3;
-//                __m256d v_d_270_3;
 
                 /* range block data */
                 __m256d v_rb;
 
                 int rtd_idx_rb = rtd_start_rb;
-
-                const __m256i dbs_offset = _mm256_set_epi64x(0, dbs, dbs + dbs, dbs + dbs + dbs);
 
                 int dbs_i = 0;
                 for (int i = 0; i < dbs; i++) {
@@ -361,8 +343,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
                         int idx_0 = i * dbs + j;
                         int idx_180 = dbs_dbs - (idx_0 + 4);
-//                        int idx_90 = dbs_dbs - dbs - dbs_j + i - 3 * dbs;
-                        int idx_270 = dbs_j + dbs - i - 1;
                         dbs_j = dbs_j + 4 * dbs;
 
                         /* get domain block data */
@@ -371,55 +351,33 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                         v_db_180_0 = _mm256_load_pd(prep_domain_block_0 + idx_180);
                         v_db_180_0 = _mm256_permute4x64_pd(v_db_180_0, _MM_SHUFFLE(0, 1, 2, 3));
 
-//                        v_d_90_0 = _mm256_i64gather_pd(prep_domain_block_0 + idx_90, dbs_offset, 8);
-//                        v_d_270_0 = _mm256_i64gather_pd(prep_domain_block_0 + idx_270, dbs_offset, 8);
-//                        v_d_270_0 = _mm256_permute4x64_pd(v_d_270_0, _MM_SHUFFLE(0, 1, 2, 3));
-
                         v_db_0_1 = _mm256_load_pd(prep_domain_block_1 + idx_0);
                         v_db_180_1 = _mm256_load_pd(prep_domain_block_1 + idx_180);
                         v_db_180_1 = _mm256_permute4x64_pd(v_db_180_1, _MM_SHUFFLE(0, 1, 2, 3));
-
-//                        v_d_90_1 = _mm256_i64gather_pd(prep_domain_block_1 + idx_90, dbs_offset, 8);
-//                        v_d_270_1 = _mm256_i64gather_pd(prep_domain_block_1 + idx_270, dbs_offset, 8);
-//                        v_d_270_1 = _mm256_permute4x64_pd(v_d_270_1, _MM_SHUFFLE(0, 1, 2, 3));
 
                         v_db_0_2 = _mm256_load_pd(prep_domain_block_2 + idx_0);
                         v_db_180_2 = _mm256_load_pd(prep_domain_block_2 + idx_180);
                         v_db_180_2 = _mm256_permute4x64_pd(v_db_180_2, _MM_SHUFFLE(0, 1, 2, 3));
 
-//                        v_d_90_2 = _mm256_i64gather_pd(prep_domain_block_2 + idx_90, dbs_offset, 8);
-//                        v_d_270_2 = _mm256_i64gather_pd(prep_domain_block_2 + idx_270, dbs_offset, 8);
-//                        v_d_270_2 = _mm256_permute4x64_pd(v_d_270_2, _MM_SHUFFLE(0, 1, 2, 3));
 
                         v_db_0_3 = _mm256_load_pd(prep_domain_block_3 + idx_0);
                         v_db_180_3 = _mm256_load_pd(prep_domain_block_3 + idx_180);
                         v_db_180_3 = _mm256_permute4x64_pd(v_db_180_3, _MM_SHUFFLE(0, 1, 2, 3));
 
-//                        v_d_90_3 = _mm256_i64gather_pd(prep_domain_block_3 + idx_90, dbs_offset, 8);
-//                        v_d_270_3 = _mm256_i64gather_pd(prep_domain_block_3 + idx_270, dbs_offset, 8);
-//                        v_d_270_3 = _mm256_permute4x64_pd(v_d_270_3, _MM_SHUFFLE(0, 1, 2, 3));
 
                         /* update rtd sum */
 
                         v_sum_0_0 = _mm256_fmadd_pd(v_rb, v_db_0_0, v_sum_0_0);
-//                        v_sum_90_0 = _mm256_fmadd_pd(v_rb, v_d_90_0, v_sum_90_0);
                         v_sum_180_0 = _mm256_fmadd_pd(v_rb, v_db_180_0, v_sum_180_0);
-//                        v_sum_270_0 = _mm256_fmadd_pd(v_rb, v_d_270_0, v_sum_270_0);
 
                         v_sum_0_1 = _mm256_fmadd_pd(v_rb, v_db_0_1, v_sum_0_1);
-//                        v_sum_90_1 = _mm256_fmadd_pd(v_rb, v_d_90_1, v_sum_90_1);
                         v_sum_180_1 = _mm256_fmadd_pd(v_rb, v_db_180_1, v_sum_180_1);
-//                        v_sum_270_1 = _mm256_fmadd_pd(v_rb, v_d_270_1, v_sum_270_1);
 
                         v_sum_0_2 = _mm256_fmadd_pd(v_rb, v_db_0_2, v_sum_0_2);
-//                        v_sum_90_2 = _mm256_fmadd_pd(v_rb, v_d_90_2, v_sum_90_2);
                         v_sum_180_2 = _mm256_fmadd_pd(v_rb, v_db_180_2, v_sum_180_2);
-//                        v_sum_270_2 = _mm256_fmadd_pd(v_rb, v_d_270_2, v_sum_270_2);
 
                         v_sum_0_3 = _mm256_fmadd_pd(v_rb, v_db_0_3, v_sum_0_3);
-//                        v_sum_90_3 = _mm256_fmadd_pd(v_rb, v_d_90_3, v_sum_90_3);
                         v_sum_180_3 = _mm256_fmadd_pd(v_rb, v_db_180_3, v_sum_180_3);
-//                        v_sum_270_3 = _mm256_fmadd_pd(v_rb, v_d_270_3, v_sum_270_3);
                     }
                     rtd_idx_rb += image->size - dbs;
                     dbs_i += dbs;
@@ -449,28 +407,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 // merge p1 into p2
                 __m128d low_0 = _mm256_castpd256_pd128(p1_0);
                 v_rtd_0 = _mm256_insertf128_pd(v_rtd_0, low_0, 0);
-//
-//                // a1,a2,a3,a4 AND b1,b2,b3,b4  -> a2,b2,a4,b4
-//                __m256d zh1_90 = _mm256_unpackhi_pd(v_sum_90_0, v_sum_90_1);
-//                // a1,a2,a3,a4 AND b1,b2,b3,b4  -> a1,b1,a3,b3
-//                __m256d zl1_90 = _mm256_unpacklo_pd(v_sum_90_0, v_sum_90_1);
-//                // a2,b2,a4,b4 AND a1,b1,a3,b3 -> a12,b12,a34,b34
-//                __m256d al1_90 = _mm256_add_pd(zh1_90, zl1_90);
-//                // a12,b12,a34,b34 -> a34, b34, a12, b12
-//                __m256d p1_90 = _mm256_permute4x64_pd(al1_90, 0x4e);
-//                // a12,b12,a34,b34 AND  a34, b34, a12, b12 -> a1234,b12345,a1234,b1234
-//                p1_90 = _mm256_add_pd(al1_90, p1_90);
-//
-//                // same for c,d  -> c1234,d12345,c1234,d1234
-//                __m256d zh2_90 = _mm256_unpackhi_pd(v_sum_90_2, v_sum_90_3);
-//                __m256d zl2_90 = _mm256_unpacklo_pd(v_sum_90_2, v_sum_90_3);
-//                __m256d al2_90 = _mm256_add_pd(zh2_90, zl2_90);
-//                __m256d v_rtd_90 = _mm256_permute4x64_pd(al2_90, 0x4e);
-//                v_rtd_90 = _mm256_add_pd(al2_90, v_rtd_90);
-//
-//                // merge p1 into p2
-//                __m128d low_90 = _mm256_castpd256_pd128(p1_90);
-//                v_rtd_90 = _mm256_insertf128_pd(v_rtd_90, low_90, 0);
 
                 // a1,a2,a3,a4 AND b1,b2,b3,b4  -> a2,b2,a4,b4
                 __m256d zh1_180 = _mm256_unpackhi_pd(v_sum_180_0, v_sum_180_1);
@@ -494,30 +430,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 __m128d low_180 = _mm256_castpd256_pd128(p1_180);
                 v_rtd_180 = _mm256_insertf128_pd(v_rtd_180, low_180, 0);
 
-
-                // a1,a2,a3,a4 AND b1,b2,b3,b4  -> a2,b2,a4,b4
-//                __m256d zh1_270 = _mm256_unpackhi_pd(v_sum_270_0, v_sum_270_1);
-//                // a1,a2,a3,a4 AND b1,b2,b3,b4  -> a1,b1,a3,b3
-//                __m256d zl1_270 = _mm256_unpacklo_pd(v_sum_270_0, v_sum_270_1);
-//                // a2,b2,a4,b4 AND a1,b1,a3,b3 -> a12,b12,a34,b34
-//                __m256d al1_270 = _mm256_add_pd(zh1_270, zl1_270);
-//                // a12,b12,a34,b34 -> a34, b34, a12, b12
-//                __m256d p1_270 = _mm256_permute4x64_pd(al1_270, 0x4e);
-//                // a12,b12,a34,b34 AND  a34, b34, a12, b12 -> a1234,b12345,a1234,b1234
-//                p1_270 = _mm256_add_pd(al1_270, p1_270);
-//
-//                // same for c,d  -> c1234,d12345,c1234,d1234
-//                __m256d zh2_270 = _mm256_unpackhi_pd(v_sum_270_2, v_sum_270_3);
-//                __m256d zl2_270 = _mm256_unpacklo_pd(v_sum_270_2, v_sum_270_3);
-//                __m256d al2_270 = _mm256_add_pd(zh2_270, zl2_270);
-//                __m256d v_rtd_270 = _mm256_permute4x64_pd(al2_270, 0x4e);
-//                v_rtd_270 = _mm256_add_pd(al2_270, v_rtd_270);
-//
-//                // merge p1 into p2
-//                __m128d low_270 = _mm256_castpd256_pd128(p1_270);
-//                v_rtd_270 = _mm256_insertf128_pd(v_rtd_270, low_270, 0);
-
-                __record_double_flops(24);
                 // END precompute rtd
 
                 // ROTATION 0
@@ -585,38 +497,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 v_best_bright = _mm256_blendv_pd(v_best_bright, v_bright_180, v_mask_180);
                 v_best_idx = _mm256_blendv_pd(v_best_idx, v_idx_db, v_mask_180);
                 v_best_angle = _mm256_blendv_pd(v_best_angle, v_deg_180, v_mask_180);
-
-                // ROTATION 270
-//                __m256d v_neg_rtd_270 = _mm256_sub_pd(v_zeros, v_rtd_270);
-//                __m256d v_contrast_270 = _mm256_fmadd_pd(v_num_pixels, v_rtd_270, v_nrs_x_ds);
-//                v_contrast_270 = _mm256_mul_pd(v_contrast_270, v_denominator_inv);
-//
-//                __m256d v_bright_270 = _mm256_fmadd_pd(v_contrast_270, v_neg_domain_sum, v_range_sum);
-//                v_bright_270 = _mm256_mul_pd(v_bright_270, v_num_pixels_inv);
-//
-//                __m256d a1_270 = _mm256_fmadd_pd(v_num_pixels, v_bright_270, v_2_x_neg_range_sum);
-//                __m256d a2_270 = _mm256_fmadd_pd(v_bright_270, a1_270, v_range_sum_sqr);
-//                __m256d a3_270 = _mm256_fmadd_pd(v_bright_270, v_2_x_domain_sum, v_neg_rtd_270);
-//                __m256d a4_270 = _mm256_fmadd_pd(v_contrast_270, v_domain_sum_sqr, v_neg_rtd_270);
-//                __m256d a5_270 = _mm256_add_pd(a3_270, a4_270);
-//
-//                __m256d v_error_270 = _mm256_fmadd_pd(a5_270, v_contrast_270, a2_270);
-//                v_error_270 = _mm256_mul_pd(v_error_270, v_num_pixels_inv);
-//
-//                __record_double_flops(4 * 18);
-//
-//                // ROATATION 270 ERROR SELECTION
-//                __m256d v_contrast_abs_270 = _mm256_andnot_pd(v_sign_bit, v_contrast_270);
-//                __m256d v_con_lt_one_270 = _mm256_cmp_pd(v_contrast_abs_270, v_ones, _CMP_LT_OQ);
-//                __m256d v_better_err_270 = _mm256_cmp_pd(v_error_270, v_best_err, _CMP_LT_OQ);
-//
-//                __m256d v_mask_270 = _mm256_and_pd(v_better_err_270, v_con_lt_one_270);
-//
-//                v_best_err = _mm256_blendv_pd(v_best_err, v_error_270, v_mask_270);
-//                v_best_contrast = _mm256_blendv_pd(v_best_contrast, v_contrast_270, v_mask_270);
-//                v_best_bright = _mm256_blendv_pd(v_best_bright, v_bright_270, v_mask_270);
-//                v_best_idx = _mm256_blendv_pd(v_best_idx, v_idx_db, v_mask_270);
-//                v_best_angle = _mm256_blendv_pd(v_best_angle, v_deg_270, v_mask_270);
 
                 v_idx_db = _mm256_add_pd(v_idx_db, v_fours);
             }
