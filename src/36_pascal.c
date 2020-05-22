@@ -333,97 +333,75 @@ struct queue *compress(const struct image_t *image, const int error_threshold) {
 
                 // BEGIN precompute rtd
 
+                /* rtd result */
+                __m256d v_sum_0 = _mm256_setzero_pd();
+                __m256d v_sum_90 = _mm256_set1_pd(0.0);
+                __m256d v_sum_180 = _mm256_setzero_pd();
+                __m256d v_sum_270 = _mm256_setzero_pd();
+
+                /* domain block data */
+                __m256d v_db_0;
+                __m256d v_d_90;
+                __m256d v_db_180;
+                __m256d v_d_270;
+
+                /* range block data */
+                __m256d v_rb;
+
                 int rtd_idx_rb = rtd_start_rb;
                 int dbs = range_blocks_size_current_iteration;
                 int dbs_dbs = dbs * dbs;
 
-                __m256d v_sum_0;
-                __m256d v_sum_180;
-                __m256d v_db_0;
-                __m256d v_db_180;
-                __m256d v_rb;
-                __m256d v_xxx;
-                v_sum_0 = _mm256_setzero_pd();
-                v_sum_180 = _mm256_setzero_pd();
-                for(int i = 0; i < dbs; i++) {
-                    for(int j = 0; j < dbs; j+=4) {
-                        int rb_idx = rtd_start_rb + i*image->size + j;
-
-                        int db_idx_0 = i*dbs + j;
-                        int db_idx_180 = dbs_dbs - (db_idx_0 + 4);
-
-                        v_db_0 = _mm256_load_pd(prep_domain_block + db_idx_0);
-                        v_db_180 = _mm256_load_pd(prep_domain_block + db_idx_180);
-                        v_db_180 = _mm256_permute4x64_pd(v_db_180, _MM_SHUFFLE(0,1,2,3));
-                        v_rb = _mm256_load_pd(image->data + rb_idx);
-
-                        v_sum_0 = _mm256_fmadd_pd(v_rb, v_db_0, v_sum_0);
-                        v_sum_180 = _mm256_fmadd_pd(v_rb, v_db_180, v_sum_180);
-
-                       /* printf("%d %d %d %d | %d %d %d %d | %d %d %d %d\n",
-                                db_idx_0, db_idx_0 + 1, db_idx_0 + 2, db_idx_0 + 3,
-                                db_idx_180, db_idx_180 + 1, db_idx_180 + 2, db_idx_180 + 3,
-                                rb_idx, rb_idx + 1, rb_idx + 2, rb_idx + 3
-                              ); */
-                    }
-                }
-
-                v_xxx = _mm256_hadd_pd(v_sum_0, v_sum_180);
-                double rtd_0 = v_xxx[0] + v_xxx[2];
-                double rtd_180 = v_xxx[1] + v_xxx[3];
-
-                // TODO: is that right? hadd as 2?
-                __record_double_flops(dbs * dbs/4 * 2 * 4 + 6);
-
-                __m256d v_r_90;
-                __m256d v_d_90;
-                __m256d v_sum_90 = _mm256_set1_pd(0.0);
-
-                __m256d v_sum_270;
-                __m256d v_r_270;
-                __m256d v_d_270 = _mm256_set1_pd(0.0);
-
                 const __m256i dbs_offset = _mm256_set_epi64x(0, dbs, dbs + dbs, dbs + dbs + dbs);
 
-
                 int dbs_i = 0;
-                for (int i = 0; i < dbs; i += 1) {
+                for(int i = 0; i < dbs; i++) {
                     int dbs_j = 0;
-                    for (int j = 0; j < dbs; j += 4) {
+                    for(int j = 0; j < dbs; j+=4) {
 
                         /* get range block data */
-                        v_r_90 = _mm256_load_pd(image->data + rtd_idx_rb);
-                        v_r_270 = _mm256_load_pd(image->data + rtd_idx_rb);
+                        v_rb = _mm256_load_pd(image->data + rtd_idx_rb);
                         rtd_idx_rb += 4;
 
                         /* compute indices for domain blocks */
+
+                        int idx_0 = i*dbs + j;
+                        int idx_180 = dbs_dbs - (idx_0 + 4);
+
                         int idx_90 = dbs_dbs - dbs - dbs_j + i - 3*dbs;
                         int idx_270 = dbs_j + dbs - i - 1;
                         dbs_j = dbs_j + 4*dbs;
 
                         /* get domain block data */
+
+                        v_db_0 = _mm256_load_pd(prep_domain_block + idx_0);
+                        v_db_180 = _mm256_load_pd(prep_domain_block + idx_180);
+                        v_db_180 = _mm256_permute4x64_pd(v_db_180, _MM_SHUFFLE(0,1,2,3));
+
                         v_d_90 = _mm256_i64gather_pd(prep_domain_block + idx_90, dbs_offset, 8);
                         v_d_270 = _mm256_i64gather_pd(prep_domain_block + idx_270, dbs_offset, 8);
                         v_d_270 = _mm256_permute4x64_pd(v_d_270, _MM_SHUFFLE(0, 1, 2, 3));
 
                         /* update rtd sum */
-                        v_sum_90 = _mm256_fmadd_pd(v_r_90, v_d_90, v_sum_90);
-                        v_sum_270 = _mm256_fmadd_pd(v_r_270, v_d_270, v_sum_270);
+
+                        v_sum_0 = _mm256_fmadd_pd(v_rb, v_db_0, v_sum_0);
+                        v_sum_90 = _mm256_fmadd_pd(v_rb, v_d_90, v_sum_90);
+                        v_sum_180 = _mm256_fmadd_pd(v_rb, v_db_180, v_sum_180);
+                        v_sum_270 = _mm256_fmadd_pd(v_rb, v_d_270, v_sum_270);
 
                     }
                     rtd_idx_rb += image->size - dbs;
                     dbs_i += dbs;
                 }
+                __record_double_flops(dbs * dbs * 4);
 
+
+                /* range x domain results */
+                double rtd_0 = v_sum_0[0] + v_sum_0[1] + v_sum_0[2] + v_sum_0[3];
                 double rtd_90 = v_sum_90[0] + v_sum_90[1] + v_sum_90[2] + v_sum_90[3];
+                double rtd_180 = v_sum_180[0] + v_sum_180[1] + v_sum_180[2] + v_sum_180[3];
                 double rtd_270 = v_sum_270[0] + v_sum_270[1] + v_sum_270[2] + v_sum_270[3];
-
-
-                // TODO: adjust flops
-                __record_double_flops(dbs * dbs/4 * 2 * 4 + 8);
-
-
-                // END precompute rtd
+                __record_double_flops(12);
 
                 // ROTATION 0
                 {
