@@ -9,6 +9,15 @@
 
 #define ALLOCATE(size) (aligned_alloc(32, size));
 
+#define BLOCK_CORD_REL_X(block_id, block_size, image_size) \
+    (block_id % (image_size / block_size)) * block_size
+#define BLOCK_CORD_REL_Y(block_id, block_size, image_size) \
+    ((int)(block_id / (image_size / block_size))) * block_size
+#define BLOCK_CORD_X(block_id, block_size, image_size) \
+    (block_id % (image_size / block_size))
+#define BLOCK_CORD_Y(block_id, block_size, image_size) \
+    ((int)(block_id / (image_size / block_size)))
+
 struct image_t {
     double *data;
     int size;
