@@ -1,30 +1,23 @@
 library(ggplot2)
 library(svglite)
 
-## executables
-
-    ## "baseline",
-    ## "01_precompute_indices",
-    ## "02_precomputations",
 executables = c(
-    "ref_impl",
-    "baseline",
-    "01_precompute_indices",
-    "05_rtd_no_precompute",
-    "08_remove_function_and_add_fma",
-    "09_basel"
+    "0_baseline",
+    "25_ilp",
+    "31_simd_precomp_rotations_no_bac_simd",
+    "35_simd",
+    "40_ilp_norot_90_270",
+    "41_simd_norot_90_270"
 )
-## for exe in baseline 01_precompute_indices
 
-## image sizes
-## TODO: only read the csv defined here
 image_sizes = c(
     64,
     128,
     256,
     512,
     1024,
-    2048
+    2048,
+    4096
 )
 
 ## collect data
@@ -32,42 +25,65 @@ df = data.frame()
 for (exe in executables) {
 
     ## read files
-    df64 = read.csv(paste("data/", exe, "/lena_64.csv", sep=""), sep=';')
-    df128 = read.csv(paste("data/", exe, "/monkey_128.csv", sep=""), sep=';')
-    df256 = read.csv(paste("data/", exe, "/lena_256.csv", sep=""), sep=';')
-    df512 = read.csv(paste("data/", exe, "/lena_512.csv", sep=""), sep=';')
-    df1024 = read.csv(paste("data/", exe, "/grey-parrot_1024.csv", sep=""), sep=';')
-    df2048 = read.csv(paste("data/", exe, "/matterhorn_2048.csv", sep=""), sep=';')
-
-    df_temp = data.frame(
-        rep(exe, length(image_sizes)),
-        image_sizes,
-        c(
-            mean(df64$flops.cycle),
-            mean(df128$flops.cycle),
-            mean(df256$flops.cycle),
-            mean(df512$flops.cycle),
-            mean(df1024$flops.cycle),
-            mean(df2048$flops.cycle)
-        ),
-        c(
-            mean(df64$cycles),
-            mean(df128$cycles),
-            mean(df256$cycles),
-            mean(df512$cycles),
-            mean(df1024$cycles),
-            mean(df2048$cycles)
-        ),
-        c(
-            mean(df64$flops),
-            mean(df128$flops),
-            mean(df256$flops),
-            mean(df512$flops),
-            mean(df1024$flops),
-            mean(df2048$flops)
-        )
+    files = c(
+        paste("data/", exe, "/lena_64.csv", sep=""),
+        paste("data/", exe, "/monkey_128.csv", sep=""),
+        paste("data/", exe, "/lena_256.csv", sep=""),
+        paste("data/", exe, "/lena_512.csv", sep=""),
+        paste("data/", exe, "/grey-parrot_1024.csv", sep=""),
+        paste("data/", exe, "/matterhorn_2048.csv", sep=""),
+        paste("data/", exe, "/lion_4096.csv", sep="")
     )
-    df = rbind(df, df_temp)
+
+    for(i in 1:7){
+        if(file.exists(files[i])){
+            csv = read.csv(files[i], sep=';')
+            df_temp = data.frame(
+                exe,
+                image_sizes[i],
+                mean(csv$flops.cycle),
+                mean(csv$cycles),
+                mean(csv$flops)
+            )
+            df = rbind(df, df_temp)
+        }
+    }
+
+    ## df64 = read.csv(, sep=';')
+    ## df128 = read.csv(, sep=';')
+    ## df256 = read.csv(, sep=';')
+    ## df512 = read.csv, sep=';')
+    ## df1024 = read.csv, sep=';')
+    ## df2048 = read.csv(, sep=';')
+
+    ## df_temp = data.frame(
+    ##     rep(exe, length(image_sizes)),
+    ##     image_sizes,
+    ##     c(
+    ##         mean(df64$flops.cycle),
+    ##         mean(df128$flops.cycle),
+    ##         mean(df256$flops.cycle),
+    ##         mean(df512$flops.cycle),
+    ##         mean(df1024$flops.cycle),
+    ##         mean(df2048$flops.cycle)
+    ##     ),
+    ##     c(
+    ##         mean(df64$cycles),
+    ##         mean(df128$cycles),
+    ##         mean(df256$cycles),
+    ##         mean(df512$cycles),
+    ##         mean(df1024$cycles),
+    ##         mean(df2048$cycles)
+    ##     ),
+    ##     c(
+    ##         mean(df64$flops),
+    ##         mean(df128$flops),
+    ##         mean(df256$flops),
+    ##         mean(df512$flops),
+    ##         mean(df1024$flops),
+    ##         mean(df2048$flops)
+    ##     )
+    ## )
 
 }
 colnames(df) = c("executable", "size", "performance", "cycles", "flops")
@@ -97,7 +113,7 @@ performance_plot = baseplot +
     scale_y_continuous(name=("[flops/cycle]"), limits=c(0,4))
 ggsave(file="performance.png",
        dpi = 300,
-       plot=image,
+       plot=performance_plot,
        width=15,
        height=8)
 
