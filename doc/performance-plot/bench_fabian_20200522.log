@@ -1,0 +1,1126 @@
+me@box performance-plot]$ ./collect-data.sh 
+ lena_64
+--------------------------------
+[lena_64 - 41_simd_norot_90_270] start (2020-05-23T 00:13:46)
+VERIFICATION phase
+	PSNR (dB): 22.8093 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	147 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/lena_64.csv'
+	cycles (median): 699606
+	flops: 1.78895e+06
+	perf [flops/cycle(median)]: 2.55708
+--------------------------------
+[lena_64 - 40_ilp_norot_90_270] start (2020-05-23T 00:13:47)
+VERIFICATION phase
+	PSNR (dB): 22.8093 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	66 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/lena_64.csv'
+	cycles (median): 1.66707e+06
+	flops: 1.84478e+06
+	perf [flops/cycle(median)]: 1.1066
+--------------------------------
+[lena_64 - 35_simd] start (2020-05-23T 00:13:47)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	57 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/lena_64.csv'
+	cycles (median): 1.78255e+06
+	flops: 3.60245e+06
+	perf [flops/cycle(median)]: 2.02095
+--------------------------------
+[lena_64 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:13:47)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	31 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/lena_64.csv'
+	cycles (median): 3.15781e+06
+	flops: 4.63044e+06
+	perf [flops/cycle(median)]: 1.46634
+--------------------------------
+[lena_64 - 25_ilp] start (2020-05-23T 00:13:47)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	40 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/lena_64.csv'
+	cycles (median): 2.4871e+06
+	flops: 3.49163e+06
+	perf [flops/cycle(median)]: 1.40389
+--------------------------------
+ monkey_128
+--------------------------------
+[monkey_128 - 41_simd_norot_90_270] start (2020-05-23T 00:13:47)
+VERIFICATION phase
+	PSNR (dB): 25.4882 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	28 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/monkey_128.csv'
+	cycles (median): 3.40726e+06
+	flops: 1.06939e+07
+	perf [flops/cycle(median)]: 3.13857
+--------------------------------
+[monkey_128 - 40_ilp_norot_90_270] start (2020-05-23T 00:13:48)
+VERIFICATION phase
+	PSNR (dB): 25.4882 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	12 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/monkey_128.csv'
+	cycles (median): 8.07908e+06
+	flops: 1.09629e+07
+	perf [flops/cycle(median)]: 1.35695
+--------------------------------
+[monkey_128 - 35_simd] start (2020-05-23T 00:13:48)
+VERIFICATION phase
+	PSNR (dB): 26.2095 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	12 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/monkey_128.csv'
+	cycles (median): 8.48248e+06
+	flops: 1.8218e+07
+	perf [flops/cycle(median)]: 2.14772
+--------------------------------
+[monkey_128 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:13:48)
+VERIFICATION phase
+	PSNR (dB): 26.2095 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	7 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/monkey_128.csv'
+	cycles (median): 1.28585e+07
+	flops: 2.22014e+07
+	perf [flops/cycle(median)]: 1.72659
+--------------------------------
+[monkey_128 - 25_ilp] start (2020-05-23T 00:13:48)
+VERIFICATION phase
+	PSNR (dB): 26.2095 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	8 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/monkey_128.csv'
+	cycles (median): 1.10026e+07
+	flops: 1.77878e+07
+	perf [flops/cycle(median)]: 1.61669
+--------------------------------
+ lena_256
+--------------------------------
+[lena_256 - 41_simd_norot_90_270] start (2020-05-23T 00:13:48)
+VERIFICATION phase
+	PSNR (dB): 25.0965 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/lena_256.csv'
+	cycles (median): 6.44695e+07
+	flops: 2.07636e+08
+	perf [flops/cycle(median)]: 3.22069
+--------------------------------
+[lena_256 - 40_ilp_norot_90_270] start (2020-05-23T 00:13:49)
+VERIFICATION phase
+	PSNR (dB): 25.0965 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/lena_256.csv'
+	cycles (median): 1.56413e+08
+	flops: 2.1365e+08
+	perf [flops/cycle(median)]: 1.36593
+--------------------------------
+[lena_256 - 35_simd] start (2020-05-23T 00:13:49)
+VERIFICATION phase
+	PSNR (dB): 26.6058 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/lena_256.csv'
+	cycles (median): 1.57685e+08
+	flops: 3.37371e+08
+	perf [flops/cycle(median)]: 2.13953
+--------------------------------
+[lena_256 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:13:50)
+VERIFICATION phase
+	PSNR (dB): 26.6058 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/lena_256.csv'
+	cycles (median): 2.67796e+08
+	flops: 4.20087e+08
+	perf [flops/cycle(median)]: 1.56868
+--------------------------------
+[lena_256 - 25_ilp] start (2020-05-23T 00:13:51)
+VERIFICATION phase
+	PSNR (dB): 26.6058 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+^C
+[me@box performance-plot]$ rm -r data/
+[me@box performance-plot]$ ./collect-data.sh 
+ lena_64
+--------------------------------
+[lena_64 - 41_simd_norot_90_270] start (2020-05-23T 00:16:07)
+VERIFICATION phase
+	PSNR (dB): 22.8093 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	136 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/lena_64.csv'
+	cycles (median): 666373
+	flops: 1.78895e+06
+	perf [flops/cycle(median)]: 2.6846
+--------------------------------
+[lena_64 - 40_ilp_norot_90_270] start (2020-05-23T 00:16:07)
+VERIFICATION phase
+	PSNR (dB): 22.8093 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	67 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/lena_64.csv'
+	cycles (median): 1.46758e+06
+	flops: 1.84478e+06
+	perf [flops/cycle(median)]: 1.25702
+--------------------------------
+[lena_64 - 35_simd] start (2020-05-23T 00:16:07)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	57 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/lena_64.csv'
+	cycles (median): 1.68248e+06
+	flops: 3.60245e+06
+	perf [flops/cycle(median)]: 2.14115
+--------------------------------
+[lena_64 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:16:07)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	32 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/lena_64.csv'
+	cycles (median): 2.95703e+06
+	flops: 4.63044e+06
+	perf [flops/cycle(median)]: 1.56591
+--------------------------------
+[lena_64 - 25_ilp] start (2020-05-23T 00:16:08)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	41 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/lena_64.csv'
+	cycles (median): 2.31864e+06
+	flops: 3.49163e+06
+	perf [flops/cycle(median)]: 1.50589
+--------------------------------
+ monkey_128
+--------------------------------
+[monkey_128 - 41_simd_norot_90_270] start (2020-05-23T 00:16:08)
+VERIFICATION phase
+	PSNR (dB): 25.4882 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	32 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/monkey_128.csv'
+	cycles (median): 3.15179e+06
+	flops: 1.06939e+07
+	perf [flops/cycle(median)]: 3.39296
+--------------------------------
+[monkey_128 - 40_ilp_norot_90_270] start (2020-05-23T 00:16:08)
+VERIFICATION phase
+	PSNR (dB): 25.4882 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	12 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/monkey_128.csv'
+	cycles (median): 7.6416e+06
+	flops: 1.09629e+07
+	perf [flops/cycle(median)]: 1.43464
+--------------------------------
+[monkey_128 - 35_simd] start (2020-05-23T 00:16:08)
+VERIFICATION phase
+	PSNR (dB): 26.2095 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	12 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/monkey_128.csv'
+	cycles (median): 8.15119e+06
+	flops: 1.8218e+07
+	perf [flops/cycle(median)]: 2.23501
+--------------------------------
+[monkey_128 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:16:08)
+VERIFICATION phase
+	PSNR (dB): 26.2095 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	8 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/monkey_128.csv'
+	cycles (median): 1.21158e+07
+	flops: 2.22014e+07
+	perf [flops/cycle(median)]: 1.83244
+--------------------------------
+[monkey_128 - 25_ilp] start (2020-05-23T 00:16:09)
+VERIFICATION phase
+	PSNR (dB): 26.2095 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	8 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/monkey_128.csv'
+	cycles (median): 1.04729e+07
+	flops: 1.77878e+07
+	perf [flops/cycle(median)]: 1.69847
+--------------------------------
+ lena_256
+--------------------------------
+[lena_256 - 41_simd_norot_90_270] start (2020-05-23T 00:16:09)
+VERIFICATION phase
+	PSNR (dB): 25.0965 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/lena_256.csv'
+	cycles (median): 5.75427e+07
+	flops: 2.07636e+08
+	perf [flops/cycle(median)]: 3.60839
+--------------------------------
+[lena_256 - 40_ilp_norot_90_270] start (2020-05-23T 00:16:09)
+VERIFICATION phase
+	PSNR (dB): 25.0965 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/lena_256.csv'
+	cycles (median): 1.44932e+08
+	flops: 2.1365e+08
+	perf [flops/cycle(median)]: 1.47414
+--------------------------------
+[lena_256 - 35_simd] start (2020-05-23T 00:16:10)
+VERIFICATION phase
+	PSNR (dB): 26.6058 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/lena_256.csv'
+	cycles (median): 1.46529e+08
+	flops: 3.37371e+08
+	perf [flops/cycle(median)]: 2.30242
+--------------------------------
+[lena_256 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:16:10)
+VERIFICATION phase
+	PSNR (dB): 26.6058 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/lena_256.csv'
+	cycles (median): 2.42706e+08
+	flops: 4.20087e+08
+	perf [flops/cycle(median)]: 1.73085
+--------------------------------
+[lena_256 - 25_ilp] start (2020-05-23T 00:16:12)
+VERIFICATION phase
+	PSNR (dB): 26.6058 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/lena_256.csv'
+	cycles (median): 1.91957e+08
+	flops: 3.28431e+08
+	perf [flops/cycle(median)]: 1.71096
+--------------------------------
+ lena_512
+--------------------------------
+[lena_512 - 41_simd_norot_90_270] start (2020-05-23T 00:16:12)
+VERIFICATION phase
+	PSNR (dB): 26.2928 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/lena_512.csv'
+	cycles (median): 5.50539e+08
+	flops: 1.87283e+09
+	perf [flops/cycle(median)]: 3.40181
+--------------------------------
+[lena_512 - 40_ilp_norot_90_270] start (2020-05-23T 00:16:15)
+VERIFICATION phase
+	PSNR (dB): 26.2928 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/lena_512.csv'
+	cycles (median): 1.30914e+09
+	flops: 1.92418e+09
+	perf [flops/cycle(median)]: 1.4698
+--------------------------------
+[lena_512 - 35_simd] start (2020-05-23T 00:16:21)
+VERIFICATION phase
+	PSNR (dB): 27.1876 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/lena_512.csv'
+	cycles (median): 1.25204e+09
+	flops: 2.70882e+09
+	perf [flops/cycle(median)]: 2.16353
+--------------------------------
+[lena_512 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:16:26)
+VERIFICATION phase
+	PSNR (dB): 27.1876 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/lena_512.csv'
+	cycles (median): 1.80317e+09
+	flops: 3.30326e+09
+	perf [flops/cycle(median)]: 1.83191
+--------------------------------
+[lena_512 - 25_ilp] start (2020-05-23T 00:16:34)
+VERIFICATION phase
+	PSNR (dB): 27.1876 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/lena_512.csv'
+	cycles (median): 1.54371e+09
+	flops: 2.64456e+09
+	perf [flops/cycle(median)]: 1.71312
+--------------------------------
+ grey-parrot_1024
+--------------------------------
+[grey-parrot_1024 - 41_simd_norot_90_270] start (2020-05-23T 00:16:41)
+VERIFICATION phase
+	PSNR (dB): 26.4719 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/grey-parrot_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/grey-parrot_1024.csv'
+	cycles (median): 8.00063e+09
+	flops: 2.66881e+10
+	perf [flops/cycle(median)]: 3.33575
+--------------------------------
+[grey-parrot_1024 - 40_ilp_norot_90_270] start (2020-05-23T 00:17:15)
+VERIFICATION phase
+	PSNR (dB): 26.4719 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/grey-parrot_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/grey-parrot_1024.csv'
+	cycles (median): 1.86051e+10
+	flops: 2.73939e+10
+	perf [flops/cycle(median)]: 1.47239
+--------------------------------
+[grey-parrot_1024 - 35_simd] start (2020-05-23T 00:18:34)
+VERIFICATION phase
+	PSNR (dB): 26.7936 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/grey-parrot_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/grey-parrot_1024.csv'
+	cycles (median): 1.6939e+10
+	flops: 3.65996e+10
+	perf [flops/cycle(median)]: 2.16068
+--------------------------------
+[grey-parrot_1024 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:19:47)
+VERIFICATION phase
+	PSNR (dB): 26.7936 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/grey-parrot_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/grey-parrot_1024.csv'
+	cycles (median): 2.67461e+10
+	flops: 4.40454e+10
+	perf [flops/cycle(median)]: 1.6468
+--------------------------------
+[grey-parrot_1024 - 25_ilp] start (2020-05-23T 00:21:41)
+VERIFICATION phase
+	PSNR (dB): 26.7936 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/grey-parrot_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/grey-parrot_1024.csv'
+	cycles (median): 2.0798e+10
+	flops: 3.57947e+10
+	perf [flops/cycle(median)]: 1.72106
+--------------------------------
+ lena_64
+--------------------------------
+[lena_64 - 41_simd_norot_90_270] start (2020-05-23T 00:23:10)
+VERIFICATION phase
+	PSNR (dB): 22.8093 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	146 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/lena_64.csv'
+	cycles (median): 673035
+	flops: 1.78895e+06
+	perf [flops/cycle(median)]: 2.65803
+--------------------------------
+[lena_64 - 40_ilp_norot_90_270] start (2020-05-23T 00:23:10)
+VERIFICATION phase
+	PSNR (dB): 22.8093 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	66 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/lena_64.csv'
+	cycles (median): 1.48079e+06
+	flops: 1.84478e+06
+	perf [flops/cycle(median)]: 1.24581
+--------------------------------
+[lena_64 - 35_simd] start (2020-05-23T 00:23:10)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	57 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/lena_64.csv'
+	cycles (median): 1.70743e+06
+	flops: 3.60245e+06
+	perf [flops/cycle(median)]: 2.10987
+--------------------------------
+[lena_64 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:23:10)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	32 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/lena_64.csv'
+	cycles (median): 3.00737e+06
+	flops: 4.63044e+06
+	perf [flops/cycle(median)]: 1.5397
+--------------------------------
+[lena_64 - 25_ilp] start (2020-05-23T 00:23:10)
+VERIFICATION phase
+	PSNR (dB): 25.1194 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	41 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/lena_64.csv'
+	cycles (median): 2.35379e+06
+	flops: 3.49163e+06
+	perf [flops/cycle(median)]: 1.4834
+--------------------------------
+ matterhorn_2048
+--------------------------------
+[matterhorn_2048 - 41_simd_norot_90_270] start (2020-05-23T 00:23:10)
+VERIFICATION phase
+	PSNR (dB): 24.8928 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/matterhorn_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/matterhorn_2048.csv'
+	cycles (median): 5.32009e+10
+	flops: 1.39638e+11
+	perf [flops/cycle(median)]: 2.62473
+--------------------------------
+[matterhorn_2048 - 40_ilp_norot_90_270] start (2020-05-23T 00:24:00)
+VERIFICATION phase
+	PSNR (dB): 24.8928 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/matterhorn_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/matterhorn_2048.csv'
+	cycles (median): 1.07206e+11
+	flops: 1.41056e+11
+	perf [flops/cycle(median)]: 1.31574
+--------------------------------
+[matterhorn_2048 - 35_simd] start (2020-05-23T 00:25:43)
+VERIFICATION phase
+	PSNR (dB): 25.5725 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/matterhorn_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/matterhorn_2048.csv'
+	cycles (median): 1.40731e+11
+	flops: 2.67325e+11
+	perf [flops/cycle(median)]: 1.89954
+--------------------------------
+[matterhorn_2048 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 00:27:58)
+VERIFICATION phase
+	PSNR (dB): 26.9525 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/matterhorn_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/matterhorn_2048.csv'
+	cycles (median): 5.75152e+11
+	flops: 8.35868e+11
+	perf [flops/cycle(median)]: 1.4533
+--------------------------------
+[matterhorn_2048 - 25_ilp] start (2020-05-23T 00:37:04)
+VERIFICATION phase
+	PSNR (dB): 25.5725 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/matterhorn_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/matterhorn_2048.csv'
+	cycles (median): 1.52942e+11
+	flops: 2.64665e+11
+	perf [flops/cycle(median)]: 1.7305
+--------------------------------
+ lion_4096
+--------------------------------
+[lion_4096 - 41_simd_norot_90_270] start (2020-05-23T 00:39:29)
+VERIFICATION phase
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/41_simd_norot_90_270/lion_4096.csv'
+	cycles (median): 4.59949e+11
+	flops: 1.06887e+12
+	perf [flops/cycle(median)]: 2.3239
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-05-23T 00:46:51)
+VERIFICATION phase
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 1.17887e+12
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 0.909368
+--------------------------------
+[lion_4096 - 35_simd] start (2020-05-23T 01:05:31)
+VERIFICATION phase
+	PSNR (dB): 20.8076 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/35_simd/lion_4096.csv'
+	cycles (median): 1.30536e+12
+	flops: 2.11367e+12
+	perf [flops/cycle(median)]: 1.61922
+--------------------------------
+[lion_4096 - 31_simd_precomp_rotations_no_bac_simd] start (2020-05-23T 01:26:13)
+VERIFICATION phase
+	PSNR (dB): 22.4666 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/31_simd_precomp_rotations_no_bac_simd/lion_4096.csv'
+	cycles (median): 5.814e+12
+	flops: 8.8085e+12
+	perf [flops/cycle(median)]: 1.51505
+--------------------------------
+[lion_4096 - 25_ilp] start (2020-05-23T 02:58:06)
+VERIFICATION phase
+	PSNR (dB): 20.8076 (at least 25 dB / higher is better)
+	✗ verification failed
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/25_ilp/lion_4096.csv'
+	cycles (median): 1.45791e+12
+	flops: 2.10747e+12
+	perf [flops/cycle(median)]: 1.44554
+--------------------------------
+ lena_64
+--------------------------------
+[lena_64 - 0_baseline] start (2020-05-23T 03:21:14)
+VERIFICATION phase
+	PSNR (dB): 25.3835 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	5 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/0_baseline/lena_64.csv'
+	cycles (median): 1.90063e+07
+	flops: 9.25939e+06
+	perf [flops/cycle(median)]: 0.487174
+--------------------------------
+ monkey_128
+--------------------------------
+[monkey_128 - 0_baseline] start (2020-05-23T 03:21:15)
+VERIFICATION phase
+	PSNR (dB): 25.8898 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/monkey_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/0_baseline/monkey_128.csv'
+	cycles (median): 6.71527e+07
+	flops: 3.43699e+07
+	perf [flops/cycle(median)]: 0.511818
+--------------------------------
+ lena_256
+--------------------------------
+[lena_256 - 0_baseline] start (2020-05-23T 03:21:15)
+VERIFICATION phase
+	PSNR (dB): 26.3204 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/0_baseline/lena_256.csv'
+	cycles (median): 1.53322e+09
+	flops: 7.68654e+08
+	perf [flops/cycle(median)]: 0.501333
+--------------------------------
+ lena_512
+--------------------------------
+[lena_512 - 0_baseline] start (2020-05-23T 03:21:18)
+VERIFICATION phase
+	PSNR (dB): 26.3188 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/lena_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/0_baseline/lena_512.csv'
+	cycles (median): 1.03364e+10
+	flops: 5.24033e+09
+	perf [flops/cycle(median)]: 0.506979
+--------------------------------
+ grey-parrot_1024
+--------------------------------
+[grey-parrot_1024 - 0_baseline] start (2020-05-23T 03:21:43)
+VERIFICATION phase
+	PSNR (dB): 26.1362 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	performing function for at least 1e+08 cycles
+	2 runs needed
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/grey-parrot_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/0_baseline/grey-parrot_1024.csv'
+	cycles (median): 8.90263e+10
+	flops: 4.63758e+10
+	perf [flops/cycle(median)]: 0.520923
+--------------------------------
+ matterhorn_2048
+--------------------------------
+[matterhorn_2048 - 0_baseline] start (2020-05-23T 03:25:14)
+VERIFICATION phase
+	PSNR (dB): 25.8127 (at least 25 dB / higher is better)
+	✔ verification succeeded
+WARMUP phase
+	image is larger than 1024 pixel: skipping warmup...
+PARAMETERS
+	File: /home/me/git/asl/doc/performance-plot/../../images/matterhorn_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+BENCHMARK phase
+	Created csv file '/home/me/git/asl/doc/performance-plot/data/0_baseline/matterhorn_2048.csv'
+	cycles (median): 3.20364e+12
+	flops: 1.55669e+12
+	perf [flops/cycle(median)]: 0.485913
+--------------------------------
+ lion_4096
+--------------------------------
+[lion_4096 - 0_baseline] start (2020-05-23T 04:15:46)
+VERIFICATION phase
+
+
