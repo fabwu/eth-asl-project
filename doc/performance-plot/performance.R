@@ -2,6 +2,7 @@ library(ggplot2)
 library(svglite)
 
 executables = c(
+    "ref_impl",
     "0_baseline",
     "25_ilp",
     "31_simd_precomp_rotations_no_bac_simd",
@@ -90,7 +91,7 @@ colnames(df) = c("executable", "size", "performance", "cycles", "flops")
 
 
 # baseplot
-theme_set(theme_light(base_size = 24))
+
 baseplot = ggplot(data=df,
                   aes(x=size,
                       group=executable,
