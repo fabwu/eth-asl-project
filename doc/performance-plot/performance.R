@@ -2,13 +2,35 @@ library(ggplot2)
 library(svglite)
 
 executables = c(
+    ## "0_baseline",
+    ## "25_ilp",
+    ## "35_simd"
     "0_baseline",
-    "25_ilp",
     "31_simd_precomp_rotations_no_bac_simd",
-    "35_simd",
     "40_ilp_norot_90_270",
     "41_simd_norot_90_270"
 )
+
+## one
+    ## "0_baseline",
+    ## "25_ilp",
+    ## "35_simd"
+
+## two
+    ## "0_baseline",
+    ## "31_simd_precomp_rotations_no_bac_simd",
+    ## "40_ilp_norot_90_270",
+    ## "41_simd_norot_90_270"
+
+
+## "35_simd",
+## "31_simd_precomp_rotations_no_bac_simd",
+## "40_ilp_norot_90_270",
+## "41_simd_norot_90_270"
+
+## 31=better-memory-access
+## 40=ILP_without_90/270
+## 41=SIMD_without_90/270
 
 image_sizes = c(
     64,
@@ -101,7 +123,9 @@ baseplot = ggplot(data=df,
     ) +
     theme(
         axis.title.y = element_text(angle=0),
-        legend.position = "bottom",
+        axis.text.x = element_text(size=24),
+        axis.text.y = element_text(size=24),
+        legend.position = "none",
         legend.title = element_blank())
 
 
@@ -109,13 +133,34 @@ baseplot = ggplot(data=df,
 performance_plot = baseplot +
     geom_line(aes(y=performance), lwd=2) +
     geom_point(aes(y=performance), lwd=4) +
-    ggtitle("Performance") +
-    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,4))
-ggsave(file="performance.png",
-       dpi = 300,
-       plot=performance_plot,
-       width=15,
-       height=8)
+    ggtitle("i7-8650U @ 1.9 GHz") +
+    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,4)) +
+    ## geom_label(aes(x=1500, y=1.7, label = "Scalar"),
+    ##            label.size = NA,
+    ##            color = "#00B937", hjust=-1/32, vjust=1, lwd=8) +
+    ## geom_label(aes(x=1500, y=2.4, label = "SIMD"),
+    ##            label.size = NA,
+    ##            color = "#609BFE", hjust=-1/32, vjust=1, lwd=8) +
+    ## geom_label(aes(x=1500, y=0.8, label = "Baseline"),
+    ##            label.size = NA,
+    ##            color = "#F7756C", hjust=-1/32, vjust=1, lwd=8)
+    geom_label(aes(x=1300, y=1.95, label = "Copy Memory"),
+               label.size = NA,
+               color = "#7BAD00", hjust=-1/32, vjust=1, lwd=8) +
+    geom_label(aes(x=900, y=3.7, label = "SIMD (without 90/270)"),
+               label.size = NA,
+               color = "#C67BFE", hjust=-1/32, vjust=1, lwd=8) +
+    geom_label(aes(x=900, y=1.3, label = "Scalar (without 90/270)"),
+               label.size = NA,
+               color = "#00BEC3", hjust=-1/32, vjust=1, lwd=8) +
+    geom_label(aes(x=1000, y=0.45, label = "Baseline"),
+               label.size = NA,
+               color = "#F7756C", hjust=-1/32, vjust=1, lwd=8)
+## ggsave(file="performance.png",
+##        dpi = 300,
+##        plot=performance_plot,
+##        width=15,
+##        height=8)
 
 ## Runtime plot
 runtime_plot = baseplot +
@@ -132,7 +177,7 @@ flops_plot = baseplot +
     scale_y_continuous(name=("[flops]"))
 
 ## Save plots
-ggsave(file="performance.png",
+ggsave(file="performance.svg",
        dpi = 300,
        plot=performance_plot,
        width=15,
