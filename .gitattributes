@@ -1,1 +1,3 @@
 images/* filter=lfs diff=lfs merge=lfs -text
+images/other/* filter=lfs diff=lfs merge=lfs -text
+images/** filter=lfs diff=lfs merge=lfs -text

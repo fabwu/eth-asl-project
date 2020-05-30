@@ -5,7 +5,7 @@ cd "$dir" || exit 1
 
 
 REPETITIONS="3"
-for img in lena_64 monkey_128 lena_256 lena_512 grey-parrot_1024
+for img in lion_64 lion_128 lion_256 lion_512 lion_1024
 do
   echo " $img"
   echo "--------------------------------"
@@ -24,7 +24,7 @@ done
 
 
 REPETITIONS="1"
-for img in lena_64 matterhorn_2048 lion_4096
+for img in lion_64 lion_2048 lion_4096
 do
   echo " $img"
   echo "--------------------------------"
@@ -43,7 +43,7 @@ done
 
 
 REPETITIONS="1"
-for img in lena_64 monkey_128 lena_256 lena_512 grey-parrot_1024 matterhorn_2048 lion_4096
+for img in lion_64 lion_128 lion_256 lion_512 lion_1024 lion_2048 lion_4096
 do
   echo " $img"
   echo "--------------------------------"

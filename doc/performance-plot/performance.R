@@ -2,13 +2,9 @@ library(ggplot2)
 library(svglite)
 
 executables = c(
-<<<<<<< HEAD
     ## "0_baseline",
     ## "25_ilp",
     ## "35_simd"
-=======
-    "ref_impl",
->>>>>>> 588e5576515b7947be6b6af6b25bf392f780089a
     "0_baseline",
     "31_simd_precomp_rotations_no_bac_simd",
     "40_ilp_norot_90_270",
@@ -52,6 +48,15 @@ for (exe in executables) {
 
     ## read files
     files = c(
+        ## new images
+        ## paste("data/", exe, "/lion_64.csv", sep=""),
+        ## paste("data/", exe, "/lion_128.csv", sep=""),
+        ## paste("data/", exe, "/lion_256.csv", sep=""),
+        ## paste("data/", exe, "/lion_512.csv", sep=""),
+        ## paste("data/", exe, "/lion_1024.csv", sep=""),
+        ## paste("data/", exe, "/lion_2048.csv", sep=""),
+        ## paste("data/", exe, "/lion_4096.csv", sep="")
+
         paste("data/", exe, "/lena_64.csv", sep=""),
         paste("data/", exe, "/monkey_128.csv", sep=""),
         paste("data/", exe, "/lena_256.csv", sep=""),
@@ -181,19 +186,19 @@ flops_plot = baseplot +
     scale_y_continuous(name=("[flops]"))
 
 ## Save plots
-ggsave(file="performance.svg",
+ggsave(file="performance.pdf",
        dpi = 300,
        plot=performance_plot,
        width=15,
        height=8)
 
-ggsave(file="runtime.png",
+ggsave(file="runtime.pdf",
        dpi = 300,
        plot=runtime_plot,
        width=15,
        height=8)
 
-ggsave(file="flops.png",
+ggsave(file="flops.pdf",
        dpi = 300,
        plot=flops_plot,
        width=15,
