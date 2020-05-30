@@ -60,7 +60,7 @@ where $I$ is the interval $[0,1]$. Specifically, an image is a set of three-tupl
 The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$, where $R_i$ is a continuous region of grayscale values. 
 A transformation $w_i$ from a domain block $D_i$ to a range block $R_i$ can then be described as a linear affine transformation
 $$
-w_i(D_i) = \bigcup_{(x,y,z) \in D_I} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} + \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
+w_i(D_i) = \bigcup_{(x,y,z) \in D_i} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} + \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
 $$
 where $a_i, b_i, c_i, d_i, e_i, f_i$ map \textit{location} and $s_i, o_i$ correspond to contrast and brightness adjustments.
 \\
@@ -108,7 +108,6 @@ predefined error threshold $\epsilon$. We start with some initial (quadratic) ra
 are twice the size. When there is a range block for which all domain blocks exceed the predefined threshold, we partition
 the range block into 4 smaller blocks and try to cover them again with domain blocks which are four times the size of these range blocks.
 This leads to good compression results in terms of quality and compression size (TODO cite). 
-
 
 
 Give a short, self-contained summary of necessary
