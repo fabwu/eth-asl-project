@@ -1,14 +1,62 @@
 \section{Your Proposed Method}\label{sec:yourmethod}
 
-Now comes the ``beef'' of the paper, where you explain what you
-did. Again, organize it in paragraphs with titles. As in every section
-you start with a very brief overview of the section.
+% Now comes the ``beef'' of the paper, where you explain what you did. Again,
+% organize it in paragraphs with titles. As in every section you start with a
+% very brief overview of the section.
 
-For this course, explain all the optimizations you performed. This mean, you first very briefly
-explain the baseline implementation, then go through locality and other optimizations, and finally SSE (every project will be slightly different of course). Show or mention relevant analysis or assumptions. A few examples: 1) Profiling may lead you to optimize one part first; 2) bandwidth plus data transfer analysis may show that it is memory bound; 3) it may be too hard to implement the algorithm in full generality: make assumptions and state them (e.g., we assume $n$ is divisible by 4; or, we consider only one type of input image); 4) explain how certain data accesses have poor locality. Generally, any type of analysis adds value to your work.
+% For this course, explain all the optimizations you performed. This mean, you
+% first very briefly explain the baseline implementation, then go through
+% locality and other optimizations, and finally SSE (every project will be
+% slightly different of course). Show or mention relevant analysis or
+% assumptions. A few examples: 1) Profiling may lead you to optimize one part
+% first; 2) bandwidth plus data transfer analysis may show that it is memory
+% bound; 3) it may be too hard to implement the algorithm in full generality:
+% make assumptions and state them (e.g., we assume $n$ is divisible by 4; or, we
+% consider only one type of input image); 4) explain how certain data accesses
+% have poor locality. Generally, any type of analysis adds value to your work.
 
-As important as the final results is to show that you took a structured, organized approach to the optimization and that you explain why you did what you did.
+% As important as the final results is to show that you took a structured,
+% organized approach to the optimization and that you explain why you did what
+% you did.
 
-Mention and cite any external resources including library or other code.
+% Mention and cite any external resources including library or other code.
 
-Good visuals or even brief code snippets to illustrate what you did are good. Pasting large amounts of code to fill the space is not good.
+% Good visuals or even brief code snippets to illustrate what you did are good.
+% Pasting large amounts of code to fill the space is not good.
+
+In this section we define the scope of our implementation, describe the baseline
+implementation and its bottlenecks and outline the steps which were followed to
+increase the performance. At the end the remaining performance blockers.
+
+\mypar{Scope} For our implementation only square grayscale images with a power
+of two width and height were considered. The reason for the restriction on the
+size is that it simplifies \textit{Quadtree Partitioning}. If the width of a
+range block is a power of two and no suitable transformation is found for it,
+then the four new range blocks created by dividing the original range block into
+4 equal parts will also have a power of two width. Colored images can be
+compressed and decompressed in the same manner as grayscale images.
+
+\notepascal{are we sure about the color stuff?}
+
+\mypar{Baseline Implementation} An overseeable Python implementation and the C
+code of Y.Fischer were used as a reference for the baseline implementation.
+
+\notepascal{not sure what to write here :/}
+\notepascal{cite python and fischer implementation}
+
+\mypar{Profiling} With Valgrind's callgrind and cachegrind
+
+\mypar{Bandwidth and Data Transfer}
+
+\begin{figure}
+  \includegraphics[page=1, width=.45\textwidth]{roofline}
+  \caption{Roofline}
+\end{figure}
+
+\mypar{Scalar Optimizations}
+
+\mypar{Vector Optimizations}
+
+\mypar{Block Rotations}
+
+\mypar{Srided Access}

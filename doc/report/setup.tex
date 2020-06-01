@@ -21,3 +21,9 @@ pdfkeywords={ETH, Fastcode, ASL, Fractal Image Compression}
 
 \newtheorem{definition}{Definition}
 \newtheorem{theorem}{Theorem}
+
+% Inline notes with one color per person
+\usepackage{todonotes}
+\newcommand{\notefabian}[1]{\todo[inline,color=green!20]{\textbf{F:} #1}}
+\newcommand{\notejonas}[1]{\todo[inline,color=blue!20]{\textbf{J:} #1}}
+\newcommand{\notepascal}[1]{\todo[inline,color=red!20]{\textbf{P:} #1}}
