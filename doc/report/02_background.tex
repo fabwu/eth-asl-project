@@ -108,13 +108,13 @@ We start with some initial (quadratic) range blocks of size $s \times s$, and do
 When there is a range block for which all domain blocks exceed the threshold $\epsilon$, we partition
 the range block into 4 smaller blocks of size $s/2 \times s/2$ and try to cover them again with domain blocks of size $s \times s$.
 This scheme has the effect that (potentially larger) homogenuous regions of the image are covered with few transformations while image
-regions with details are covered with transformations which map smaller blocks.
+regions with details are covered with transformations which map smaller blocks. 
+Usually, one defines also a maximum depth of the quadtree as described in \cite{fisher2012}
 
-\mypar{Implementation}
-Our implementation uses an iterative quadtree approach. 
 
 \mypar{Cost analysis}
-TODO
+Due to the highly dynamic nature of quadtree, a cost analysis in Big O notation is cumbersome and highly pessimistic (when $\epsilon$ not too small).\\
+
 
 Give a short, self-contained summary of necessary
 background information on the algorithm or application that you then later optimize including a cost analysis.

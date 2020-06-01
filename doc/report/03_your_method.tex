@@ -28,6 +28,24 @@ In this section we define the scope of our implementation, describe the baseline
 implementation and its bottlenecks and outline the steps which were followed to
 increase the performance. At the end the remaining performance blockers.
 
+\mypar{Basic implementation}
+Our implementation uses an iterative quadtree approach. We consider only grayscale image of squared sizes of powers of two.
+The following pseudocode illustrates the compression, whose inputs are the image (row-wise array of doubles), 
+the max quadtree depth $m$ and the error threshold $\epsilon$.
+\begin{algorithmic}
+    \State $\boldsymbol{R} \gets \Call{partition}{image, image_size / 2}$ \Comment{Range blocks to process} 
+    \For{$c=0..m$} \Comment{$c$ is the current quadtree depth}
+        \State $\boldsymbol{R} \gets $ \Call{partition}{image, rs}
+        \State $\boldsymbol{D} \gets $ \Call{partition}{image, ds}
+        \For{$R_i \in \boldsymbol{R}$}
+            \State $error \gets \infty$
+            \For{$D_i \in \boldsymbol{D}$}
+
+            \EndFor
+        \EndFor
+    \EndFor
+\end{algorithmic}
+
 \mypar{Scope} For our implementation only square grayscale images with a power
 of two width and height were considered. The reason for the restriction on the
 size is that it simplifies \textit{Quadtree Partitioning}. If the width of a
