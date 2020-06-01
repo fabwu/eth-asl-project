@@ -19,45 +19,44 @@ i.e. their distance gets smaller.
     The Hutchinson operater for an IFS is the function
     \begin{align*}
         F \colon 2^X &\to 2^X\\
-        F(.) &= \bigcup_{i=1}^n f_i(.)
+        x &\mapsto \bigcup_{i=1}^n f_i(x)
     \end{align*}
 \end{definition}
-One can iteratevely apply the Hutchinson operator multiple times on its input. More precisely,
-$F^{\circ n}(.)$ means that we are applying $F$ $n$ times on its inputs iteratively.
+With $F^{\circ n}(x)$, we denote the iterative application of $F$ $n$ times on its input $x$, e.g. $F^{\circ 2}(x) = F(F(x))$.
 \begin{definition}[Attractor of an IFS]
-    Let $A \in 2^X$. When $F(A)=A$, then $A$ is called is called attractor.
+    Let $A \in 2^X$. When $F(A)=A$, then $A$ is called attractor.
 \end{definition}
 The following theorem about attractors has been proved by Hutchinson in \cite{hutchinson1981fractals} and is
 the essential theoretical part how fractal image compression works.
 \begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
     For an IFS on a set $X$ it holds that:
     \begin{enumerate}
-        \item There always exists an attractor $A$ which is unique
+        \item There always exists a unique attractor $A$
         \item For any nonempty set $S_0 \in X$ it holds that $A = \lim_{n \to \infty} F^{\circ n}(S_0)$
     \end{enumerate}
 \end{theorem}
-Note that in the theorem above, we require that $X$ is a compact set, whose definition is not relevant for fractal image compression.
+Note that in the theorem above, we require that $X$ is a compact set, which holds for fractal image compression.
 \\
 \mypar{From IFS to image compression}
-The key idea in fractal image compression is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (called transformations) on the image.
+The key idea in fractal image compression is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in this context called transformations) on the image.
 From theorem \ref{theorem-fixpoint}, we then know that some unique attractor $A$ exists. If the transformations $\boldsymbol{W}$ are chosen in a way such that the attractor $A$ is the original image,
 one only needs to store the transformations. For decompression, one can iteratively apply all transformations on any initial starting image, which then converges to the original image to be compressed.\\
-A transformation $w_i$ is defined on a source region (called domain block) and a target region (range block) of the image. 
+A transformation $w_i$ is defined on a contiguous source region (called domain block) and a contiguous target region (range block) of the image. 
 The transformation maps the pixels of the domain block to the pixels of the range block and then applies a brightness and saturation adjustment.\\
 A high-level algorithmic approach for compression is then:
 \begin{enumerate}
     \item Partition the image into range blocks $\boldsymbol{R}$ and domain blocks $\boldsymbol{D}$.
     \item For each range block $R_i \in \boldsymbol{R}$, find a transformation $w_i$ with domain block $D_i \in \boldsymbol{D}$ 
-            such that $w_i(D_i)$ approximates the pixel values of $R_i$ best. In order that $w_i$ is contractive, one must require that $D_i$ is larger than $R_i$.
+            such that $w_i(D_i)$ approximates the pixel values of block $R_i$ best. In order that $w_i$ is contractive, one must require that $D_i$ is larger than $R_i$.
 \end{enumerate}
-\mypar{Mathematical view}
+\mypar{Computing transformations}
 A grayscale image can be interpreted as a function
 \begin{align*}
     f \colon I^2 &\to I\\
     (x,y) &\mapsto z = f(x,y)
 \end{align*}
 where $I$ is the interval $[0,1]$. Specifically, an image is a set of three-tuples $(x,y,z) \in I^3$, where $x,y$ are positions and $z$ is the grayscale value.
-The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$, where $R_i$ is a continuous region of grayscale values. 
+The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$. 
 A transformation $w_i$ from a domain block $D_i$ to a range block $R_i$ can then be described as a linear affine transformation
 $$
 w_i(D_i) = \bigcup_{(x,y,z) \in D_i} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} + \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
@@ -73,13 +72,13 @@ $$
     w_i = \argmin_{w} \left( d_{RMS}(w(D_i), f \cap (R_i \times I)) \right)
 $$
 Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and $o_i$ in order to minimize the error.
-Furthermore, because a domain block is defined over a bigger region of the image than a range block, $w_i$ is then contractive. \\
+$w_i$ is furthermore contractive, because we require that $D_i$ is larger than $R_i$.\\
 The set of all transformations is a partitioned iterated function system (PIFS). The only difference to an IFS is that the transformations are restricted
-to \textit{blocks} (partitions) of the image. However, the underlying theory still holds, as described in \cite{fisher2012}.
+to \textit{blocks} (partitions) of the image. However, the underlying theory still holds \cite{fisher2012}.
 
-\mypar{Finding transformations in practice}
+\mypar{Practical implementation}
 In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
-The minimization problem described before can be solved using least squares regression, as done in TODO MAKE REFERENCE TO GITHUB PROJECT.
+The minimization problem described before can be solved using least squares regression, as done in \cite{github-python}.
 Fisher uses an analytical solution in \cite{fisher2012} to compute the adjustments directly. Let $b_1, ..., b_n$ be the $n$ pixel values of the range block $R_i$
 and $a_i,...,a_n$ be the $n$ pixel values of the downsampled domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
 $$
@@ -87,9 +86,9 @@ R = \sum_{i=1}^n (s \cdot a_i + o - b_i)^2
 $$
 is minimal. An analytical solution for $s,o,R$ is:
 \begin{align*}
-    s &= \frac{n \sum_{i=1}^n a_i bi - \sum_{i=1}^n ai \sum_{i=1}^n bi}{n \sum_{i=1}^n ai^2 - \left(\sum{i=1}^n ai \right)^2} \\
-    o &= \frac{1}{n} \left( \sum_{i=1}^n bi - s \sum_{}{i=1}^n ai \right) \\
-    R &= \frac{1}{n} \left[ \sum_{i=1}^n bi^2 + s \left( s \sum_{i=1}^n ai^2 - 2 \sum_{i=1}^n a_i bi + 2o \sum_{i=1}^n ai \right) \right. \\
+    s &= \frac{n \sum_{i=1}^n a_i b_i - \sum_{i=1}^n a_i \sum_{i=1}^n b_i}{n \sum_{i=1}^n a_i^2 - \left(\sum{i=1}^n a_i \right)^2} \\
+    o &= \frac{1}{n} \left( \sum_{i=1}^n b_i - s \sum_{}{i=1}^n a_i \right) \\
+    R &= \frac{1}{n} \left[ \sum_{i=1}^n b_i^2 + s \left( s \sum_{i=1}^n a_i^2 - 2 \sum_{i=1}^n a_i b_i + 2o \sum_{i=1}^n a_i \right) \right. \\
     &\text{\hspace{1cm}} \left. + o \left(no - 2 \sum_{i=1}^n b_i \right)  \right]
     \end{align*}
 Thus, to compute an optimal transformation $w_i$ and the error for a given range block $R_i$ and given domain block $D_i$, one needs to compute the sums above
@@ -99,16 +98,23 @@ as efficient as possible.
 There are many ways to partition an image into range and domain blocks. We require that the range blocks cover the full image and do not overlap, otherwise the
 decompressed image would have uncovered regions. The domain blocks represent the search space for self-similarity and may overlap. 
 Increasing the domain block pool $\boldsymbol{D}$ may lead to better transformations but can increase the compression performance significantly.
-As a simple approach, one can use brute force block mapping, where each range block is compared with each domain block. 
-There are other techniques where TODO elaborate
-Blocks can be of various sizes and shapes (quadratic, rectangular), the only requirement is that domain blocks are larger than the range blocks to satisfy the
+A simple approach is brute force block mapping, where each range block is compared with each domain block.\\
+Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), the only requirement is that domain blocks are larger than the range blocks to satisfy the
 contractivity requirement. The most basic version is to choose range blocks of size $s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$, for some
-integer constant $k$. In practice, quadtree partitioning is often used (TODO CITE), which dynamicaly adapts range and domain block sizes by a
-predefined error threshold $\epsilon$. We start with some initial (quadratic) range blocks, and domain blocks which
-are twice the size. When there is a range block for which all domain blocks exceed the predefined threshold, we partition
-the range block into 4 smaller blocks and try to cover them again with domain blocks which are four times the size of these range blocks.
-This leads to good compression results in terms of quality and compression size (TODO cite). 
+integer constant $k$.\\
+In practice, quadtree partitioning is considedered a reasonable reference point for more advanced partitioning schemes \cite{fisher2012}. 
+It dynamicaly adapts range and domain block sizes by a predefined error threshold $\epsilon$. 
+We start with some initial (quadratic) range blocks of size $s \times s$, and domain blocks of size $2s \times 2s$. 
+When there is a range block for which all domain blocks exceed the threshold $\epsilon$, we partition
+the range block into 4 smaller blocks of size $s/2 \times s/2$ and try to cover them again with domain blocks of size $s \times s$.
+This scheme has the effect that (potentially larger) homogenuous regions of the image are covered with few transformations while image
+regions with details are covered with transformations which map smaller blocks.
 
+\mypar{Implementation}
+Our implementation uses an iterative quadtree approach. 
+
+\mypar{Cost analysis}
+TODO
 
 Give a short, self-contained summary of necessary
 background information on the algorithm or application that you then later optimize including a cost analysis.
