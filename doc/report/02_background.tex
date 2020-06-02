@@ -103,7 +103,7 @@ Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), the on
 contractivity requirement. The most basic version is to choose range blocks of size $s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$, for some
 integer constant $k$.\\
 In practice, quadtree partitioning is considedered a reasonable reference point for more advanced partitioning schemes \cite{fisher2012}. 
-It dynamicaly adapts range and domain block sizes by a predefined error threshold $\epsilon$. 
+It dynamicaly adapts range and domain block sizes by a predefined RMS error threshold $\epsilon$. 
 We start with some initial (quadratic) range blocks of size $s \times s$, and domain blocks of size $2s \times 2s$. 
 When there is a range block for which all domain blocks exceed the threshold $\epsilon$, we partition
 the range block into 4 smaller blocks of size $s/2 \times s/2$ and try to cover them again with domain blocks of size $s \times s$.
