@@ -41,12 +41,12 @@ Note that in the theorem above, we require that $X$ is a compact set, which hold
 The key idea in fractal image compression is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in this context called transformations) on the image.
 From theorem \ref{theorem-fixpoint}, we then know that some unique attractor $A$ exists. If the transformations $\boldsymbol{W}$ are chosen in a way such that the attractor $A$ is the original image,
 one only needs to store the transformations. For decompression, one can iteratively apply all transformations on any initial starting image, which then converges to the original image to be compressed.\\
-A transformation $w_i$ is defined on a contiguous source region (called domain block) and a contiguous target region (range block) of the image. 
+A transformation $w_i$ is defined on a contiguous source region (called domain block) and a contiguous target region (range block) of the image.
 The transformation maps the pixels of the domain block to the pixels of the range block and then applies a brightness and saturation adjustment.\\
 A high-level algorithmic approach for compression is then:
 \begin{enumerate}
     \item Partition the image into range blocks $\boldsymbol{R}$ and domain blocks $\boldsymbol{D}$.
-    \item For each range block $R_i \in \boldsymbol{R}$, find a transformation $w_i$ with domain block $D_i \in \boldsymbol{D}$ 
+    \item For each range block $R_i \in \boldsymbol{R}$, find a transformation $w_i$ with domain block $D_i \in \boldsymbol{D}$
             such that $w_i(D_i)$ approximates the pixel values of block $R_i$ best.
 \end{enumerate}
 \mypar{Computing transformations}
@@ -56,7 +56,7 @@ A grayscale image can be interpreted as a function
     (x,y) &\mapsto z = f(x,y)
 \end{align*}
 where $I$ is the interval $[0,1]$. Specifically, an image is a set of three-tuples $(x,y,z) \in I^3$, where $x,y$ are positions and $z$ is the grayscale value.
-The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$. 
+The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$.
 A transformation $w_i$ from the image of a domain block $D_i$ to the image of a range block $R_i$ can then be described as a linear affine transformation
 $$
 w_i(D_i) = \bigcup_{(x,y,z) \in f \cap (D_i \times I)} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
@@ -85,94 +85,117 @@ $$
 R = \sum_{i=1}^n (s \cdot a_i + o - b_i)^2
 $$
 is minimal. An analytical solution for $s,o,R$ is:
-\begin{align*}
-    s &= \frac{n \sum_{i=1}^n a_i b_i - \sum_{i=1}^n a_i \sum_{i=1}^n b_i}{n \sum_{i=1}^n a_i^2 - \left(\sum{i=1}^n a_i \right)^2} \\
-    o &= \frac{1}{n} \left( \sum_{i=1}^n b_i - s \sum_{}{i=1}^n a_i \right) \\
-    R &= \frac{1}{n} \left[ \sum_{i=1}^n b_i^2 + s \left( s \sum_{i=1}^n a_i^2 - 2 \sum_{i=1}^n a_i b_i + 2o \sum_{i=1}^n a_i \right) \right. \\
-    &\text{\hspace{1cm}} \left. + o \left(no - 2 \sum_{i=1}^n b_i \right)  \right]
-    \end{align*}
+\begin{align}
+    s &= \frac{n \sum_{i=1}^n a_i b_i - \sum_{i=1}^n a_i \sum_{i=1}^n b_i}{n \sum_{i=1}^n a_i^2 - \left(\sum_{i=1}^n a_i \right)^2} \label{contrast}\\
+    o &= \frac{1}{n} \left( \sum_{i=1}^n b_i - s \sum_{i=1}^n a_i \right) \label{brightness}\\
+    R &= \frac{1}{n} \left[ \sum_{i=1}^n b_i^2 + s \left( s \sum_{i=1}^n a_i^2 - 2 \sum_{i=1}^n a_i b_i + 2o \sum_{i=1}^n a_i \right) \right. \notag\\
+    &\text{\hspace{1cm}} \left. + o \left(no - 2 \sum_{i=1}^n b_i \right)  \right]\label{error}
+    \end{align}
 Thus, to compute an optimal transformation $w_i$ and the error for a given range block $R_i$ and given domain block $D_i$, one needs to compute the sums above
 as efficient as possible.
 
 \mypar{Image partitioning}
 There are many ways to partition an image into range and domain blocks. We require that the range blocks cover the full image and do not overlap, otherwise the
-decompressed image would have uncovered regions. The domain blocks represent the search space for self-similarity and may overlap. 
+decompressed image would have uncovered regions. The domain blocks represent the search space for self-similarity and may overlap.
 Increasing the domain block pool $\boldsymbol{D}$ may lead to better transformations but can increase the compression performance significantly.
 A simple approach is brute force block mapping, where each range block is compared with each domain block.\\
 Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), the only requirement is that domain blocks are larger than the range blocks to satisfy the
 contractivity requirement. The most basic version is to choose range blocks of size $s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$, for some
 integer constant $k$.\\
-In practice, quadtree partitioning is considedered a reasonable reference point for more advanced partitioning schemes \cite{fisher2012}. 
-It dynamicaly adapts range and domain block sizes by a predefined RMS error threshold $\epsilon$. 
-We start with some initial (quadratic) range blocks of size $s \times s$, and domain blocks of size $2s \times 2s$. 
+In practice, quadtree partitioning is considedered a reasonable reference point for more advanced partitioning schemes \cite{fisher2012}.
+It dynamicaly adapts range and domain block sizes by a predefined RMS error threshold $\epsilon$.
+We start with some initial (quadratic) range blocks of size $s \times s$, and domain blocks of size $2s \times 2s$.
 When there is a range block for which all domain blocks exceed the threshold $\epsilon$, we partition
 the range block into 4 smaller blocks of size $s/2 \times s/2$ and try to cover them again with domain blocks of size $s \times s$.
 This scheme has the effect that (potentially larger) homogenuous regions of the image are covered with few transformations while image
-regions with details are covered with transformations which map smaller blocks. 
+regions with details are covered with transformations which map smaller blocks.
 Usually, one defines also a maximum depth of the quadtree as described in \cite{fisher2012}.
 
-\mypar{Cost analysis}
-Due to the highly dynamic nature of quadtree, a precise cost analysis is highly pessimistic (when $\epsilon$ is not too small).\\
-We have manually instrumented our code to count the amount of flops with:
+\mypar{Cost analysis} We provide a pessimistic upper bound on the cost for our
+algorithm where we assume that no transformation will yield at an error below
+the threshold and thus the only termination criteria is the maximum quadtree
+depth. In practice, the cost will be (much) lower assuming a reasonable error
+threshold $\epsilon$. As a cost metric, the number of floating point operations
+are counted.
+
+% TODO: I think this belongs in 3
+% We have manually instrumented our code to count the amount of flops:
+
 $$
-C = N_{mult} \cdot N_{add}
+C = N_{mult} + N_{div} + N_{add} + N_{sub}
 $$
-We have restricted ourselves to flop multiplications and additions, because these are the two dominant operations we perform.\\
-For completeness, we provide a general, yet pessimisstic upper bound for our algorithm. To simplify calculations, we treat additions and multiplications similarly.\\
-This cost analysis depends on the pseudocode implementation of our iterative quadtree implementation, described in section \ref{sec:yourmethod}.
-\notejonas{Übergang}
-Assume the image has size $S^2$ and the maximum quadtree depth is $M$ and assume that we initially have four range blocks of size $(S/2)^2$
-and one domain block of size $S^2$. Because we want to calculate an upper bound for our algorithm, we furthermore assume that
-we can not cover any range block at any quadtree depth iteration (i.e. $\epsilon = 0$). \\
-For iteration $i \in \{1,...,M\}$ the range blocks have size $S_{R^{(i)}} = (\frac{S}{2^i})^2 = \frac{S^2}{2^{2i}}$ 
-and we have a total amount of $|R^{(i)}|=\frac{S^2}{(\frac{S}{2^i})^2} = 2^{2i}$ of them.\\
-Similarly, we have $|D^{(i)}|=2^{2i-2} = \frac{1}{4} 2^{2i}$ domain blocks of size $S_{D^{(i)}} = \frac{S^2}{2^{2i-2}} = \frac{4S^2}{2^{2i}} $. 
-We totally have $\sum_{i=1}^M |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i$ operations then, 
-where $\alpha_i$ is the amount of required operations to compute the transformation ($s_i$, $o_i$ and $R$ as mentioned in \ref{sec:background}) for one domain block / range block pair.\\
-$\alpha_i$ consists of the downscaling of the domain block, computing the sum $\sum_{i=1}^{n_i} a_i$,$\sum_{i=1}^{n_i} a_i^2$, $\sum_{i=1}^{n_i} b_i$,$\sum_{i=1}^{n_i} b_i^2$ and the sum $\sum_{i=1}^{n_i} a_i b_i$ for each of the 4
-rotations, where $n_i=S_{R^{(i)}}$. The sums with the squared summands ($a_i^2, b_i^2$) can be done in the same operation but we assume no further precomputations. \\
-Downsampling can be done in $S_{D^{(i)}}$ flops because we have to aggregate (average) four pixels of the domain into one pixel (this is 4 flops, and we have to do this $S_{D^{(i)}}/4$ times) because domain blocks are four times the size of a range block. \\
-We then get 
-\begin{align*}
-\alpha_i    &= S_{D^{(i)}} + 8 \cdot (n_i-1) + 6n_i \\
-            &= S_{D^{(i)}} + 14n_i - 8 \\
-            &= 4 \cdot \frac{S^2}{2^{2i}} + 14 \cdot \frac{S^2}{2^{2i}} - 8 \\
-            &= 18 \cdot \frac{S^2}{2^{2i}} - 8
-\end{align*}
-In total, we thus get the following amount of operations:
-\begin{align*}
-C(n)    &= \sum_{i=1}^M |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
-        &= \sum_{i=1}^M 2^{2i} \cdot \frac{1}{4} 2^{2i} \cdot (18 \cdot \frac{S^2}{2^{2i}} - 8) \\
-        &= \frac{1}{4} \sum_{i=1}^M \left(18 \cdot 2^{2i} \cdot S^2 - 8 \cdot 2^{4i} \right) \\
-        &= \frac{18S^2}{4} \sum_{i=1}^M 2^{2i} - 2 \sum_{i=1}^M 2^{4i} \\
-        &= \frac{18S^2}{4} \cdot \frac{4}{3}(4^M-1) - 2 \cdot \frac{16}{15}(4^{2M} - 1) \\
-        &= 6S^2(4^M-1) - \frac{32}{15}(4^{2M}-1) \\
-\end{align*}
-We see that this algorithm is exponential in $M$ and polynomial in $S$, i.e. it's time complexity is $\mathcal{O}(S^24^{M} - 4^{2M})$.\\
-Our experiments showed that this upper bound is way too pessimistic and the exponentiality in $M$ is practically not a problem given a reasonable $S,M,\epsilon$.
 
-Give a short, self-contained summary of necessary
-background information on the algorithm or application that you then later optimize including a cost analysis.
+Let $M$ be the maximum quadtree depth an let $S$ be the width of the square
+input image and assume that we start quadtree with range blocks of size
+$\frac{S}{2}\times\frac{S}{2}$ and one domain block of size $S\times S$. For
+quadtree depth $i \in \{1,\cdots, M\}$, let $R^{(i)}$ be the set of range
+blocks, $D^{(i)}$ the set of domain blocks, $S_{R}^{(i)}$ the number of pixels
+of one range block and $S_{D}^{(i)}$ the number of pixels of one domain block.
+For a given domain block and range block in quadtree depth $i$, let $\alpha_{i}$
+denote the cost to compute the transformations and their errors for all four
+rotations.
 
-For example, assume you present an
-implementation of FFT algorithms. You could organize into DFT
-definition, FFTs considered, and cost analysis. The goal of the
-background section is to make the paper self-contained for an audience
-as large as possible. As in every section
-you start with a very brief overview of the section. Here it could be as follows: In this section
-we formally define the discrete Fourier transform, introduce the algorithms we use
-and perform a cost analysis.
+To calcuate $\alpha_{i}$, we need to compute all the sums for brightness,
+contrast and error (equations \eqref{contrast}, \eqref{brightness} and
+\eqref{error}) and apply the formulas. In addition, we need to downscale and
+rotate the domain block.
 
-\mypar{Discrete Fourier Transform}
-Precisely define the transform so I understand it even if I have never
-seen it before.
+Note that the sums $\sum_{i=1}^{n_i} a_i$,$\sum_{i=1}^{n_i} a_i^2$,
+$\sum_{i=1}^{n_i} b_i$,$\sum_{i=1}^{n_i} b_i^2$ are the same for all four
+rotations and $\sum_{i=1}^{n_i} a_i b_i$ has to be computed for each rotation.
 
-\mypar{Fast Fourier Transforms}
-Explain the algorithm you use.
+Downsampling can be done in $S_{D}^{(i)}$ flops because we have to aggregate the
+average of four pixels of the domain block into one pixel which requires 4 flops
+for every square of four pixels.
 
-\mypar{Cost Analysis}
-First define you cost measure (what you count) and then compute or determine on other ways the
-cost as explained in class. In the end you will likely consolidate it into one number (e.g., adds/mults/comparisons) but be aware of major imbalances as they affect the peak performance..
+\begin{align}
+  \alpha_i &= S_{D}^{(i)} + 4 \cdot (2\cdot S_{R}^{(i)}-1) + (6\cdot S_{R}^{(i)}-4) +  26\\
+           &= S_{D}^{(i)} + 14\cdot S_{R}^{(i)} + 18 \\
+           &= 18\cdot S_{R}^{(i)} + 18 \\
+         % &= 4 \cdot \frac{S^2}{2^{2i}} + 14 \cdot \frac{S^2}{2^{2i}} - 8 \\
+           &= 18 \cdot \frac{S^2}{2^{2i}} + 18
+\end{align}
 
-Also state what is known about the complexity (asymptotic usually)
-about your problem (including citations).
+In total, we thus get the following upper bound on the cost:
+
+\begin{align}
+C &= \sum_{i=1}^M |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
+  &= \sum_{i=1}^M 2^{2i} \cdot 2^{2i-2} \cdot (18 \cdot \frac{S^2}{2^{2i}} + 18) \\
+  &= \frac{6}{5}\cdot (4^{M}-1)\cdot (4^{M+1} + 5\cdot S^{2} + 4)
+\end{align}
+
+We see that this algorithm is exponential in $M$ and polynomial in $S$, i.e.
+it's time complexity is $\mathcal{O}(S^24^{M} - 4^{2M+1})$.
+
+% TODO: but is in chapter 3 or even 4
+% Our experiments showed that this upper bound is way
+% too pessimistic and the exponentiality in $M$ is practically not a problem
+% given a reasonable $S,M,\epsilon$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Give a short, self-contained summary of necessary
+% background information on the algorithm or application that you then later optimize including a cost analysis.
+
+% For example, assume you present an
+% implementation of FFT algorithms. You could organize into DFT
+% definition, FFTs considered, and cost analysis. The goal of the
+% background section is to make the paper self-contained for an audience
+% as large as possible. As in every section
+% you start with a very brief overview of the section. Here it could be as follows: In this section
+% we formally define the discrete Fourier transform, introduce the algorithms we use
+% and perform a cost analysis.
+
+% \mypar{Discrete Fourier Transform}
+% Precisely define the transform so I understand it even if I have never
+% seen it before.
+
+% \mypar{Fast Fourier Transforms}
+% Explain the algorithm you use.
+
+% \mypar{Cost Analysis}
+% First define you cost measure (what you count) and then compute or determine on other ways the
+% cost as explained in class. In the end you will likely consolidate it into one number (e.g., adds/mults/comparisons) but be aware of major imbalances as they affect the peak performance..
+
+% Also state what is known about the complexity (asymptotic usually)
+% about your problem (including citations).
