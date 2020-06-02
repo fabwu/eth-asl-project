@@ -24,15 +24,15 @@ i.e. their distance gets smaller.
 \end{definition}
 With $F^{\circ n}(x)$, we denote the iterative application of $F$ $n$ times on its input $x$, e.g. $F^{\circ 2}(x) = F(F(x))$.
 \begin{definition}[Attractor of an IFS]
-    Let $A \in 2^X$. When $F(A)=A$, then $A$ is called attractor.
+    Let $A \in X$. When $F(A)=A$, then $A$ is called attractor.
 \end{definition}
 The following theorem about attractors has been proved by Hutchinson in \cite{hutchinson1981fractals} and is
 the essential theoretical part how fractal image compression works.
 \begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
     For an IFS on a set $X$ it holds that:
     \begin{enumerate}
-        \item There always exists a unique attractor $A$
-        \item For any nonempty set $S_0 \in X$ it holds that $A = \lim_{n \to \infty} F^{\circ n}(S_0)$
+        \item There always exists a unique attractor $A \in X$
+        \item For any nonempty set $S_0 \subset X$ it holds that $A = \lim_{n \to \infty} F^{\circ n}(S_0)$
     \end{enumerate}
 \end{theorem}
 Note that in the theorem above, we require that $X$ is a compact set, which holds for fractal image compression.
@@ -47,7 +47,7 @@ A high-level algorithmic approach for compression is then:
 \begin{enumerate}
     \item Partition the image into range blocks $\boldsymbol{R}$ and domain blocks $\boldsymbol{D}$.
     \item For each range block $R_i \in \boldsymbol{R}$, find a transformation $w_i$ with domain block $D_i \in \boldsymbol{D}$ 
-            such that $w_i(D_i)$ approximates the pixel values of block $R_i$ best. In order that $w_i$ is contractive, one must require that $D_i$ is larger than $R_i$.
+            such that $w_i(D_i)$ approximates the pixel values of block $R_i$ best.
 \end{enumerate}
 \mypar{Computing transformations}
 A grayscale image can be interpreted as a function
@@ -57,11 +57,12 @@ A grayscale image can be interpreted as a function
 \end{align*}
 where $I$ is the interval $[0,1]$. Specifically, an image is a set of three-tuples $(x,y,z) \in I^3$, where $x,y$ are positions and $z$ is the grayscale value.
 The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$. 
-A transformation $w_i$ from a domain block $D_i$ to a range block $R_i$ can then be described as a linear affine transformation
+A transformation $w_i$ from the image of a domain block $D_i$ to the image of a range block $R_i$ can then be described as a linear affine transformation
 $$
-w_i(D_i) = \bigcup_{(x,y,z) \in D_i} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} + \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
+w_i(D_i) = \bigcup_{(x,y,z) \in f \cap (D_i \times I)} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
 $$
-where $a_i, b_i, c_i, d_i, e_i, f_i$ map \textit{location} and $s_i, o_i$ correspond to contrast and brightness adjustments.
+where $a_i, b_i, c_i, d_i, e_i, f_i$ map \textit{location} (which can involve rotations) and $s_i, o_i$ correspond to contrast and brightness adjustments.
+In order that $w_i$ is contractive, it is necessary that $D_i$ is larger than $R_i$ (in terms of region sizes) and that $0 \leq s_i < 1$.
 \\
 We now can define a metric to compare two images (or two blocks). Usually, the root mean square error (RMS) metric is used:
 $$
@@ -71,16 +72,15 @@ For a range block $R_i$ and domain block $D_i$ we now seek the transformation $w
 $$
     w_i = \argmin_{w} \left( d_{RMS}(w(D_i), f \cap (R_i \times I)) \right)
 $$
-Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and $o_i$ in order to minimize the error.
-$w_i$ is furthermore contractive, because we require that $D_i$ is larger than $R_i$.\\
+Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and $o_i$ in order to minimize the error.\\
 The set of all transformations is a partitioned iterated function system (PIFS). The only difference to an IFS is that the transformations are restricted
 to \textit{blocks} (partitions) of the image. However, the underlying theory still holds \cite{fisher2012}.
 
-\mypar{Practical implementation}
+\mypar{Practical implementation} \label{par-practical-implementation}
 In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
 The minimization problem described before can be solved using least squares regression, as done in \cite{github-python}.
 Fisher uses an analytical solution in \cite{fisher2012} to compute the adjustments directly. Let $b_1, ..., b_n$ be the $n$ pixel values of the range block $R_i$
-and $a_i,...,a_n$ be the $n$ pixel values of the downsampled domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
+and $a_i,...,a_n$ be the $n$ pixel values of the downsampled and rotated domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
 $$
 R = \sum_{i=1}^n (s \cdot a_i + o - b_i)^2
 $$
@@ -109,12 +109,47 @@ When there is a range block for which all domain blocks exceed the threshold $\e
 the range block into 4 smaller blocks of size $s/2 \times s/2$ and try to cover them again with domain blocks of size $s \times s$.
 This scheme has the effect that (potentially larger) homogenuous regions of the image are covered with few transformations while image
 regions with details are covered with transformations which map smaller blocks. 
-Usually, one defines also a maximum depth of the quadtree as described in \cite{fisher2012}
-
+Usually, one defines also a maximum depth of the quadtree as described in \cite{fisher2012}.
 
 \mypar{Cost analysis}
-Due to the highly dynamic nature of quadtree, a cost analysis in Big O notation is cumbersome and highly pessimistic (when $\epsilon$ not too small).\\
-
+Due to the highly dynamic nature of quadtree, a precise cost analysis is highly pessimistic (when $\epsilon$ is not too small).\\
+We have manually instrumented our code to count the amount of flops with:
+$$
+C = N_{mult} \cdot N_{add}
+$$
+We have restricted ourselves to flop multiplications and additions, because these are the two dominant operations we perform.\\
+For completeness, we provide a general, yet pessimisstic upper bound for our algorithm. To simplify calculations, we treat additions and multiplications similarly.\\
+This cost analysis depends on the pseudocode implementation of our iterative quadtree implementation, described in section \ref{sec:yourmethod}.
+\notejonas{Übergang}
+Assume the image has size $S^2$ and the maximum quadtree depth is $M$ and assume that we initially have four range blocks of size $(S/2)^2$
+and one domain block of size $S^2$. Because we want to calculate an upper bound for our algorithm, we furthermore assume that
+we can not cover any range block at any quadtree depth iteration (i.e. $\epsilon = 0$). \\
+For iteration $i \in \{1,...,M\}$ the range blocks have size $S_{R^{(i)}} = (\frac{S}{2^i})^2 = \frac{S^2}{2^{2i}}$ 
+and we have a total amount of $|R^{(i)}|=\frac{S^2}{(\frac{S}{2^i})^2} = 2^{2i}$ of them.\\
+Similarly, we have $|D^{(i)}|=2^{2i-2} = \frac{1}{4} 2^{2i}$ domain blocks of size $S_{D^{(i)}} = \frac{S^2}{2^{2i-2}} = \frac{4S^2}{2^{2i}} $. 
+We totally have $\sum_{i=1}^M |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i$ operations then, 
+where $\alpha_i$ is the amount of required operations to compute the transformation ($s_i$, $o_i$ and $R$ as mentioned in \ref{sec:background}) for one domain block / range block pair.\\
+$\alpha_i$ consists of the downscaling of the domain block, computing the sum $\sum_{i=1}^{n_i} a_i$,$\sum_{i=1}^{n_i} a_i^2$, $\sum_{i=1}^{n_i} b_i$,$\sum_{i=1}^{n_i} b_i^2$ and the sum $\sum_{i=1}^{n_i} a_i b_i$ for each of the 4
+rotations, where $n_i=S_{R^{(i)}}$. The sums with the squared summands ($a_i^2, b_i^2$) can be done in the same operation but we assume no further precomputations. \\
+Downsampling can be done in $S_{D^{(i)}}$ flops because we have to aggregate (average) four pixels of the domain into one pixel (this is 4 flops, and we have to do this $S_{D^{(i)}}/4$ times) because domain blocks are four times the size of a range block. \\
+We then get 
+\begin{align*}
+\alpha_i    &= S_{D^{(i)}} + 8 \cdot (n_i-1) + 6n_i \\
+            &= S_{D^{(i)}} + 14n_i - 8 \\
+            &= 4 \cdot \frac{S^2}{2^{2i}} + 14 \cdot \frac{S^2}{2^{2i}} - 8 \\
+            &= 18 \cdot \frac{S^2}{2^{2i}} - 8
+\end{align*}
+In total, we thus get the following amount of operations:
+\begin{align*}
+C(n)    &= \sum_{i=1}^M |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
+        &= \sum_{i=1}^M 2^{2i} \cdot \frac{1}{4} 2^{2i} \cdot (18 \cdot \frac{S^2}{2^{2i}} - 8) \\
+        &= \frac{1}{4} \sum_{i=1}^M \left(18 \cdot 2^{2i} \cdot S^2 - 8 \cdot 2^{4i} \right) \\
+        &= \frac{18S^2}{4} \sum_{i=1}^M 2^{2i} - 2 \sum_{i=1}^M 2^{4i} \\
+        &= \frac{18S^2}{4} \cdot \frac{4}{3}(4^M-1) - 2 \cdot \frac{16}{15}(4^{2M} - 1) \\
+        &= 6S^2(4^M-1) - \frac{32}{15}(4^{2M}-1) \\
+\end{align*}
+We see that this algorithm is exponential in $M$ and polynomial in $S$, i.e. it's time complexity is $\mathcal{O}(S^24^{M} - 4^{2M})$.\\
+Our experiments showed that this upper bound is way too pessimistic and the exponentiality in $M$ is practically not a problem given a reasonable $S,M,\epsilon$.
 
 Give a short, self-contained summary of necessary
 background information on the algorithm or application that you then later optimize including a cost analysis.
