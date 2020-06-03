@@ -1,0 +1,1413 @@
+----------------------------
+  gcc_Ofast_fma
+----------------------------
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pascal/git/asl-code/build
+[  9%] Building C object src/CMakeFiles/lib_queue.dir/lib/queue.c.o
+[ 18%] Linking C static library liblib_queue.a
+[ 18%] Built target lib_queue
+[ 27%] Building C object src/CMakeFiles/lib_types.dir/lib/types.c.o
+[ 36%] Linking C static library liblib_types.a
+[ 36%] Built target lib_types
+[ 45%] Building CXX object src/CMakeFiles/lib_commons.dir/lib/filehandler.cpp.o
+[ 54%] Building C object src/CMakeFiles/lib_commons.dir/lib/performance.c.o
+[ 63%] Linking CXX static library liblib_commons.a
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_40.dir/40_ilp_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_40.a
+[ 81%] Built target lib_40
+[ 90%] Building CXX object src/CMakeFiles/40_ilp_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../40_ilp_norot_90_270
+[100%] Built target 40_ilp_norot_90_270
+--------------------------------
+[lion_64 - 40_ilp_norot_90_270] start (2020-06-03T 00:22:38)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	75 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-40_ilp_norot_90_270/lion_64.csv'
+	cycles (median): 1.26832e+06
+	flops: 1.61793e+06
+	perf [flops/cycle(median)]: 1.27564
+--------------------------------
+[lion_128 - 40_ilp_norot_90_270] start (2020-06-03T 00:22:38)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	9 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-40_ilp_norot_90_270/lion_128.csv'
+	cycles (median): 1.06351e+07
+	flops: 1.48513e+07
+	perf [flops/cycle(median)]: 1.39643
+--------------------------------
+[lion_256 - 40_ilp_norot_90_270] start (2020-06-03T 00:22:38)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-40_ilp_norot_90_270/lion_256.csv'
+	cycles (median): 8.25448e+07
+	flops: 1.2141e+08
+	perf [flops/cycle(median)]: 1.47084
+--------------------------------
+[lion_512 - 40_ilp_norot_90_270] start (2020-06-03T 00:22:39)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-40_ilp_norot_90_270/lion_512.csv'
+	cycles (median): 1.02569e+09
+	flops: 1.47875e+09
+	perf [flops/cycle(median)]: 1.44171
+--------------------------------
+[lion_1024 - 40_ilp_norot_90_270] start (2020-06-03T 00:22:42)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-40_ilp_norot_90_270/lion_1024.csv'
+	cycles (median): 2.60356e+10
+	flops: 3.76926e+10
+	perf [flops/cycle(median)]: 1.44773
+--------------------------------
+[lion_2048 - 40_ilp_norot_90_270] start (2020-06-03T 00:24:09)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-40_ilp_norot_90_270/lion_2048.csv'
+	cycles (median): 2.0581e+11
+	flops: 2.75307e+11
+	perf [flops/cycle(median)]: 1.33767
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-06-03T 00:29:00)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 1.06407e+12
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 1.00748
+[ 18%] Built target lib_queue
+[ 36%] Built target lib_types
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_41.dir/41_simd_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_41.a
+[ 81%] Built target lib_41
+[ 90%] Building CXX object src/CMakeFiles/41_simd_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../41_simd_norot_90_270
+[100%] Built target 41_simd_norot_90_270
+--------------------------------
+[lion_64 - 41_simd_norot_90_270] start (2020-06-03T 00:54:23)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	167 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-41_simd_norot_90_270/lion_64.csv'
+	cycles (median): 555518
+	flops: 1.57032e+06
+	perf [flops/cycle(median)]: 2.82677
+--------------------------------
+[lion_128 - 41_simd_norot_90_270] start (2020-06-03T 00:54:23)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	24 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-41_simd_norot_90_270/lion_128.csv'
+	cycles (median): 4.13354e+06
+	flops: 1.445e+07
+	perf [flops/cycle(median)]: 3.4958
+--------------------------------
+[lion_256 - 41_simd_norot_90_270] start (2020-06-03T 00:54:23)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-41_simd_norot_90_270/lion_256.csv'
+	cycles (median): 3.14018e+07
+	flops: 1.18488e+08
+	perf [flops/cycle(median)]: 3.77329
+--------------------------------
+[lion_512 - 41_simd_norot_90_270] start (2020-06-03T 00:54:23)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-41_simd_norot_90_270/lion_512.csv'
+	cycles (median): 4.21977e+08
+	flops: 1.44233e+09
+	perf [flops/cycle(median)]: 3.41804
+--------------------------------
+[lion_1024 - 41_simd_norot_90_270] start (2020-06-03T 00:54:25)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-41_simd_norot_90_270/lion_1024.csv'
+	cycles (median): 1.08555e+10
+	flops: 3.6611e+10
+	perf [flops/cycle(median)]: 3.37256
+--------------------------------
+[lion_2048 - 41_simd_norot_90_270] start (2020-06-03T 00:55:01)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-41_simd_norot_90_270/lion_2048.csv'
+	cycles (median): 9.84543e+10
+	flops: 2.72385e+11
+	perf [flops/cycle(median)]: 2.76661
+--------------------------------
+[lion_4096 - 41_simd_norot_90_270] start (2020-06-03T 00:57:22)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_Ofast_fma-41_simd_norot_90_270/lion_4096.csv'
+	cycles (median): 4.49143e+11
+	flops: 1.06887e+12
+	perf [flops/cycle(median)]: 2.37981
+----------------------------
+  gcc_03_fma_unroll 
+----------------------------
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pascal/git/asl-code/build
+[  9%] Building C object src/CMakeFiles/lib_queue.dir/lib/queue.c.o
+[ 18%] Linking C static library liblib_queue.a
+[ 18%] Built target lib_queue
+[ 27%] Building C object src/CMakeFiles/lib_types.dir/lib/types.c.o
+[ 36%] Linking C static library liblib_types.a
+[ 36%] Built target lib_types
+[ 45%] Building CXX object src/CMakeFiles/lib_commons.dir/lib/filehandler.cpp.o
+[ 54%] Building C object src/CMakeFiles/lib_commons.dir/lib/performance.c.o
+[ 63%] Linking CXX static library liblib_commons.a
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_40.dir/40_ilp_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_40.a
+[ 81%] Built target lib_40
+[ 90%] Building CXX object src/CMakeFiles/40_ilp_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../40_ilp_norot_90_270
+[100%] Built target 40_ilp_norot_90_270
+--------------------------------
+[lion_64 - 40_ilp_norot_90_270] start (2020-06-03T 01:08:16)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	75 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-40_ilp_norot_90_270/lion_64.csv'
+	cycles (median): 1.28806e+06
+	flops: 1.61793e+06
+	perf [flops/cycle(median)]: 1.2561
+--------------------------------
+[lion_128 - 40_ilp_norot_90_270] start (2020-06-03T 01:08:16)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	9 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-40_ilp_norot_90_270/lion_128.csv'
+	cycles (median): 1.05185e+07
+	flops: 1.48513e+07
+	perf [flops/cycle(median)]: 1.41192
+--------------------------------
+[lion_256 - 40_ilp_norot_90_270] start (2020-06-03T 01:08:16)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-40_ilp_norot_90_270/lion_256.csv'
+	cycles (median): 8.29523e+07
+	flops: 1.2141e+08
+	perf [flops/cycle(median)]: 1.46361
+--------------------------------
+[lion_512 - 40_ilp_norot_90_270] start (2020-06-03T 01:08:17)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-40_ilp_norot_90_270/lion_512.csv'
+	cycles (median): 1.02253e+09
+	flops: 1.47875e+09
+	perf [flops/cycle(median)]: 1.44618
+--------------------------------
+[lion_1024 - 40_ilp_norot_90_270] start (2020-06-03T 01:08:20)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-40_ilp_norot_90_270/lion_1024.csv'
+	cycles (median): 2.60274e+10
+	flops: 3.76926e+10
+	perf [flops/cycle(median)]: 1.44819
+--------------------------------
+[lion_2048 - 40_ilp_norot_90_270] start (2020-06-03T 01:09:47)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-40_ilp_norot_90_270/lion_2048.csv'
+	cycles (median): 2.15442e+11
+	flops: 2.75307e+11
+	perf [flops/cycle(median)]: 1.27787
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-06-03T 01:14:52)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 1.17992e+12
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 0.908559
+[ 18%] Built target lib_queue
+[ 36%] Built target lib_types
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_41.dir/41_simd_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_41.a
+[ 81%] Built target lib_41
+[ 90%] Building CXX object src/CMakeFiles/41_simd_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../41_simd_norot_90_270
+[100%] Built target 41_simd_norot_90_270
+--------------------------------
+[lion_64 - 41_simd_norot_90_270] start (2020-06-03T 01:43:05)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	161 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-41_simd_norot_90_270/lion_64.csv'
+	cycles (median): 578858
+	flops: 1.57032e+06
+	perf [flops/cycle(median)]: 2.71279
+--------------------------------
+[lion_128 - 41_simd_norot_90_270] start (2020-06-03T 01:43:05)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	23 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-41_simd_norot_90_270/lion_128.csv'
+	cycles (median): 4.18971e+06
+	flops: 1.445e+07
+	perf [flops/cycle(median)]: 3.44893
+--------------------------------
+[lion_256 - 41_simd_norot_90_270] start (2020-06-03T 01:43:06)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-41_simd_norot_90_270/lion_256.csv'
+	cycles (median): 3.10341e+07
+	flops: 1.18488e+08
+	perf [flops/cycle(median)]: 3.818
+--------------------------------
+[lion_512 - 41_simd_norot_90_270] start (2020-06-03T 01:43:06)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-41_simd_norot_90_270/lion_512.csv'
+	cycles (median): 4.11495e+08
+	flops: 1.44233e+09
+	perf [flops/cycle(median)]: 3.5051
+--------------------------------
+[lion_1024 - 41_simd_norot_90_270] start (2020-06-03T 01:43:07)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-41_simd_norot_90_270/lion_1024.csv'
+	cycles (median): 1.10766e+10
+	flops: 3.6611e+10
+	perf [flops/cycle(median)]: 3.30524
+--------------------------------
+[lion_2048 - 41_simd_norot_90_270] start (2020-06-03T 01:43:44)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-41_simd_norot_90_270/lion_2048.csv'
+	cycles (median): 1.0526e+11
+	flops: 2.72385e+11
+	perf [flops/cycle(median)]: 2.58773
+--------------------------------
+[lion_4096 - 41_simd_norot_90_270] start (2020-06-03T 01:46:11)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma_unroll-41_simd_norot_90_270/lion_4096.csv'
+	cycles (median): 4.47089e+11
+	flops: 1.06887e+12
+	perf [flops/cycle(median)]: 2.39074
+----------------------------
+  gcc_O3_fma
+----------------------------
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pascal/git/asl-code/build
+[  9%] Building C object src/CMakeFiles/lib_queue.dir/lib/queue.c.o
+[ 18%] Linking C static library liblib_queue.a
+[ 18%] Built target lib_queue
+[ 27%] Building C object src/CMakeFiles/lib_types.dir/lib/types.c.o
+[ 36%] Linking C static library liblib_types.a
+[ 36%] Built target lib_types
+[ 45%] Building CXX object src/CMakeFiles/lib_commons.dir/lib/filehandler.cpp.o
+[ 54%] Building C object src/CMakeFiles/lib_commons.dir/lib/performance.c.o
+[ 63%] Linking CXX static library liblib_commons.a
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_40.dir/40_ilp_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_40.a
+[ 81%] Built target lib_40
+[ 90%] Building CXX object src/CMakeFiles/40_ilp_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../40_ilp_norot_90_270
+[100%] Built target 40_ilp_norot_90_270
+--------------------------------
+[lion_64 - 40_ilp_norot_90_270] start (2020-06-03T 01:57:01)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	72 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-40_ilp_norot_90_270/lion_64.csv'
+	cycles (median): 1.34323e+06
+	flops: 1.61793e+06
+	perf [flops/cycle(median)]: 1.20451
+--------------------------------
+[lion_128 - 40_ilp_norot_90_270] start (2020-06-03T 01:57:01)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	8 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-40_ilp_norot_90_270/lion_128.csv'
+	cycles (median): 1.12911e+07
+	flops: 1.48513e+07
+	perf [flops/cycle(median)]: 1.3153
+--------------------------------
+[lion_256 - 40_ilp_norot_90_270] start (2020-06-03T 01:57:02)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-40_ilp_norot_90_270/lion_256.csv'
+	cycles (median): 8.96088e+07
+	flops: 1.2141e+08
+	perf [flops/cycle(median)]: 1.35489
+--------------------------------
+[lion_512 - 40_ilp_norot_90_270] start (2020-06-03T 01:57:02)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-40_ilp_norot_90_270/lion_512.csv'
+	cycles (median): 1.08279e+09
+	flops: 1.47875e+09
+	perf [flops/cycle(median)]: 1.36568
+--------------------------------
+[lion_1024 - 40_ilp_norot_90_270] start (2020-06-03T 01:57:06)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-40_ilp_norot_90_270/lion_1024.csv'
+	cycles (median): 2.7208e+10
+	flops: 3.76926e+10
+	perf [flops/cycle(median)]: 1.38535
+--------------------------------
+[lion_2048 - 40_ilp_norot_90_270] start (2020-06-03T 01:58:36)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-40_ilp_norot_90_270/lion_2048.csv'
+	cycles (median): 2.26728e+11
+	flops: 2.75307e+11
+	perf [flops/cycle(median)]: 1.21426
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-06-03T 02:03:57)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 1.10167e+12
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 0.973097
+[ 18%] Built target lib_queue
+[ 36%] Built target lib_types
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_41.dir/41_simd_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_41.a
+[ 81%] Built target lib_41
+[ 90%] Building CXX object src/CMakeFiles/41_simd_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../41_simd_norot_90_270
+[100%] Built target 41_simd_norot_90_270
+--------------------------------
+[lion_64 - 41_simd_norot_90_270] start (2020-06-03T 02:30:10)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	163 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-41_simd_norot_90_270/lion_64.csv'
+	cycles (median): 560167
+	flops: 1.57032e+06
+	perf [flops/cycle(median)]: 2.80331
+--------------------------------
+[lion_128 - 41_simd_norot_90_270] start (2020-06-03T 02:30:10)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	23 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-41_simd_norot_90_270/lion_128.csv'
+	cycles (median): 4.14104e+06
+	flops: 1.445e+07
+	perf [flops/cycle(median)]: 3.48946
+--------------------------------
+[lion_256 - 41_simd_norot_90_270] start (2020-06-03T 02:30:10)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-41_simd_norot_90_270/lion_256.csv'
+	cycles (median): 3.10994e+07
+	flops: 1.18488e+08
+	perf [flops/cycle(median)]: 3.80998
+--------------------------------
+[lion_512 - 41_simd_norot_90_270] start (2020-06-03T 02:30:10)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-41_simd_norot_90_270/lion_512.csv'
+	cycles (median): 4.23149e+08
+	flops: 1.44233e+09
+	perf [flops/cycle(median)]: 3.40857
+--------------------------------
+[lion_1024 - 41_simd_norot_90_270] start (2020-06-03T 02:30:12)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-41_simd_norot_90_270/lion_1024.csv'
+	cycles (median): 1.04609e+10
+	flops: 3.6611e+10
+	perf [flops/cycle(median)]: 3.4998
+--------------------------------
+[lion_2048 - 41_simd_norot_90_270] start (2020-06-03T 02:30:47)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-41_simd_norot_90_270/lion_2048.csv'
+	cycles (median): 9.73091e+10
+	flops: 2.72385e+11
+	perf [flops/cycle(median)]: 2.79917
+--------------------------------
+[lion_4096 - 41_simd_norot_90_270] start (2020-06-03T 02:33:06)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3_fma-41_simd_norot_90_270/lion_4096.csv'
+	cycles (median): 4.52481e+11
+	flops: 1.06887e+12
+	perf [flops/cycle(median)]: 2.36225
+----------------------------
+  gcc_03
+----------------------------
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pascal/git/asl-code/build
+[  9%] Building C object src/CMakeFiles/lib_queue.dir/lib/queue.c.o
+[ 18%] Linking C static library liblib_queue.a
+[ 18%] Built target lib_queue
+[ 27%] Building C object src/CMakeFiles/lib_types.dir/lib/types.c.o
+[ 36%] Linking C static library liblib_types.a
+[ 36%] Built target lib_types
+[ 45%] Building CXX object src/CMakeFiles/lib_commons.dir/lib/filehandler.cpp.o
+[ 54%] Building C object src/CMakeFiles/lib_commons.dir/lib/performance.c.o
+[ 63%] Linking CXX static library liblib_commons.a
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_40.dir/40_ilp_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_40.a
+[ 81%] Built target lib_40
+[ 90%] Building CXX object src/CMakeFiles/40_ilp_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../40_ilp_norot_90_270
+[100%] Built target 40_ilp_norot_90_270
+--------------------------------
+[lion_64 - 40_ilp_norot_90_270] start (2020-06-03T 02:44:03)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	40 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3-40_ilp_norot_90_270/lion_64.csv'
+	cycles (median): 2.38137e+06
+	flops: 1.61793e+06
+	perf [flops/cycle(median)]: 0.679411
+--------------------------------
+[lion_128 - 40_ilp_norot_90_270] start (2020-06-03T 02:44:04)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	5 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3-40_ilp_norot_90_270/lion_128.csv'
+	cycles (median): 1.97766e+07
+	flops: 1.48513e+07
+	perf [flops/cycle(median)]: 0.750952
+--------------------------------
+[lion_256 - 40_ilp_norot_90_270] start (2020-06-03T 02:44:04)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3-40_ilp_norot_90_270/lion_256.csv'
+	cycles (median): 1.50265e+08
+	flops: 1.2141e+08
+	perf [flops/cycle(median)]: 0.807974
+--------------------------------
+[lion_512 - 40_ilp_norot_90_270] start (2020-06-03T 02:44:04)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3-40_ilp_norot_90_270/lion_512.csv'
+	cycles (median): 1.87549e+09
+	flops: 1.47875e+09
+	perf [flops/cycle(median)]: 0.788462
+--------------------------------
+[lion_1024 - 40_ilp_norot_90_270] start (2020-06-03T 02:44:11)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3-40_ilp_norot_90_270/lion_1024.csv'
+	cycles (median): 5.04878e+10
+	flops: 3.76926e+10
+	perf [flops/cycle(median)]: 0.746569
+--------------------------------
+[lion_2048 - 40_ilp_norot_90_270] start (2020-06-03T 02:46:58)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3-40_ilp_norot_90_270/lion_2048.csv'
+	cycles (median): 2.97461e+11
+	flops: 2.75307e+11
+	perf [flops/cycle(median)]: 0.92552
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-06-03T 02:54:00)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc_O3-40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 1.33077e+12
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 0.805573
+############################
+############################
+         ICC
+############################
+############################
+----------------------------
+  icc_Ofast_fma
+----------------------------
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pascal/git/asl-code/build
+[  9%] Building C object src/CMakeFiles/lib_types.dir/lib/types.c.o
+[ 18%] Linking C static library liblib_types.a
+[ 18%] Built target lib_types
+[ 27%] Building C object src/CMakeFiles/lib_queue.dir/lib/queue.c.o
+[ 36%] Linking C static library liblib_queue.a
+[ 36%] Built target lib_queue
+[ 45%] Building CXX object src/CMakeFiles/lib_commons.dir/lib/filehandler.cpp.o
+[ 54%] Building C object src/CMakeFiles/lib_commons.dir/lib/performance.c.o
+[ 63%] Linking CXX static library liblib_commons.a
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_41.dir/41_simd_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_41.a
+[ 81%] Built target lib_41
+[ 90%] Building CXX object src/CMakeFiles/41_simd_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../41_simd_norot_90_270
+[100%] Built target 41_simd_norot_90_270
+--------------------------------
+[lion_64 - 41_simd_norot_90_270] start (2020-06-03T 03:25:47)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	141 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-41_simd_norot_90_270/lion_64.csv'
+	cycles (median): 667136
+	flops: 1.57032e+06
+	perf [flops/cycle(median)]: 2.35383
+--------------------------------
+[lion_128 - 41_simd_norot_90_270] start (2020-06-03T 03:25:47)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	19 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-41_simd_norot_90_270/lion_128.csv'
+	cycles (median): 4.99126e+06
+	flops: 1.445e+07
+	perf [flops/cycle(median)]: 2.89506
+--------------------------------
+[lion_256 - 41_simd_norot_90_270] start (2020-06-03T 03:25:47)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-41_simd_norot_90_270/lion_256.csv'
+	cycles (median): 3.80123e+07
+	flops: 1.18488e+08
+	perf [flops/cycle(median)]: 3.1171
+--------------------------------
+[lion_512 - 41_simd_norot_90_270] start (2020-06-03T 03:25:48)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-41_simd_norot_90_270/lion_512.csv'
+	cycles (median): 4.8178e+08
+	flops: 1.44233e+09
+	perf [flops/cycle(median)]: 2.99376
+--------------------------------
+[lion_1024 - 41_simd_norot_90_270] start (2020-06-03T 03:25:49)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-41_simd_norot_90_270/lion_1024.csv'
+	cycles (median): 1.25417e+10
+	flops: 3.6611e+10
+	perf [flops/cycle(median)]: 2.91913
+--------------------------------
+[lion_2048 - 41_simd_norot_90_270] start (2020-06-03T 03:26:31)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-41_simd_norot_90_270/lion_2048.csv'
+	cycles (median): 1.11475e+11
+	flops: 2.72385e+11
+	perf [flops/cycle(median)]: 2.44347
+--------------------------------
+[lion_4096 - 41_simd_norot_90_270] start (2020-06-03T 03:29:08)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-41_simd_norot_90_270/lion_4096.csv'
+	cycles (median): 4.67266e+11
+	flops: 1.06887e+12
+	perf [flops/cycle(median)]: 2.28751
+[ 18%] Built target lib_types
+[ 36%] Built target lib_queue
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_40.dir/40_ilp_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_40.a
+[ 81%] Built target lib_40
+[ 90%] Building CXX object src/CMakeFiles/40_ilp_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../40_ilp_norot_90_270
+[100%] Built target 40_ilp_norot_90_270
+--------------------------------
+[lion_64 - 40_ilp_norot_90_270] start (2020-06-03T 03:40:25)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	53 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-40_ilp_norot_90_270/lion_64.csv'
+	cycles (median): 1.59432e+06
+	flops: 1.61793e+06
+	perf [flops/cycle(median)]: 1.01481
+--------------------------------
+[lion_128 - 40_ilp_norot_90_270] start (2020-06-03T 03:40:25)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	7 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-40_ilp_norot_90_270/lion_128.csv'
+	cycles (median): 1.34726e+07
+	flops: 1.48513e+07
+	perf [flops/cycle(median)]: 1.10233
+--------------------------------
+[lion_256 - 40_ilp_norot_90_270] start (2020-06-03T 03:40:25)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-40_ilp_norot_90_270/lion_256.csv'
+	cycles (median): 1.07147e+08
+	flops: 1.2141e+08
+	perf [flops/cycle(median)]: 1.13311
+--------------------------------
+[lion_512 - 40_ilp_norot_90_270] start (2020-06-03T 03:40:26)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-40_ilp_norot_90_270/lion_512.csv'
+	cycles (median): 1.30515e+09
+	flops: 1.47875e+09
+	perf [flops/cycle(median)]: 1.13301
+--------------------------------
+[lion_1024 - 40_ilp_norot_90_270] start (2020-06-03T 03:40:30)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-40_ilp_norot_90_270/lion_1024.csv'
+	cycles (median): 3.32868e+10
+	flops: 3.76926e+10
+	perf [flops/cycle(median)]: 1.13236
+--------------------------------
+[lion_2048 - 40_ilp_norot_90_270] start (2020-06-03T 03:42:21)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-40_ilp_norot_90_270/lion_2048.csv'
+	cycles (median): 2.72469e+11
+	flops: 2.75307e+11
+	perf [flops/cycle(median)]: 1.01041
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-06-03T 03:48:48)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_Ofast_fma-40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 1.2051e+12
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 0.889575
+----------------------------
+  icc_03
+----------------------------
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/pascal/git/asl-code/build
+[  9%] Building C object src/CMakeFiles/lib_types.dir/lib/types.c.o
+[ 18%] Linking C static library liblib_types.a
+[ 18%] Built target lib_types
+[ 27%] Building C object src/CMakeFiles/lib_queue.dir/lib/queue.c.o
+[ 36%] Linking C static library liblib_queue.a
+[ 36%] Built target lib_queue
+[ 45%] Building CXX object src/CMakeFiles/lib_commons.dir/lib/filehandler.cpp.o
+[ 54%] Building C object src/CMakeFiles/lib_commons.dir/lib/performance.c.o
+[ 63%] Linking CXX static library liblib_commons.a
+[ 63%] Built target lib_commons
+[ 72%] Building C object src/CMakeFiles/lib_40.dir/40_ilp_norot_90_270.c.o
+[ 81%] Linking CXX static library liblib_40.a
+[ 81%] Built target lib_40
+[ 90%] Building CXX object src/CMakeFiles/40_ilp_norot_90_270.dir/exec/fic.cpp.o
+[100%] Linking CXX executable ../40_ilp_norot_90_270
+[100%] Built target 40_ilp_norot_90_270
+--------------------------------
+[lion_64 - 40_ilp_norot_90_270] start (2020-06-03T 04:17:36)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	41 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_O3-40_ilp_norot_90_270/lion_64.csv'
+	cycles (median): 2.37728e+06
+	flops: 1.61793e+06
+	perf [flops/cycle(median)]: 0.680582
+--------------------------------
+[lion_128 - 40_ilp_norot_90_270] start (2020-06-03T 04:17:36)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	5 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_O3-40_ilp_norot_90_270/lion_128.csv'
+	cycles (median): 1.97038e+07
+	flops: 1.48513e+07
+	perf [flops/cycle(median)]: 0.753726
+--------------------------------
+[lion_256 - 40_ilp_norot_90_270] start (2020-06-03T 04:17:36)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_O3-40_ilp_norot_90_270/lion_256.csv'
+	cycles (median): 1.50981e+08
+	flops: 1.2141e+08
+	perf [flops/cycle(median)]: 0.804142
+--------------------------------
+[lion_512 - 40_ilp_norot_90_270] start (2020-06-03T 04:17:37)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_O3-40_ilp_norot_90_270/lion_512.csv'
+	cycles (median): 1.87064e+09
+	flops: 1.47875e+09
+	perf [flops/cycle(median)]: 0.790505
+--------------------------------
+[lion_1024 - 40_ilp_norot_90_270] start (2020-06-03T 04:17:43)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_O3-40_ilp_norot_90_270/lion_1024.csv'
+	cycles (median): 5.0424e+10
+	flops: 3.76926e+10
+	perf [flops/cycle(median)]: 0.747513
+--------------------------------
+[lion_2048 - 40_ilp_norot_90_270] start (2020-06-03T 04:20:31)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_O3-40_ilp_norot_90_270/lion_2048.csv'
+	cycles (median): 2.96019e+11
+	flops: 2.75307e+11
+	perf [flops/cycle(median)]: 0.930031
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-06-03T 04:27:31)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/compiler-flags/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 2
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/icc_O3-40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 1.32193e+12
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 0.810955
