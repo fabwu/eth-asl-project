@@ -1,28 +1,4 @@
-\section{Your Proposed Method}\label{sec:yourmethod}
-
-% Now comes the ``beef'' of the paper, where you explain what you did. Again,
-% organize it in paragraphs with titles. As in every section you start with a
-% very brief overview of the section.
-
-% For this course, explain all the optimizations you performed. This mean, you
-% first very briefly explain the baseline implementation, then go through
-% locality and other optimizations, and finally SSE (every project will be
-% slightly different of course). Show or mention relevant analysis or
-% assumptions. A few examples: 1) Profiling may lead you to optimize one part
-% first; 2) bandwidth plus data transfer analysis may show that it is memory
-% bound; 3) it may be too hard to implement the algorithm in full generality:
-% make assumptions and state them (e.g., we assume $n$ is divisible by 4; or, we
-% consider only one type of input image); 4) explain how certain data accesses
-% have poor locality. Generally, any type of analysis adds value to your work.
-
-% As important as the final results is to show that you took a structured,
-% organized approach to the optimization and that you explain why you did what
-% you did.
-
-% Mention and cite any external resources including library or other code.
-
-% Good visuals or even brief code snippets to illustrate what you did are good.
-% Pasting large amounts of code to fill the space is not good.
+\section{Methodology}\label{sec:yourmethod}
 
 In this section we define the scope of our implementation, describe the baseline
 implementation and its bottlenecks and outline the steps which were followed to
@@ -86,24 +62,37 @@ ports specified in the manual \cite{intel-opt-manual}. We distinguish between sc
 performance. The bandwidth $\beta$ was measured with the STREAM benchmark \cite{stream}. We verified both the peak
 performance and the bandwidth with the Empirical Roofline Tool \cite{ert}, which confirmed the values.
 
-For the program model, we need to determine the work $W$ i.e. the number of operations executed by the algorithm. The model also
-requires the runtime $T$ and the data movement $Q$ i.e. the number of bytes transferred between memory and cache.
+For the program model, we need to measure the work $W$, the runtime $T$ and the data move movement $Q$ of
+the algorithm. As the decisions made by the quadtree algorithm differ from image to image, the program
+model depends not only on the size but also on the content of an image. Therefore, we define the three 
+quantities as $W=W(S, img)$, $T=T(S, img)$ and $Q=Q(S, img)$, where $S$ and $img$ are define as in 
+\ref{alg:baseline}. We measured $W$ by instrumenting the code according to the cost metric \ref{eq:cost}.
+For measuring $T$, we used the \texttt{RDTSC} instruction available on all x86 architecture and disabled
+Turbo Boost to guarantee an integer runtime. The measurement of $Q$ is the most challenging and requires
+advanced techniques. Thus, we assumed that the image has to be loaded at least once so we derived a very
+optimistic lower bound of $Q \geq 8 \cdot S^2$.
 
-\notefabian{explain that W,Q,T dependent not only dependent on size but also on content}
+To place the baseline in the roofline plot, we calculated the \textit{operational intensity}
+$$
+I=\frac{W}{Q}
+$$
+and the \textit{performance}
+$$P=\frac{W}{T}$$
+of our implementation. Figure \ref{fig:roofline} shows the 
+roofline plot. One can see that the baseline is inherently compute bound and we have good potential for
+performance improvement as the baseline runs only at 12.5\% of scalar peak performance. Next, we use 
+profiling to find the performance bottlenecks of the code.
 
-To place the baseline in the roofline plot, we need to derive the \textit{operational intensity} and the
-\textit{performance} of our implementation (as defined in \cite{applying-roofline}).
+\begin{figure}
+  \includegraphics[page=1, width=.45\textwidth]{roofline}
+  \caption{Roofline plot for the baseline and various performance optimizations}
+  \label{fig:roofline}
+\end{figure}
 
 
 \mypar{Profiling} With Valgrind's callgrind and cachegrind
 
 \mypar{Bandwidth and Data Transfer}
-
-\begin{figure}
-  \includegraphics[page=1, width=.45\textwidth]{roofline}
-  \caption{Roofline}
-\end{figure}
-
 \mypar{Scalar Optimizations}
 
 \mypar{Vector Optimizations}
