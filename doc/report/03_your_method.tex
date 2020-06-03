@@ -69,8 +69,8 @@ quantities as $W=W(S, img)$, $T=T(S, img)$ and $Q=Q(S, img)$, where $S$ and $img
 \ref{alg:baseline}. We measured $W$ by instrumenting the code according to the cost metric \ref{eq:cost}.
 For measuring $T$, we used the \texttt{RDTSC} instruction available on all x86 architecture and disabled
 Turbo Boost to guarantee an integer runtime. The measurement of $Q$ is the most challenging and requires
-advanced techniques. Thus, we assumed that the image has to be loaded at least once so we derived a very
-optimistic lower bound of $Q \geq 8 \cdot S^2$.
+performance counters which are not supported by our hardware. Thus, we assumed that the image has to be
+loaded at least once so we derived a very optimistic lower bound of $Q \geq 8 \cdot S^2$.
 
 To place the baseline in the roofline plot, we calculated the \textit{operational intensity}
 $$
