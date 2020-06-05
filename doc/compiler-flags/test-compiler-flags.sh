@@ -44,107 +44,145 @@ runbenchmarks41(){
       done
 }
 
+# echo "----------------------------"
+# echo "  gcc_Ofast_fma"
+# echo "----------------------------"
+# cmake -DCMAKE_BUILD_TYPE=Release \
+#       -DICC=NO \
+#       -DOPT_ARCH=YES \
+#       -DOPT_O1=NO \
+#       -DOPT_O2=NO \
+#       -DOPT_O3=NO \
+#       -DOPT_OFAST=YES \
+#       -DOPT_FMA=YES \
+#       -DOPT_UNROLL_LOOPS=NO \
+#       -B build/
+# runbenchmarks40 "gcc_Ofast_fma"
+# runbenchmarks41 "gcc_Ofast_fma"
+
+
+# echo "----------------------------"
+# echo "  gcc_03_fma_unroll "
+# echo "----------------------------"
+# cmake -DCMAKE_BUILD_TYPE=Release \
+#       -DICC=NO \
+#       -DOPT_O1=NO \
+#       -DOPT_O2=NO \
+#       -DOPT_O3=YES \
+#       -DOPT_OFAST=NO \
+#       -DOPT_FMA=YES \
+#       -DOPT_UNROLL_LOOPS=YES \
+#       -B build/
+# runbenchmarks40 "gcc_O3_fma_unroll"
+# runbenchmarks41 "gcc_O3_fma_unroll"
+
+
+# echo "----------------------------"
+# echo "  gcc_O3_fma"
+# echo "----------------------------"
+# cmake -DCMAKE_BUILD_TYPE=Release \
+#       -DICC=NO \
+#       -DOPT_ARCH=YES \
+#       -DOPT_O1=NO \
+#       -DOPT_O2=NO \
+#       -DOPT_O3=YES \
+#       -DOPT_OFAST=NO \
+#       -DOPT_FMA=YES \
+#       -DOPT_UNROLL_LOOPS=NO \
+#       -B build/
+# runbenchmarks40 "gcc_O3_fma"
+# runbenchmarks41 "gcc_O3_fma"
+
+
+# echo "----------------------------"
+# echo "  gcc_03"
+# echo "----------------------------"
+# cmake -DCMAKE_BUILD_TYPE=Release \
+#       -DICC=NO \
+#       -DOPT_O1=NO \
+#       -DOPT_O2=NO \
+#       -DOPT_O3=YES \
+#       -DOPT_OFAST=NO \
+#       -DOPT_FMA=NO \
+#       -DOPT_UNROLL_LOOPS=NO \
+#       -B build/
+# runbenchmarks40 "gcc_O3"
+# # no fma runbenchmarks41 "gcc_O3"
+
+
+# echo "############################"
+# echo "############################"
+# echo "         ICC"
+# echo "############################"
+# echo "############################"
+
+
+# echo "----------------------------"
+# echo "  icc_Ofast_fma"
+# echo "----------------------------"
+# cmake -DCMAKE_BUILD_TYPE=Release \
+#       -DICC=YES \
+#       -DOPT_ARCH=YES \
+#       -DOPT_O1=NO \
+#       -DOPT_O2=NO \
+#       -DOPT_O3=NO \
+#       -DOPT_OFAST=YES \
+#       -DOPT_FMA=YES \
+#       -DOPT_UNROLL_LOOPS=NO \
+#       -B build/
+# runbenchmarks41 "icc_Ofast_fma"
+# runbenchmarks40 "icc_Ofast_fma"
+
+
+# echo "----------------------------"
+# echo "  icc_03"
+# echo "----------------------------"
+# cmake -DCMAKE_BUILD_TYPE=Release \
+#       -DICC=NO \
+#       -DOPT_O1=NO \
+#       -DOPT_O2=NO \
+#       -DOPT_O3=YES \
+#       -DOPT_OFAST=NO \
+#       -DOPT_FMA=NO \
+#       -DOPT_UNROLL_LOOPS=NO \
+#       -B build/
+# runbenchmarks40 "icc_O3"
+# # no fma runbenchmarks41 "icc_O3"
+
+
+
+###############################################
+# Second run
+###############################################
+
 echo "----------------------------"
-echo "  gcc_Ofast_fma"
+echo "  gcc_O2_fma"
 echo "----------------------------"
 cmake -DCMAKE_BUILD_TYPE=Release \
       -DICC=NO \
       -DOPT_ARCH=YES \
       -DOPT_O1=NO \
+      -DOPT_O2=YES \
+      -DOPT_O3=NO \
+      -DOPT_OFAST=NO \
+      -DOPT_FMA=YES \
+      -DOPT_UNROLL_LOOPS=NO \
+      -B build/
+runbenchmarks40 "gcc_O2_fma"
+runbenchmarks41 "gcc_O2_fma"
+
+echo "----------------------------"
+echo "  gcc_O1_fma"
+echo "----------------------------"
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DICC=NO \
+      -DOPT_ARCH=YES \
+      -DOPT_O1=YES \
       -DOPT_O2=NO \
       -DOPT_O3=NO \
-      -DOPT_OFAST=YES \
-      -DOPT_FMA=YES \
-      -DOPT_UNROLL_LOOPS=NO \
-      -B build/
-runbenchmarks40 "gcc_Ofast_fma"
-runbenchmarks41 "gcc_Ofast_fma"
-
-
-echo "----------------------------"
-echo "  gcc_03_fma_unroll "
-echo "----------------------------"
-cmake -DCMAKE_BUILD_TYPE=Release \
-      -DICC=NO \
-      -DOPT_O1=NO \
-      -DOPT_O2=NO \
-      -DOPT_O3=YES \
-      -DOPT_OFAST=NO \
-      -DOPT_FMA=YES \
-      -DOPT_UNROLL_LOOPS=YES \
-      -B build/
-runbenchmarks40 "gcc_O3_fma_unroll"
-runbenchmarks41 "gcc_O3_fma_unroll"
-
-
-echo "----------------------------"
-echo "  gcc_O3_fma"
-echo "----------------------------"
-cmake -DCMAKE_BUILD_TYPE=Release \
-      -DICC=NO \
-      -DOPT_ARCH=YES \
-      -DOPT_O1=NO \
-      -DOPT_O2=NO \
-      -DOPT_O3=YES \
       -DOPT_OFAST=NO \
       -DOPT_FMA=YES \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
-runbenchmarks40 "gcc_O3_fma"
-runbenchmarks41 "gcc_O3_fma"
-
-
-echo "----------------------------"
-echo "  gcc_03"
-echo "----------------------------"
-cmake -DCMAKE_BUILD_TYPE=Release \
-      -DICC=NO \
-      -DOPT_O1=NO \
-      -DOPT_O2=NO \
-      -DOPT_O3=YES \
-      -DOPT_OFAST=NO \
-      -DOPT_FMA=NO \
-      -DOPT_UNROLL_LOOPS=NO \
-      -B build/
-runbenchmarks40 "gcc_O3"
-# no fma runbenchmarks41 "gcc_O3"
-
-
-echo "############################"
-echo "############################"
-echo "         ICC"
-echo "############################"
-echo "############################"
-
-
-echo "----------------------------"
-echo "  icc_Ofast_fma"
-echo "----------------------------"
-cmake -DCMAKE_BUILD_TYPE=Release \
-      -DICC=YES \
-      -DOPT_ARCH=YES \
-      -DOPT_O1=NO \
-      -DOPT_O2=NO \
-      -DOPT_O3=NO \
-      -DOPT_OFAST=YES \
-      -DOPT_FMA=YES \
-      -DOPT_UNROLL_LOOPS=NO \
-      -B build/
-runbenchmarks41 "icc_Ofast_fma"
-runbenchmarks40 "icc_Ofast_fma"
-
-
-echo "----------------------------"
-echo "  icc_03"
-echo "----------------------------"
-cmake -DCMAKE_BUILD_TYPE=Release \
-      -DICC=NO \
-      -DOPT_O1=NO \
-      -DOPT_O2=NO \
-      -DOPT_O3=YES \
-      -DOPT_OFAST=NO \
-      -DOPT_FMA=NO \
-      -DOPT_UNROLL_LOOPS=NO \
-      -B build/
-runbenchmarks40 "icc_O3"
-# no fma runbenchmarks41 "icc_O3"
+runbenchmarks40 "gcc_O1_fma"
+runbenchmarks41 "gcc_O1_fma"

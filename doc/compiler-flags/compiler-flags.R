@@ -2,21 +2,27 @@ library(ggplot2)
 library(svglite)
 
 executables = c(
-    ## "25_ilp"
-    ## "35_simd"
-    ## "0_baseline",
-    ## "31_simd_precomp_rotations_no_bac_simd",
     ## "40_ilp_norot_90_270"
     "41_simd_norot_90_270"
 )
 
 flags = c(
-  "gcc_O3",
-  "icc_O3",
-  ## "gcc_O3_fma",
+
+  # changing main flags (with 40/41) -> Ofast/O3 wins
+  "gcc_O1_fma",
+  "gcc_O2_fma",
+  "gcc_O3_fma",
+  "gcc_Ofast_fma"
+
+  # icc vs gcc (with 40) -> gcc wins
+  ## "gcc_O3",
+  ## "icc_O3",
+  ## "icc_Ofast_fma",
+  ## "gcc_Ofast_fma"
+
+  # unroll (with 40/41) -> no effect
   ## "gcc_O3_fma_unroll",
-  "gcc_Ofast_fma",
-  "icc_Ofast_fma"
+  ## "gcc_O3_fma"
 )
 
 ## one
@@ -25,7 +31,7 @@ flags = c(
     ## "35_simd"
 
 ## two
-    ## "0_baseline",
+   ## "0_baseline",
     ## "31_simd_precomp_rotations_no_bac_simd",
     ## "40_ilp_norot_90_270",
     ## "41_simd_norot_90_270"
