@@ -25,7 +25,7 @@ add_library(lib_37 37_full_simd.c)
 add_library(lib_40 40_ilp_norot_90_270.c)
 add_library(lib_41 41_simd_norot_90_270.c)
 
-add_executable(51_simd_improved_rot exec/fic.cpp)
+add_library(lib_51 51_simd_improved_rot.c)
 
 ##################################################################################
 
@@ -81,4 +81,4 @@ target_link_libraries(37_full_simd PUBLIC lib_37 ${Boost_LIBRARIES})
 target_link_libraries(40_ilp_norot_90_270 PUBLIC lib_40 ${Boost_LIBRARIES})
 target_link_libraries(41_simd_norot_90_270 PUBLIC lib_41 ${Boost_LIBRARIES})
 
-target_link_libraries(51_simd_norot_90_270 PUBLIC lib_51 ${Boost_LIBRARIES})
+target_link_libraries(51_simd_improved_rot PUBLIC lib_51 ${Boost_LIBRARIES})
