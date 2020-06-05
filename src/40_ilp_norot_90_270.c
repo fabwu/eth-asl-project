@@ -231,10 +231,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             const double sr_x_2 = 2 * range_sum;
             __record_double_flops(1);
 
-            int a = BLOCK_CORD_REL_Y(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
-            int b = BLOCK_CORD_REL_X(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
-            int rtd_start_rb = a * image->size + b;
-
             for (size_t idx_db = 0; idx_db < domain_blocks_length; ++idx_db) {
                 double *prep_domain_block = prep_domain_blocks + idx_db *
                                                                  range_blocks_size_current_iteration *
@@ -254,7 +250,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 __record_double_flops(3);
 
                 // BEGIN precompute rtd
-                int rtd_idx_rb = rtd_start_rb;
+                int rtd_idx_rb = 0;
                 int dbs = range_blocks_size_current_iteration;
                 int dbs_dbs = dbs * dbs;
 
@@ -272,10 +268,8 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                         int idx_180_db1 = dbs_dbs - dbs_i - j - 1;
                         int idx_180_db2 = idx_180_db1 - 1;
 
-                        int idx_rb2 = rtd_idx_rb + 1;
-
-                        double ri1 = image->data[rtd_idx_rb];
-                        double ri2 = image->data[idx_rb2];
+                        double ri1 = prepared_range_block[rtd_idx_rb];
+                        double ri2 = prepared_range_block[rtd_idx_rb + 1];
 
                         double di_0_1 = prep_domain_block[idx_0_db1];
                         double di_0_2 = prep_domain_block[idx_0_db2];
@@ -291,7 +285,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                         rtd_idx_rb += 2;
                         dbs_j = dbs_j + dbs + dbs;
                     }
-                    rtd_idx_rb += image->size - dbs;
+//                    rtd_idx_rb += dbs;
                     dbs_i += dbs;
                 }
 
