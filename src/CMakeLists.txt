@@ -25,6 +25,8 @@ add_library(lib_37 37_full_simd.c)
 add_library(lib_40 40_ilp_norot_90_270.c)
 add_library(lib_41 41_simd_norot_90_270.c)
 
+add_executable(51_simd_improved_rot exec/fic.cpp)
+
 ##################################################################################
 
 add_executable(test_rotate exec/test_rotate.cpp)
@@ -40,6 +42,8 @@ add_executable(37_full_simd exec/fic.cpp)
 # add_executable(38_simd_other_images exec/fic.cpp)
 add_executable(40_ilp_norot_90_270 exec/fic.cpp)
 add_executable(41_simd_norot_90_270 exec/fic.cpp)
+
+add_executable(51_simd_improved_rot exec/fic.cpp)
 
 ##################################################################################
 
@@ -58,6 +62,8 @@ target_link_libraries(lib_37 PRIVATE lib_types lib_commons lib_queue)
 target_link_libraries(lib_40 PRIVATE lib_types lib_commons lib_queue)
 target_link_libraries(lib_41 PRIVATE lib_types lib_commons lib_queue)
 
+target_link_libraries(lib_51 PRIVATE lib_types lib_commons lib_queue)
+
 ##################################################################################
 
 target_link_libraries(test_rotate PUBLIC lib_rotate)
@@ -74,3 +80,5 @@ target_link_libraries(37_full_simd PUBLIC lib_37 ${Boost_LIBRARIES})
 # target_link_libraries(38_simd_other_images PUBLIC lib_38 ${Boost_LIBRARIES})
 target_link_libraries(40_ilp_norot_90_270 PUBLIC lib_40 ${Boost_LIBRARIES})
 target_link_libraries(41_simd_norot_90_270 PUBLIC lib_41 ${Boost_LIBRARIES})
+
+target_link_libraries(51_simd_norot_90_270 PUBLIC lib_51 ${Boost_LIBRARIES})
