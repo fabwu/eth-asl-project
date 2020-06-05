@@ -255,10 +255,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
             __m256d v_range_sum_sqr = _mm256_set1_pd(range_sum_squared);
 
-            int a = BLOCK_CORD_REL_Y(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
-            int b = BLOCK_CORD_REL_X(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
-            int rtd_start_rb = a * image->size + b;
-
             __m256d v_best_err = _mm256_set1_pd(DBL_MAX);
             __m256d v_best_contrast;
             __m256d v_best_bright;
@@ -345,7 +341,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 /* range block data */
                 __m256d v_rb;
 
-                int rtd_idx_rb = rtd_start_rb;
+                int rtd_idx_rb = 0;
 
                 const __m256i dbs_offset = _mm256_set_epi64x(0, dbs, dbs + dbs, dbs + dbs + dbs);
 
@@ -354,7 +350,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                     int dbs_j = 0;
                     for (int j = 0; j < dbs; j += 4) {
                         /* get range block data */
-                        v_rb = _mm256_load_pd(image->data + rtd_idx_rb);
+                        v_rb = _mm256_load_pd(prepared_range_block + rtd_idx_rb);
                         rtd_idx_rb += 4;
 
                         /* compute indices for domain blocks */
@@ -421,7 +417,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                         v_sum_180_3 = _mm256_fmadd_pd(v_rb, v_db_180_3, v_sum_180_3);
                         v_sum_270_3 = _mm256_fmadd_pd(v_rb, v_d_270_3, v_sum_270_3);
                     }
-                    rtd_idx_rb += image->size - dbs;
                     dbs_i += dbs;
                 }
                 __record_double_flops(dbs * dbs * 32);
