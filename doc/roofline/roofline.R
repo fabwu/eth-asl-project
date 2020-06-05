@@ -11,7 +11,7 @@ roofline <- function(x) ifelse(x*beta<pi_scalar, log2(x*beta), log2(pi_scalar))
 executables = c(
   "0_baseline",
   "25_ilp",
-  "31_simd_precomp_rotations_no_bac_simd",
+ # "31_simd_precomp_rotations_no_bac_simd",
   "35_simd",
   "40_ilp_norot_90_270",
   "41_simd_norot_90_270"
@@ -71,8 +71,32 @@ roofline <- ggplot(mapping = aes(x = op_int, y = perf, color = opt), data = df) 
   geom_line() +
   
   # start/end size
-  geom_label(data = subset(df, n == 64 | n == 4096 | (opt == '0_baseline' & n == 2048)),
-                            aes(label=n), vjust = -0.4, label.size = NA) +
+  geom_label(
+    data = subset(df, n == 64 & opt != '0_baseline'), 
+    aes(label=n), 
+    vjust = 0.3, 
+    hjust = 1.1, 
+    label.size = NA, 
+    alpha = 0.0
+  ) +
+  geom_label(
+    data = subset(df, n == 4096 & opt != '0_baseline'), 
+    aes(label=n), 
+    vjust = 0.3, 
+    hjust = -0.1, 
+    label.size = NA, 
+    alpha = 0.0
+  ) +
+  geom_label(
+    data = subset(df, n == 64 & opt == '0_baseline'), 
+    aes(label=n), 
+    vjust = 0.3, 
+    hjust = 1.1, 
+    label.size = NA, 
+    alpha = 0.0
+  ) +
+
+  
   # roofline with dashed helper
   geom_vline(xintercept = pi_scalar / beta, linetype='dashed', color = 'darkgrey') +
   geom_hline(yintercept = pi_scalar, color = 'darkgrey') +
@@ -88,14 +112,14 @@ roofline <- ggplot(mapping = aes(x = op_int, y = perf, color = opt), data = df) 
   geom_text(data = subset(df, opt == '0_baseline' & n == 2048), aes(x=0.17, y=1.4, angle = 64, label = "Bandwidth (9 bytes/cycle)"), colour = 'darkgrey', vjust=-1) +
   
   labs(
-    y = 'Performance [flops/cycle]',
+    subtitle = 'Performance [flops/cycle]',
     x = 'Operational Intensity [flops/byte]'
   ) +
   
-  ggtitle('i7-8650U @ 1.9 GHz') +
-  
-  theme_light() +
-  theme(legend.position = "none"
+  theme(
+    plot.subtitle = element_text(hjust=-0.05),
+    axis.title.y = element_blank()
+  )
 )
 
 plot(roofline)
