@@ -255,10 +255,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
             __m256d v_range_sum_sqr = _mm256_set1_pd(range_sum_squared);
 
-            int a = BLOCK_CORD_REL_Y(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
-            int b = BLOCK_CORD_REL_X(curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
-            int rtd_start_rb = a * image->size + b;
-
             __m256d v_best_err = _mm256_set1_pd(DBL_MAX);
             __m256d v_best_contrast;
             __m256d v_best_bright;
@@ -268,19 +264,19 @@ static struct queue *compress(const struct image_t *image, const int error_thres
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; idx_db += 4) {
                 double *prep_domain_block_0 = prep_domain_blocks + idx_db *
-                                                                   range_blocks_size_current_iteration *
-                                                                   range_blocks_size_current_iteration;
+                                                                       range_blocks_size_current_iteration *
+                                                                       range_blocks_size_current_iteration;
                 double *prep_domain_block_1 = prep_domain_blocks + (idx_db + 1) *
-                                                                   range_blocks_size_current_iteration *
-                                                                   range_blocks_size_current_iteration;
+                                                                       range_blocks_size_current_iteration *
+                                                                       range_blocks_size_current_iteration;
 
                 double *prep_domain_block_2 = prep_domain_blocks + (idx_db + 2) *
-                                                                   range_blocks_size_current_iteration *
-                                                                   range_blocks_size_current_iteration;
+                                                                       range_blocks_size_current_iteration *
+                                                                       range_blocks_size_current_iteration;
 
                 double *prep_domain_block_3 = prep_domain_blocks + (idx_db + 3) *
-                                                                   range_blocks_size_current_iteration *
-                                                                   range_blocks_size_current_iteration;
+                                                                       range_blocks_size_current_iteration *
+                                                                       range_blocks_size_current_iteration;
 
                 __m256d v_domain_sum = _mm256_load_pd(domain_block_sums + idx_db);
                 __m256d v_neg_domain_sum = _mm256_sub_pd(v_zeros, v_domain_sum);
@@ -327,18 +323,16 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 __m256d v_db_180_3;
 
                 /* range block data */
+                int rtd_idx_rb = 0;
                 __m256d v_rb;
-
-                int rtd_idx_rb = rtd_start_rb;
 
                 int dbs_i = 0;
                 for (int i = 0; i < dbs; i++) {
                     int dbs_j = 0;
                     for (int j = 0; j < dbs; j += 4) {
                         /* get range block data */
-                        v_rb = _mm256_load_pd(image->data + rtd_idx_rb);
-                        rtd_idx_rb += 4;
-
+                        v_rb = _mm256_load_pd(prepared_range_block + rtd_idx_rb);
+                        rtd_idx_rb+=4;
                         /* compute indices for domain blocks */
 
                         int idx_0 = i * dbs + j;
@@ -359,11 +353,9 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                         v_db_180_2 = _mm256_load_pd(prep_domain_block_2 + idx_180);
                         v_db_180_2 = _mm256_permute4x64_pd(v_db_180_2, _MM_SHUFFLE(0, 1, 2, 3));
 
-
                         v_db_0_3 = _mm256_load_pd(prep_domain_block_3 + idx_0);
                         v_db_180_3 = _mm256_load_pd(prep_domain_block_3 + idx_180);
                         v_db_180_3 = _mm256_permute4x64_pd(v_db_180_3, _MM_SHUFFLE(0, 1, 2, 3));
-
 
                         /* update rtd sum */
 
@@ -379,7 +371,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                         v_sum_0_3 = _mm256_fmadd_pd(v_rb, v_db_0_3, v_sum_0_3);
                         v_sum_180_3 = _mm256_fmadd_pd(v_rb, v_db_180_3, v_sum_180_3);
                     }
-                    rtd_idx_rb += image->size - dbs;
                     dbs_i += dbs;
                 }
                 __record_double_flops(dbs * dbs * 16);
@@ -465,7 +456,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
                 v_best_idx = _mm256_blendv_pd(v_best_idx, v_idx_db, v_mask_0);
                 v_best_angle = _mm256_blendv_pd(v_best_angle, v_deg_0, v_mask_0);
 
-
                 // ROTATION 180
                 __m256d v_neg_rtd_180 = _mm256_sub_pd(v_zeros, v_rtd_180);
                 __m256d v_contrast_180 = _mm256_fmadd_pd(v_num_pixels, v_rtd_180, v_nrs_x_ds);
@@ -515,7 +505,6 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             if (best_error > error_threshold && current_quadtree_depth < MAX_QUADTREE_DEPTH &&
                 range_blocks_size_next_iteration >= MIN_RANGE_BLOCK_SIZE &&
                 range_blocks_size_next_iteration % 2 == 0) {
-
                 quad3(range_blocks_idx_next_iteration + range_blocks_length_next_iteration,
                       curr_relative_rb_idx, range_blocks_size_current_iteration, image->size);
 
