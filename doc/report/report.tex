@@ -44,10 +44,13 @@
 %
 
 \begin{abstract}
-Describe in concise words what you do, why you do it (not necessarily
-in this order), and the main result. The abstract has to be
-self-contained and readable for a person in the general area. You
-should write the abstract last.
+    Fractal image compression provides is a lossy image compression scheme,
+    which yields good compression ratios and quality at the cost of high encoding times.\\
+    In our work, we started with our own implementation of a fractal compression scheme using quadtree partitioning
+    and exhaustive search for self-similarity in the image. 
+    We then applied various optimizations to the given computations, such as ILP, precomputation and vectorization using AVX2 intrinsics.\\
+    Our optimized version without SIMD led to a 3x speedup, whereas we observed a speedup of up to 8x with vectorization.
+    \notejonas{speedups anpassen}
 \end{abstract}
 
 \input{01_introduction.tex}
