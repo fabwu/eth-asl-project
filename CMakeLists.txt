@@ -21,7 +21,7 @@ option(OPT_O2 "O2" OFF)
 option(OPT_O3 "O3" ON)
 option(OPT_OFAST "OFast" OFF)
 option(OPT_FMA "fma" OFF)
-option(OPT_UNROLL_LOOPS "unroll loops" ON)
+option(OPT_UNROLL_LOOPS "unroll loops" OFF)
 
 
 if(ICC)
