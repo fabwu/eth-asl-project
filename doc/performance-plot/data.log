@@ -1,0 +1,757 @@
+ lion_64
+--------------------------------
+[lion_64 - 51_simd_improved_rot] start (2020-06-06T 02:02:40)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.8378 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	105 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/51_simd_improved_rot/lion_64.csv'
+	cycles (median): 786608
+	flops: 3.04245e+06
+	perf [flops/cycle(median)]: 3.86781
+--------------------------------
+[lion_64 - 41_simd_norot_90_270] start (2020-06-06T 02:02:40)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	167 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/41_simd_norot_90_270/lion_64.csv'
+	cycles (median): 551583
+	flops: 1.57032e+06
+	perf [flops/cycle(median)]: 2.84694
+--------------------------------
+[lion_64 - 40_ilp_norot_90_270] start (2020-06-06T 02:02:40)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.234 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	83 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/40_ilp_norot_90_270/lion_64.csv'
+	cycles (median): 1.16706e+06
+	flops: 1.61793e+06
+	perf [flops/cycle(median)]: 1.38633
+--------------------------------
+[lion_64 - 35_simd] start (2020-06-06T 02:02:40)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.8378 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	69 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/35_simd/lion_64.csv'
+	cycles (median): 1.41747e+06
+	flops: 3.04245e+06
+	perf [flops/cycle(median)]: 2.14639
+--------------------------------
+[lion_64 - 25_ilp] start (2020-06-06T 02:02:40)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.8378 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	52 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/25_ilp/lion_64.csv'
+	cycles (median): 1.85147e+06
+	flops: 2.95207e+06
+	perf [flops/cycle(median)]: 1.59445
+--------------------------------
+ lion_128
+--------------------------------
+[lion_128 - 51_simd_improved_rot] start (2020-06-06T 02:02:41)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 26.1439 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	17 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/51_simd_improved_rot/lion_128.csv'
+	cycles (median): 5.65329e+06
+	flops: 2.56444e+07
+	perf [flops/cycle(median)]: 4.53619
+--------------------------------
+[lion_128 - 41_simd_norot_90_270] start (2020-06-06T 02:02:41)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	23 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/41_simd_norot_90_270/lion_128.csv'
+	cycles (median): 4.19081e+06
+	flops: 1.445e+07
+	perf [flops/cycle(median)]: 3.44803
+--------------------------------
+[lion_128 - 40_ilp_norot_90_270] start (2020-06-06T 02:02:41)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2001 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	10 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/40_ilp_norot_90_270/lion_128.csv'
+	cycles (median): 9.66115e+06
+	flops: 1.48513e+07
+	perf [flops/cycle(median)]: 1.53721
+--------------------------------
+[lion_128 - 35_simd] start (2020-06-06T 02:02:41)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 26.1439 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	8 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/35_simd/lion_128.csv'
+	cycles (median): 1.13558e+07
+	flops: 2.56444e+07
+	perf [flops/cycle(median)]: 2.25825
+--------------------------------
+[lion_128 - 25_ilp] start (2020-06-06T 02:02:41)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 26.1439 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	6 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/25_ilp/lion_128.csv'
+	cycles (median): 1.4294e+07
+	flops: 2.49747e+07
+	perf [flops/cycle(median)]: 1.74722
+--------------------------------
+ lion_256
+--------------------------------
+[lion_256 - 51_simd_improved_rot] start (2020-06-06T 02:02:42)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.8952 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/51_simd_improved_rot/lion_256.csv'
+	cycles (median): 3.79832e+07
+	flops: 1.86326e+08
+	perf [flops/cycle(median)]: 4.90548
+--------------------------------
+[lion_256 - 41_simd_norot_90_270] start (2020-06-06T 02:02:42)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/41_simd_norot_90_270/lion_256.csv'
+	cycles (median): 3.00425e+07
+	flops: 1.18488e+08
+	perf [flops/cycle(median)]: 3.94401
+--------------------------------
+[lion_256 - 40_ilp_norot_90_270] start (2020-06-06T 02:02:42)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.2765 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/40_ilp_norot_90_270/lion_256.csv'
+	cycles (median): 7.46225e+07
+	flops: 1.2141e+08
+	perf [flops/cycle(median)]: 1.62699
+--------------------------------
+[lion_256 - 35_simd] start (2020-06-06T 02:02:42)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.8952 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/35_simd/lion_256.csv'
+	cycles (median): 8.23865e+07
+	flops: 1.86326e+08
+	perf [flops/cycle(median)]: 2.26161
+--------------------------------
+[lion_256 - 25_ilp] start (2020-06-06T 02:02:43)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.8952 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/25_ilp/lion_256.csv'
+	cycles (median): 1.0001e+08
+	flops: 1.8237e+08
+	perf [flops/cycle(median)]: 1.82352
+--------------------------------
+ lion_512
+--------------------------------
+[lion_512 - 51_simd_improved_rot] start (2020-06-06T 02:02:43)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.364 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/51_simd_improved_rot/lion_512.csv'
+	cycles (median): 5.13823e+08
+	flops: 2.35388e+09
+	perf [flops/cycle(median)]: 4.58112
+--------------------------------
+[lion_512 - 41_simd_norot_90_270] start (2020-06-06T 02:02:45)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/41_simd_norot_90_270/lion_512.csv'
+	cycles (median): 3.9463e+08
+	flops: 1.44233e+09
+	perf [flops/cycle(median)]: 3.6549
+--------------------------------
+[lion_512 - 40_ilp_norot_90_270] start (2020-06-06T 02:02:47)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9829 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/40_ilp_norot_90_270/lion_512.csv'
+	cycles (median): 9.12129e+08
+	flops: 1.47875e+09
+	perf [flops/cycle(median)]: 1.62121
+--------------------------------
+[lion_512 - 35_simd] start (2020-06-06T 02:02:51)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.364 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/35_simd/lion_512.csv'
+	cycles (median): 1.08943e+09
+	flops: 2.35388e+09
+	perf [flops/cycle(median)]: 2.16066
+--------------------------------
+[lion_512 - 25_ilp] start (2020-06-06T 02:02:56)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.364 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/25_ilp/lion_512.csv'
+	cycles (median): 1.28994e+09
+	flops: 2.3001e+09
+	perf [flops/cycle(median)]: 1.78311
+--------------------------------
+ lion_1024
+--------------------------------
+[lion_1024 - 51_simd_improved_rot] start (2020-06-06T 02:03:02)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.7403 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/51_simd_improved_rot/lion_1024.csv'
+	cycles (median): 1.44852e+10
+	flops: 6.65123e+10
+	perf [flops/cycle(median)]: 4.59173
+--------------------------------
+[lion_1024 - 41_simd_norot_90_270] start (2020-06-06T 02:04:04)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/41_simd_norot_90_270/lion_1024.csv'
+	cycles (median): 1.01023e+10
+	flops: 3.6611e+10
+	perf [flops/cycle(median)]: 3.62404
+--------------------------------
+[lion_1024 - 40_ilp_norot_90_270] start (2020-06-06T 02:04:47)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3884 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/40_ilp_norot_90_270/lion_1024.csv'
+	cycles (median): 2.30989e+10
+	flops: 3.76926e+10
+	perf [flops/cycle(median)]: 1.63179
+--------------------------------
+[lion_1024 - 35_simd] start (2020-06-06T 02:06:26)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.7403 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/35_simd/lion_1024.csv'
+	cycles (median): 2.9845e+10
+	flops: 6.65123e+10
+	perf [flops/cycle(median)]: 2.22859
+--------------------------------
+[lion_1024 - 25_ilp] start (2020-06-06T 02:08:34)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.7403 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/25_ilp/lion_1024.csv'
+	cycles (median): 3.74834e+10
+	flops: 6.46158e+10
+	perf [flops/cycle(median)]: 1.72385
+--------------------------------
+ lion_2048
+--------------------------------
+[lion_2048 - 51_simd_improved_rot] start (2020-06-06T 02:11:14)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.5308 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/51_simd_improved_rot/lion_2048.csv'
+	cycles (median): 1.43957e+11
+	flops: 5.37663e+11
+	perf [flops/cycle(median)]: 3.73489
+--------------------------------
+[lion_2048 - 41_simd_norot_90_270] start (2020-06-06T 02:15:41)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/41_simd_norot_90_270/lion_2048.csv'
+	cycles (median): 1.05886e+11
+	flops: 2.72385e+11
+	perf [flops/cycle(median)]: 2.57242
+--------------------------------
+[lion_2048 - 40_ilp_norot_90_270] start (2020-06-06T 02:18:57)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.1268 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/40_ilp_norot_90_270/lion_2048.csv'
+	cycles (median): 1.92692e+11
+	flops: 2.75307e+11
+	perf [flops/cycle(median)]: 1.42874
+--------------------------------
+[lion_2048 - 35_simd] start (2020-06-06T 02:24:58)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.5308 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/35_simd/lion_2048.csv'
+	cycles (median): 2.89955e+11
+	flops: 5.37663e+11
+	perf [flops/cycle(median)]: 1.8543
+--------------------------------
+[lion_2048 - 25_ilp] start (2020-06-06T 02:34:05)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 21.5308 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/25_ilp/lion_2048.csv'
+	cycles (median): 3.02068e+11
+	flops: 5.31958e+11
+	perf [flops/cycle(median)]: 1.76105
+--------------------------------
+ lion_4096
+--------------------------------
+[lion_4096 - 51_simd_improved_rot] start (2020-06-06T 02:43:35)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.8076 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/51_simd_improved_rot/lion_4096.csv'
+	cycles (median): 5.90586e+11
+	flops: 2.11367e+12
+	perf [flops/cycle(median)]: 3.57894
+--------------------------------
+[lion_4096 - 41_simd_norot_90_270] start (2020-06-06T 03:02:21)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/41_simd_norot_90_270/lion_4096.csv'
+	cycles (median): 4.29962e+11
+	flops: 1.06887e+12
+	perf [flops/cycle(median)]: 2.48598
+--------------------------------
+[lion_4096 - 40_ilp_norot_90_270] start (2020-06-06T 03:16:01)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.4507 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/40_ilp_norot_90_270/lion_4096.csv'
+	cycles (median): 9.5843e+11
+	flops: 1.07203e+12
+	perf [flops/cycle(median)]: 1.11853
+--------------------------------
+[lion_4096 - 35_simd] start (2020-06-06T 03:46:27)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.8076 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/35_simd/lion_4096.csv'
+	cycles (median): 1.294e+12
+	flops: 2.11367e+12
+	perf [flops/cycle(median)]: 1.63344
+--------------------------------
+[lion_4096 - 25_ilp] start (2020-06-06T 04:27:37)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 20.8076 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_4096.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 3
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/25_ilp/lion_4096.csv'
+	cycles (median): 1.44488e+12
+	flops: 2.10747e+12
+	perf [flops/cycle(median)]: 1.45857
+--------------------------------
+ lion_64
+--------------------------------
+[lion_64 - 0_baseline] start (2020-06-06T 05:13:17)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 26.1063 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	6 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_64.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/0_baseline/lion_64.csv'
+	cycles (median): 1.44131e+07
+	flops: 7.11718e+06
+	perf [flops/cycle(median)]: 0.493801
+--------------------------------
+ lion_128
+--------------------------------
+[lion_128 - 0_baseline] start (2020-06-06T 05:13:17)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.7995 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_128.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/0_baseline/lion_128.csv'
+	cycles (median): 9.8462e+07
+	flops: 4.98385e+07
+	perf [flops/cycle(median)]: 0.506169
+--------------------------------
+ lion_256
+--------------------------------
+[lion_256 - 0_baseline] start (2020-06-06T 05:13:18)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 25.8589 (at least 25 dB / higher is better)
+	[1;32m✔ verification succeeded[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_256.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/0_baseline/lion_256.csv'
+	cycles (median): 7.50254e+08
+	flops: 3.82598e+08
+	perf [flops/cycle(median)]: 0.509958
+--------------------------------
+ lion_512
+--------------------------------
+[lion_512 - 0_baseline] start (2020-06-06T 05:13:20)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.9834 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_512.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/0_baseline/lion_512.csv'
+	cycles (median): 1.12319e+10
+	flops: 5.63256e+09
+	perf [flops/cycle(median)]: 0.501479
+--------------------------------
+ lion_1024
+--------------------------------
+[lion_1024 - 0_baseline] start (2020-06-06T 05:13:46)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3437 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	performing function for at least 1e+08 cycles
+	2 runs needed
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_1024.gray
+	Error: 300
+	Warmup: Yes
+	Repetitions: 1
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/0_baseline/lion_1024.csv'
+	cycles (median): 3.92469e+11
+	flops: 1.86318e+11
+	perf [flops/cycle(median)]: 0.474731
+--------------------------------
+ lion_2048
+--------------------------------
+[lion_2048 - 0_baseline] start (2020-06-06T 05:29:13)
+[1mVERIFICATION phase[0m
+	PSNR (dB): 24.3595 (at least 25 dB / higher is better)
+	[1;31m✗ verification failed[0m
+[1mWARMUP phase[0m
+	image is larger than 1024 pixel: skipping warmup...
+[1mPARAMETERS[0m
+	File: /home/pascal/git/asl-code/doc/performance-plot/../../images/lion_2048.gray
+	Error: 300
+	Warmup: No
+	Repetitions: 1
+[1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/performance-plot/data/0_baseline/lion_2048.csv'
+	cycles (median): 1.37877e+13
+	flops: 6.32023e+12
+	perf [flops/cycle(median)]: 0.458395
+--------------------------------
+ lion_4096
+--------------------------------
+[lion_4096 - 0_baseline] start (2020-06-06T 09:04:59)
+[1mVERIFICATION phase[0m
