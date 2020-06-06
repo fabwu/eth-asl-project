@@ -112,11 +112,12 @@ regions with details are covered with transformations which map smaller blocks.
 Usually, one defines also a maximum depth of the quadtree as described in \cite{fisher2012}.
 
 \mypar{Cost analysis} We provide a pessimistic upper bound on the cost for our
-algorithm where we assume that no transformation will yield at an error below
+algorithm where we assume that no transformation will yield an error below
 the threshold and thus the only termination criteria is the maximum quadtree
 depth. In practice, the cost will be (much) lower assuming a reasonable error
 threshold $\epsilon$. As a cost metric, the number of floating point operations
 are counted.
+\notejonas{Evtl erwähnen das wir das manuell im code instrumented haben?}
 
 % TODO: I think this belongs in 3
 % We have manually instrumented our code to count the amount of flops:
