@@ -1,18 +1,34 @@
 \section{Experimental Results}\label{sec:exp}
 
-summary of section
+summary of section\\
 
-\mypar{Experimental setup}
+\mypar{Experimental setup} All benchmarks and tests were conducted on an Intel
+i7-8650U processor with \textit{Intel Turbo Boost} disabled and running at 1.9
+GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
+4-way associative L2 cache and 4$\times$2 MB 16-way associative L3 cache
+\cite{intel-opt-manual}.
+
+\mypar{Compiler Flags} Several benchmarks were conducted comparing the achieved
+performance using different compiler flags for the \textit{GNU Compiler
+  Collection (gcc)} version 9.3.0 and the \textit{Intel C++ Compiler (icc)}
+version 19.1.1.217.
+
+While the flags ``-O1'' and ``-O2'' both increased the performance
+significantly, the result for ``-O3'' was only marginally better and hardly no
+difference could be observed with the flag ``-Ofast''. Intel's compiler did not
+perform as good as gcc, especially with ``-O3'' and ``-Ofast''.
+
+\notepascal{write about icc, fma, unroll}
+
+\begin{figure}[ht]
+  \includegraphics[page=1, width=.45\textwidth]{compiler-flags}
+  \caption{GCC Compiler Flags}
+\end{figure}
 
 \mypar{some}
 \mypar{Result}
 \mypar{paragraphs}
 
-\mypar{Compiler Flags}
-\begin{figure}[ht]
-  \includegraphics[page=1, width=.45\textwidth]{compiler-flags}
-  \caption{GCC Compiler Flags}
-\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
