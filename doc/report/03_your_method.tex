@@ -89,11 +89,44 @@ profiling to find the performance bottlenecks of the code.
   \label{fig:roofline}
 \end{figure}
 
+\mypar{Hotspots} A major performance blocker is obviously the brute force search to find a matching domain
+block for each range block. As discussed in section \ref{sec:intro} using a better search strategy is more
+an algorithmic improvement instead of a performance optimization. The focus of this work is work is strictly
+on performance so we decided to not replace the brute force search.
 
-\mypar{Profiling} With Valgrind's callgrind and cachegrind
+When inspecting the code of the baseline, it is apparent that the majority of the work
+is done, when calculating the contrast, brightness and error of each range/domain-block pair 
+(see equations \ref{contrast}, \ref{brightness} and \ref{error}). We used \textit{Valgrind} 
+\cite{valgrind} to profile the code and the profiling report confirmed our assumption. Especially, the sums
+over all pixel of a block were identified as hotspots so we started our optimizations there.
 
-\mypar{Bandwidth and Data Transfer}
-\mypar{Scalar Optimizations}
+\mypar{Scalar Optimizations} As a first optimization we moved the calculation of the sums $\sum_{i=1}^n a_i$, 
+$\sum_{i=1}^n a_i^2$, $\sum_{i=1}^n b_i$ and $\sum_{i=1}^n b_i^2$ out of the nested loop 
+(see algorithm \ref{alg:baseline} line 5 and 7). The values of these sums change only if the algorithm goes
+to the next quadtree depth so we can easily precompute them on each quadtree iteration and reuse them when we
+compare each domain block with a range block. This simple precomputation reduced the runtime significantly.
+
+The baseline implementation focused on a clear and understandable code style. Therefore, it uses a queue 
+to keep track of the remaining range blocks and several structs to model different concepts of the algorithm 
+(e.g. the image). Both the queue and the usage of structs are not optimal for performance so we replaced the
+queue and the structs with simple variables and arrays. These changes made the code harder to understand
+but eliminated pointer chasing and placed the data better in memory which improves locality.
+
+After the removal of the queue and several structs, we continued with inlining several functions. The inlining
+revealed many small optimizations which were not immediately obvious. Another profiling of the optimized
+version of the code showed that the computation of $\sum_{i=1}^n a_i b_i$, which is used by the equations 
+\ref{contrast} and \ref{error}, is the remaining performance bottleneck. Precomputation of this sum is not possible
+because the term depends on values from a specific range and domain block. Thus, we exploit instruction level
+parallelism (ILP) to calculate the sum as fast as possible. ILP in combination with scalar replacement and 
+optimized array index calculation enabled a faster calculation of this crucial sum which improved overall
+performance and runtime significantly.
+
+Finally, we did some experiments with blocking but could not improve performance. We didn't really expect an
+improvement as the roofline plot showed that we are compute bound so we abandoned any further experiments in
+that direction.
+
+These are all scalar optimizations we applied to the baseline implementation and in the next paragraph we 
+discuss further improvements using vector instructions.
 
 \mypar{Vector Optimizations}
 
