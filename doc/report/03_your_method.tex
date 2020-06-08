@@ -167,21 +167,38 @@ we traversed blocks which are closer together in the image to exploit better tem
 With the insights from the roofline analysis, we abandoned any further experiments in that direction, because no big performance
 gains can be expected.
 
-\mypar{Vector Optimizations} Different approaches to implement SIMD were
-followed. In most successful implementation the computation of brightness,
-contrast and error of one range block was performed for four domain blocks at a
-time. Sadly only adding SIMD instructions did not lead to a better performance.
-The reason for that could be found in the 90 and 270 degree rotations. By simply
-removing these two rotations in both the code version with and without SIMD
-instructions, a significant increase in performance could be measured in the
-version with SIMD.
+\mypar{Vector Optimizations} Two different strategies to implement SIMD were
+followed. A first approach was to perform the computations of brightness,
+contrast and the corresponding error for all four rotations for each
+domain-range block pair at once. It was found that a smarter way of using SIMD
+is to compute those values for four different domain blocks at a time in
+addition to processing four pixels at once when computing the sums in equations
+\ref{contrast}, \ref{brightness} and \ref{error}.
 
-One major challenge was to avoid expensive gather instructions like
-``\_mm256\_i64gather\_pd'' and permutations like ``\_mm256\_permute4x64'' as
-much as possible. While it was possible to eliminate the gather operations
-completely by smarter precomputations and better memory layout, the permutations
-across lanes could not be completely eliminated. As a result, the performance of
-the optimized SIMD version was much higher.
+Sadly only adding SIMD instructions did not lead to a better performance in our
+case. The main reason for that result could be found in the 90 and 270 degree
+rotations which were highly inefficient because of memory locations of the
+needed pixels. By simply removing these two rotations in both the code version
+with and without SIMD instructions, a significant increase in performance could
+be measured in the version with SIMD with only a minimal loss in the image
+quality.
+
+To solve the performance issue with the 90 and 270 degrees rotations the task
+was to avoid expensive gather instructions (e.g. ``\_mm256\_i64gather\_pd'').
+With smarter precomputations including a better memory layout which included
+rotating the range blocks instead of the domain blocks we were able to increase
+the performance for the code version with all four rotations. This solution also
+outperformed the previous version where the costly rotations were deleted by an
+order of magnitude.
+
+In addition, an important objective was to avoid using other costly instructions
+like permutations or blends across lanes (e.g. ``\_mm256\_permute4x64'',
+``_mm256_blendv_pd'').
+
+As a result we were able to significantly increase the performance of the image
+compression.
+
+
 
 \mypar{Block Rotations}
 \notepascal{are we still doing this?}
