@@ -98,7 +98,7 @@ as efficient as possible.
 There are many ways to partition an image into range and domain blocks. We require that the range blocks cover the full image and do not overlap, otherwise the
 decompressed image would have uncovered regions. The domain blocks represent the search space for self-similarity and may overlap.
 Increasing the domain block pool $\boldsymbol{D}$ may lead to better transformations but can increase the compression performance significantly.
-A simple approach is brute force block mapping, where each range block is compared with each domain block.\\
+A simple approach is exhaustive block mapping, where each range block is compared with each domain block.\\
 Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), the only requirement is that domain blocks are larger than the range blocks to satisfy the
 contractivity requirement. The most basic version is to choose range blocks of size $s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$, for some
 integer constant $k$.\\
