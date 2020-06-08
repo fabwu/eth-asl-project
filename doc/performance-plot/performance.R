@@ -176,12 +176,12 @@ runtime_plot = baseplot +
     ggtitle("Runtime") +
     geom_line(aes(y=cycles), lwd=2) +
     geom_point(aes(y=cycles), lwd=4) +
-    scale_y_continuous(name=("[cycles]"))
+    coord_cartesian(ylim = c(0, 2e+12))
 
 ## Flops plot
 flops_plot = baseplot +
     ggtitle("Flops") +
-    geom_line(aes(y=flops), lwd=2) +
+    geom_line(aes(y=flops, linetype=executable), lwd=2) +
     geom_point(aes(y=flops), lwd=4) +
     scale_y_continuous(name=("[flops]"))
 
