@@ -3,26 +3,26 @@ library(svglite)
 
 executables = c(
     ## "40_ilp_norot_90_270"
-    "41_simd_norot_90_270"
+    "51_simd_improved_rot"
 )
 
 flags = c(
 
   # changing main flags (with 40/41) -> Ofast/O3 wins
-  "gcc_O1_fma",
-  "gcc_O2_fma",
-  "gcc_O3_fma",
-  "gcc_Ofast_fma"
+  "gcc_O1",
+  "gcc_O2",
+  "gcc_O3",
+  "gcc_Ofast"
 
   # icc vs gcc (with 40) -> gcc wins
   ## "gcc_O3",
   ## "icc_O3",
-  ## "icc_Ofast_fma",
-  ## "gcc_Ofast_fma"
+  ## "icc_Ofast",
+  ## "gcc_Ofast"
 
   # unroll (with 40/41) -> no effect
-  ## "gcc_O3_fma_unroll",
-  ## "gcc_O3_fma"
+  ## "gcc_O3_unroll",
+  ## "gcc_O3"
 )
 
 ## one
@@ -63,16 +63,6 @@ for (exe in executables) {
 
     ## read files
     files = c(
-      ## new images
-      ## paste("data/", exe, "/lion_64.csv", sep=""),
-      ## paste("data/", exe, "/lion_128.csv", sep=""),
-      ## paste("data/", exe, "/lion_256.csv", sep=""),
-      ## paste("data/", exe, "/lion_512.csv", sep=""),
-      ## paste("data/", exe, "/lion_1024.csv", sep=""),
-      ## paste("data/", exe, "/lion_2048.csv", sep=""),
-      ## paste("data/", exe, "/lion_4096.csv", sep="")
-
-      paste("data/", flag, "-", exe, "/lion_64.csv", sep=""),
       paste("data/", flag, "-", exe, "/lion_128.csv", sep=""),
       paste("data/", flag, "-", exe, "/lion_256.csv", sep=""),
       paste("data/", flag, "-", exe, "/lion_512.csv", sep=""),
@@ -126,7 +116,7 @@ performance_plot = baseplot +
     geom_line(aes(y=performance), lwd=2) +
     geom_point(aes(y=performance), lwd=4) +
     ggtitle("i7-8650U @ 1.9 GHz") +
-    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,4))
+    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,6))
 
     ## geom_label(aes(x=1800, y=2.4, label = "-O3"),
     ##            label.size = NA,

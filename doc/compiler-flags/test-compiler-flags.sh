@@ -28,9 +28,9 @@ runbenchmarks40(){
 
 
 runbenchmarks41(){
-      cmake --build build --target 41_simd_norot_90_270
+      cmake --build build --target 51_simd_improved_rot
       name="$1"
-      exe="41_simd_norot_90_270"
+      exe="51_simd_improved_rot"
       for img in ${images[@]}
       do
             echo "--------------------------------"
@@ -44,70 +44,70 @@ runbenchmarks41(){
       done
 }
 
-# echo "----------------------------"
-# echo "  gcc_Ofast_fma"
-# echo "----------------------------"
-# cmake -DCMAKE_BUILD_TYPE=Release \
-#       -DICC=NO \
-#       -DOPT_ARCH=YES \
-#       -DOPT_O1=NO \
-#       -DOPT_O2=NO \
-#       -DOPT_O3=NO \
-#       -DOPT_OFAST=YES \
-#       -DOPT_FMA=YES \
-#       -DOPT_UNROLL_LOOPS=NO \
-#       -B build/
-# runbenchmarks40 "gcc_Ofast_fma"
-# runbenchmarks41 "gcc_Ofast_fma"
+echo "----------------------------"
+echo "  gcc_Ofast"
+echo "----------------------------"
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DICC=NO \
+      -DOPT_ARCH=YES \
+      -DOPT_O1=NO \
+      -DOPT_O2=NO \
+      -DOPT_O3=NO \
+      -DOPT_OFAST=YES \
+      -DOPT_FMA=YES \
+      -DOPT_UNROLL_LOOPS=NO \
+      -B build/
+runbenchmarks40 "gcc_Ofast"
+runbenchmarks41 "gcc_Ofast"
 
 
-# echo "----------------------------"
-# echo "  gcc_03_fma_unroll "
-# echo "----------------------------"
-# cmake -DCMAKE_BUILD_TYPE=Release \
-#       -DICC=NO \
-#       -DOPT_O1=NO \
-#       -DOPT_O2=NO \
-#       -DOPT_O3=YES \
-#       -DOPT_OFAST=NO \
-#       -DOPT_FMA=YES \
-#       -DOPT_UNROLL_LOOPS=YES \
-#       -B build/
-# runbenchmarks40 "gcc_O3_fma_unroll"
-# runbenchmarks41 "gcc_O3_fma_unroll"
+echo "----------------------------"
+echo "  gcc_03_unroll "
+echo "----------------------------"
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DICC=NO \
+      -DOPT_O1=NO \
+      -DOPT_O2=NO \
+      -DOPT_O3=YES \
+      -DOPT_OFAST=NO \
+      -DOPT_FMA=YES \
+      -DOPT_UNROLL_LOOPS=YES \
+      -B build/
+runbenchmarks40 "gcc_O3_unroll"
+runbenchmarks41 "gcc_O3_unroll"
 
 
-# echo "----------------------------"
-# echo "  gcc_O3_fma"
-# echo "----------------------------"
-# cmake -DCMAKE_BUILD_TYPE=Release \
-#       -DICC=NO \
-#       -DOPT_ARCH=YES \
-#       -DOPT_O1=NO \
-#       -DOPT_O2=NO \
-#       -DOPT_O3=YES \
-#       -DOPT_OFAST=NO \
-#       -DOPT_FMA=YES \
-#       -DOPT_UNROLL_LOOPS=NO \
-#       -B build/
-# runbenchmarks40 "gcc_O3_fma"
-# runbenchmarks41 "gcc_O3_fma"
+echo "----------------------------"
+echo "  gcc_O3"
+echo "----------------------------"
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DICC=NO \
+      -DOPT_ARCH=YES \
+      -DOPT_O1=NO \
+      -DOPT_O2=NO \
+      -DOPT_O3=YES \
+      -DOPT_OFAST=NO \
+      -DOPT_FMA=YES \
+      -DOPT_UNROLL_LOOPS=NO \
+      -B build/
+runbenchmarks40 "gcc_O3"
+runbenchmarks41 "gcc_O3"
 
 
-# echo "----------------------------"
-# echo "  gcc_03"
-# echo "----------------------------"
-# cmake -DCMAKE_BUILD_TYPE=Release \
-#       -DICC=NO \
-#       -DOPT_O1=NO \
-#       -DOPT_O2=NO \
-#       -DOPT_O3=YES \
-#       -DOPT_OFAST=NO \
-#       -DOPT_FMA=NO \
-#       -DOPT_UNROLL_LOOPS=NO \
-#       -B build/
-# runbenchmarks40 "gcc_O3"
-# # no fma runbenchmarks41 "gcc_O3"
+echo "----------------------------"
+echo "  gcc_03_no_fma"
+echo "----------------------------"
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DICC=NO \
+      -DOPT_O1=NO \
+      -DOPT_O2=NO \
+      -DOPT_O3=YES \
+      -DOPT_OFAST=NO \
+      -DOPT_FMA=NO \
+      -DOPT_UNROLL_LOOPS=NO \
+      -B build/
+runbenchmarks40 "gcc_O3_no_fma"
+# no fma runbenchmarks41 "gcc_O3"
 
 
 # echo "############################"
@@ -117,37 +117,37 @@ runbenchmarks41(){
 # echo "############################"
 
 
-# echo "----------------------------"
-# echo "  icc_Ofast_fma"
-# echo "----------------------------"
-# cmake -DCMAKE_BUILD_TYPE=Release \
-#       -DICC=YES \
-#       -DOPT_ARCH=YES \
-#       -DOPT_O1=NO \
-#       -DOPT_O2=NO \
-#       -DOPT_O3=NO \
-#       -DOPT_OFAST=YES \
-#       -DOPT_FMA=YES \
-#       -DOPT_UNROLL_LOOPS=NO \
-#       -B build/
-# runbenchmarks41 "icc_Ofast_fma"
-# runbenchmarks40 "icc_Ofast_fma"
+echo "----------------------------"
+echo "  icc_Ofast"
+echo "----------------------------"
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DICC=YES \
+      -DOPT_ARCH=YES \
+      -DOPT_O1=NO \
+      -DOPT_O2=NO \
+      -DOPT_O3=NO \
+      -DOPT_OFAST=YES \
+      -DOPT_FMA=YES \
+      -DOPT_UNROLL_LOOPS=NO \
+      -B build/
+runbenchmarks41 "icc_Ofast"
+runbenchmarks40 "icc_Ofast"
 
 
-# echo "----------------------------"
-# echo "  icc_03"
-# echo "----------------------------"
-# cmake -DCMAKE_BUILD_TYPE=Release \
-#       -DICC=NO \
-#       -DOPT_O1=NO \
-#       -DOPT_O2=NO \
-#       -DOPT_O3=YES \
-#       -DOPT_OFAST=NO \
-#       -DOPT_FMA=NO \
-#       -DOPT_UNROLL_LOOPS=NO \
-#       -B build/
-# runbenchmarks40 "icc_O3"
-# # no fma runbenchmarks41 "icc_O3"
+echo "----------------------------"
+echo "  icc_03_no_fma"
+echo "----------------------------"
+cmake -DCMAKE_BUILD_TYPE=Release \
+      -DICC=NO \
+      -DOPT_O1=NO \
+      -DOPT_O2=NO \
+      -DOPT_O3=YES \
+      -DOPT_OFAST=NO \
+      -DOPT_FMA=NO \
+      -DOPT_UNROLL_LOOPS=NO \
+      -B build/
+runbenchmarks40 "icc_O3_no_fma"
+# no fma runbenchmarks41 "icc_O3"
 
 
 
@@ -156,7 +156,7 @@ runbenchmarks41(){
 ###############################################
 
 echo "----------------------------"
-echo "  gcc_O2_fma"
+echo "  gcc_O2"
 echo "----------------------------"
 cmake -DCMAKE_BUILD_TYPE=Release \
       -DICC=NO \
@@ -168,11 +168,11 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_FMA=YES \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
-runbenchmarks40 "gcc_O2_fma"
-runbenchmarks41 "gcc_O2_fma"
+runbenchmarks40 "gcc_O2"
+runbenchmarks41 "gcc_O2"
 
 echo "----------------------------"
-echo "  gcc_O1_fma"
+echo "  gcc_O1"
 echo "----------------------------"
 cmake -DCMAKE_BUILD_TYPE=Release \
       -DICC=NO \
@@ -184,5 +184,5 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_FMA=YES \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
-runbenchmarks40 "gcc_O1_fma"
-runbenchmarks41 "gcc_O1_fma"
+runbenchmarks40 "gcc_O1"
+runbenchmarks41 "gcc_O1"
