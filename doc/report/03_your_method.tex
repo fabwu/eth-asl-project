@@ -139,13 +139,28 @@ Finally, we did some experiments with blocking but could not improve performance
 improvement as the roofline plot showed that we are compute bound so we abandoned any further experiments in
 that direction.
 
-These are all scalar optimizations we applied to the baseline implementation and in the next paragraph we 
+These are all scalar optimizations we applied to the baseline implementation and in the next paragraph we
 discuss further improvements using vector instructions.
 \notejonas{Eventuell bei Beginn der Section erwähnen?}
 \notejonas{Vielleicht rotationen expliziter erwähnen, dh dass wir die nicht mehr im memory speichern?}
 
-\mypar{Vector Optimizations}
+\mypar{Vector Optimizations} Different approaches to implement SIMD were
+followed. In most successful implementation the computation of brightness,
+contrast and error of one range block was performed for four domain blocks at a
+time. Sadly only adding SIMD instructions did not lead to a better performance.
+The reason for that could be found in the 90 and 270 degree rotations. By simply
+removing these two rotations in both the code version with and without SIMD
+instructions, a significant increase in performance could be measured in the
+version with SIMD.
+
+One major challenge was to avoid expensive gather instructions like
+``\_mm256\_i64gather\_pd'' and permutations like ``\_mm256\_permute4x64'' as
+much as possible. While it was possible to eliminate the gather operations
+completely by smarter precomputations and better memory layout, the permutations
+across lanes could not be completely eliminated. As a result, the performance of
+the optimized SIMD version was much higher.
 
 \mypar{Block Rotations}
-
+\notepascal{are we still doing this?}
 \mypar{Strided Access}
+\notepascal{are we still doing this?}
