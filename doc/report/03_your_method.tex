@@ -1,8 +1,14 @@
-\section{Methodology}\label{sec:yourmethod}
+\section{Proposed method}\label{sec:yourmethod}
 
-In this section we define the scope of our implementation, describe the baseline
-implementation and its bottlenecks and outline the steps which were followed to
-increase the performance. At the end the remaining performance blockers.
+This section defines the scope of our implementation, describes our initial baseline
+implementation, analyzes its bottlenecks and outlines the steps which were followed to
+increase performance.
+
+\mypar{Scope}
+In our project, we focus on grayscale of size $S \times S$, where $S$ is a power of two.
+We use quadtree partitioning with maximum depth $7$, error threshold $\epsilon = 300$ and ensure
+that the range blocks do not get smaller than $4 \times 4$ pixels which simplifies vectorization.
+We furthermore use exhaustive block mapping to search for suitable transformations.
 
 \mypar{Basic implementation}
 The baseline is written from scratch in C using an iterative quadtree approach.
@@ -46,6 +52,8 @@ In order to see if our baseline achieves a reasonable performance, we compared i
 a popular C\texttt{++} implementation from GitHub \cite{github-cpp}. We used the same infrastructure to benchmark
 the C\texttt{++} code and our baseline performed slightly better (see !!!ADD LINE TO PERFORMANCEPLOT!!!).
 
+\notejonas{Erwähnen wieso iterativ und nicht rekursiv (memory nicht doppelt so gross)}
+
 \mypar{Scope} For our implementation only square grayscale images with a power
 of two width and height were considered. The reason for the restriction on the
 size is that it simplifies \textit{Quadtree Partitioning}. If the width of a
@@ -63,14 +71,21 @@ performance. The bandwidth $\beta$ was measured with the STREAM benchmark \cite{
 performance and the bandwidth with the Empirical Roofline Tool \cite{ert}, which confirmed the values.
 
 For the program model, we need to measure the work $W$, the runtime $T$ and the data move movement $Q$ of
-the algorithm. As the decisions made by the quadtree algorithm differ from image to image, the program
-model depends not only on the size but also on the content of an image. Therefore, we define the three 
+the algorithm. Due to the dynamic nature of quadtree, the model does not only depend on the image size 
+but also on the content of the image itself. Therefore, we define the three 
 quantities as $W=W(S, img)$, $T=T(S, img)$ and $Q=Q(S, img)$, where $S$ and $img$ are define as in 
 \ref{alg:baseline}. We measured $W$ by instrumenting the code according to the cost metric \ref{eq:cost}.
 For measuring $T$, we used the \texttt{RDTSC} instruction available on all x86 architecture and disabled
 Turbo Boost to guarantee an integer runtime. The measurement of $Q$ is the most challenging and requires
-performance counters which are not supported by our hardware. Thus, we assumed that the image has to be
-loaded at least once so we derived a very optimistic lower bound of $Q \geq 8 \cdot S^2$.
+performance counters which are not supported by our hardware. A correct, yet too pessimistic lower bound for $Q$
+is $Q \geq 8 \cdot S^2$ because we have to load the image once from memory. One of our group members
+developed a tool to simulate a program's memory accesses throughout the course, supporting multi-level caches \cite{github-cache}.\\
+We simulated our scalar-optimized code with this tool for the hardware we run our benchmarks on, 
+which should give us a tighter lower bound for $Q$. 
+This simulation is still too pessimistic for the non-optimized code but more accurate for our scalar-optimized and vectorized code. 
+Our experiments showed that for small images ($\leq 512 \times 512$), our theoretical bound holds well. 
+It is no surprise that for larger images ($\geq 1024 \times 1024$) the theoretical bound is way too pessimistic
+because these images do not entirely fit into L3 cache of our hardware anymore, which leads to more traffic between main memory and cache.
 
 To place the baseline in the roofline plot, we calculated the \textit{operational intensity}
 $$
@@ -79,7 +94,7 @@ $$
 and the \textit{performance}
 $$P=\frac{W}{T}$$
 of our implementation. Figure \ref{fig:roofline} shows the 
-roofline plot. One can see that the baseline is inherently compute bound and we have good potential for
+roofline plot for a specific image with different sizes. One can see that the baseline is inherently compute bound and we have good potential for
 performance improvement as the baseline runs only at 12.5\% of scalar peak performance. Next, we use 
 profiling to find the performance bottlenecks of the code.
 
@@ -89,16 +104,15 @@ profiling to find the performance bottlenecks of the code.
   \label{fig:roofline}
 \end{figure}
 
-\mypar{Hotspots} A major performance blocker is obviously the brute force search to find a matching domain
-block for each range block. As discussed in section \ref{sec:intro} using a better search strategy is more
-an algorithmic improvement instead of a performance optimization. The focus of this work is work is strictly
-on performance so we decided to not replace the brute force search.
+\mypar{Hotspots} A major performance blocker is the exhaustive search for block matches.
+In our project, we focus solely on performance, 
+whereas using a better search strategy as mentioned in section \ref{sec:intro} is an algorithmic improvement.
 
 When inspecting the code of the baseline, it is apparent that the majority of the work
-is done, when calculating the contrast, brightness and error of each range/domain-block pair 
-(see equations \ref{contrast}, \ref{brightness} and \ref{error}). We used \textit{Valgrind} 
+is done when calculating the contrast, brightness and error of each range/domain block pair 
+(equations \ref{contrast}, \ref{brightness} and \ref{error}). We used \textit{Valgrind} 
 \cite{valgrind} to profile the code and the profiling report confirmed our assumption. Especially, the sums
-over all pixel of a block were identified as hotspots so we started our optimizations there.
+over all pixels of a block were identified as hotspots so we started our optimizations there.
 
 \mypar{Scalar Optimizations} As a first optimization we moved the calculation of the sums $\sum_{i=1}^n a_i$, 
 $\sum_{i=1}^n a_i^2$, $\sum_{i=1}^n b_i$ and $\sum_{i=1}^n b_i^2$ out of the nested loop 
@@ -127,6 +141,8 @@ that direction.
 
 These are all scalar optimizations we applied to the baseline implementation and in the next paragraph we 
 discuss further improvements using vector instructions.
+\notejonas{Eventuell bei Beginn der Section erwähnen?}
+\notejonas{Vielleicht rotationen expliziter erwähnen, dh dass wir die nicht mehr im memory speichern?}
 
 \mypar{Vector Optimizations}
 
