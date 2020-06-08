@@ -9,6 +9,12 @@ Experimented with block-wise domain/range block traversal.
 
 \mypar{Pascal} \dots
 
-\mypar{Fabian} \dots
+\mypar{Fabian} Added rotations to baseline. Created roofline plot and compared baseline to reference 
+implementation. ILP and index optimizations for $\sum_{i=1}^n a_i b_i$ calculation. 
 
-\notefabian{Should we mention Janis?}
+Implemented parts of four-domain-blocks-a-time SIMD (tricky part was error calculcation with 
+\verb|blendv| and mask) and participated in bringing the two SIMD approaches together. 
+Helped increasing performance regarding 90 and 270 degree rotations.
+
+\mypar{Janis} Changed baseline from C\texttt{++} to C and started with the implementation of a fast queue.
+Due to personal problems he withdrew from the project.
