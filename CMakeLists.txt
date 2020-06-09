@@ -10,19 +10,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}) # place binaries in buil
 # default flags (they get extended by options)
 #
 set(DEFAULT_FLAGS "-Wall -lboost_program_options -mavx2 -mfma")
-set(RELEASE_FLAGS "-DNDEBUG -march=native")
+set(RELEASE_FLAGS "-DNDEBUG")
 set(DEBUG_FLAGS "-g -O0")
 
 # see here: https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
 
-option(OPT_ARCH "optimize for arch" ON)
+option(ICC "use intel compiler" OFF)
+option(OPT_ARCH "optimize for arch" OFF)
 option(OPT_O1 "O1" OFF)
 option(OPT_O2 "O2" OFF)
 option(OPT_O3 "O3" OFF)
 option(OPT_OFAST "OFast" OFF)
-option(OPT_FMA "fma" OFF)
+option(OPT_FMA "fma" ON)
 option(OPT_UNROLL_LOOPS "unroll loops" OFF)
-
 
 if(ICC)
   set(CMAKE_CXX_COMPILER "/opt/intel/bin/icpc")
@@ -33,6 +33,9 @@ if(ICC)
   set(CMAKE_CXX_FLAGS_RELEASE ${INTEL_OPTIMIZATION_FLAGS})
 endif(ICC)
 
+if (OPT_ARCH)
+  set(RELEASE_FLAGS "${RELEASE_FLAGS} -march=native")
+endif(OPT_ARCH)
 
 if (OPT_O1)
   set(RELEASE_FLAGS "${RELEASE_FLAGS} -O1")

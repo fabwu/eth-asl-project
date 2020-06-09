@@ -8,26 +8,61 @@ GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
 4-way associative L2 cache and 4$\times$2 MB 16-way associative L3 cache
 \cite{intel-opt-manual}.
 
+We chose to benchmark our algorithm with a challenging image depicting a lion
+with its cub (\cite{lions}). While some parts of the image, for example the
+background, are not quite as hard, their faces to contain a lot of little lines,
+dots and other details. As a result, relatively small range blocks are needed to
+achieve a reasonable output. Figure \ref{fig:lions} shows the output of the
+vectorized code with all four rotations and with error threshold 100 and 3
+decompression iterations. For the benchmarks, an error threshold of 300 was used
+which means that the quality of the compression is slightly worse but the
+running time is shorter.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[page=1, width=.45\textwidth]{lion_512_51_e100}
+  \caption{Decompressed Image}
+  \label{fig:lions}
+\end{figure}
+
+\notepascal{should we talk about the PSNR and number of iterations more?}
+
 \mypar{Compiler Flags} Several benchmarks were conducted comparing the achieved
 performance using different compiler flags for the \textit{GNU Compiler
   Collection (gcc)} version 9.3.0 and the \textit{Intel C++ Compiler (icc)}
-version 19.1.1.217.
+version 19.1.1.217. For all tests \textsc{-march=native} was set.
 
-While the flags ``-O1'' and ``-O2'' both increased the performance
-significantly, the result for ``-O3'' was only marginally better and hardly no
-difference could be observed with the flag ``-Ofast''. Intel's compiler did not
-perform as good as gcc, especially with ``-O3'' and ``-Ofast''.
+For both the scalar and the vectorized versions the flag \textsc{-O1} increased
+the performance significantly. While \textsc{-O2}, \textsc{-O3} and
+\textsc{-Ofast} did come with small improvements for the scalar version (figure
+\ref{fig:perf_scal}), they did not make measurable difference for the vectorized
+version (figure \ref{fig:perf_vec}).
 
-\notepascal{write about icc, fma, unroll}
+Intel's compiler was never able to outperform gcc but at least for the
+vectorized version it managed to keep up for the larger images (figure\ref{fig:perf_gcc_vs_icc})
 
-\begin{figure}[ht]
-  \includegraphics[page=1, width=.45\textwidth]{compiler-flags}
-  \caption{GCC Compiler Flags}
+\begin{figure}[H]
+  \includegraphics[page=1, width=.45\textwidth]{performance_scalar_opts}
+  \caption{Optimization Flags - Scalar Version}
+  \label{fig:perf_vec}
 \end{figure}
+
+\begin{figure}[H]
+  \includegraphics[page=1, width=.45\textwidth]{performance_vectorized_opts}
+  \caption{Optimization Flags - Vectorized Version}
+  \label{fig:perf_scal}
+\end{figure}
+
+\begin{figure}[H]
+  \includegraphics[page=1, width=.45\textwidth]{performance_gcc_vs_icc}
+  \caption{GCC vs ICC}
+  \label{fig:perf_gcc_vs_icc}
+\end{figure}
+
 
 \mypar{Performance}
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
   \includegraphics[page=1, width=.45\textwidth]{performance}
   \caption{Performance}
 \end{figure}
