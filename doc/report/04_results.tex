@@ -10,7 +10,7 @@ GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
 
 For all our benchmarks, we chose our quadtree parameters to be $M=8$ and $\epsilon=300$.
 \notejonas{Im Code ist M=7 aber dort beginne wir bei 0 zu zählen oder?}
-\notejonas{Ich habe den Hinweis mit der schlechten Bildquali weggelassen. 
+\notejonas{Ich habe den Hinweis mit der schlechten Bildquali weggelassen.
 Irgendwie ist das ja eigentlich gar nicht wichtig? Aber bin mir auch nicht so sicher}
 
 We chose to benchmark our algorithm with a challenging image depicting a lioness
@@ -32,17 +32,14 @@ decompression iterations.
 \mypar{Compiler Flags} Several benchmarks were conducted comparing the achieved
 performance using different compiler flags for the \textit{GNU Compiler
   Collection (gcc)} version 9.3.0 and the \textit{Intel C++ Compiler (icc)}
-version 19.1.1.217. For all tests \textsc{-march=native} was set.
+version 19.1.1.217. For all tests \texttt{-march=native} was set.
 
-For both the scalar and the vectorized versions the flag \textsc{-O1} increased
-the performance significantly. While \textsc{-O2}, \textsc{-O3} did come with
+For both the scalar and the vectorized versions the flag \texttt{-O1} increased
+the performance significantly. While \texttt{-O2}, \textsc{-O3} did come with
 small improvements for the scalar version (figure \ref{fig:perf_scal}), they did
 not make measurable difference for the vectorized version (figure
-\ref{fig:perf_vec}). \textsc{-Ofast} was not able increase performance at all
+\ref{fig:perf_vec}). \texttt{-Ofast} was not able increase performance at all
 for neither versions.
-
-Intel's compiler was never able to outperform gcc but at least for the
-vectorized version it managed to keep up for the larger images (figure\ref{fig:perf_gcc_vs_icc})
 
 \begin{figure}[H]
   \includegraphics[page=1, width=.45\textwidth]{performance_scalar_opts}
@@ -56,19 +53,39 @@ vectorized version it managed to keep up for the larger images (figure\ref{fig:p
   \label{fig:perf_vec}
 \end{figure}
 
+Intel's compiler was not able to outperform gcc but at least for the vectorized
+version it managed to keep up for the larger images as shown in figure
+\ref{fig:perf_gcc_vs_icc}.
+
 \begin{figure}[H]
   \includegraphics[page=1, width=.45\textwidth]{performance_gcc_vs_icc}
-  \caption{GCC vs ICC}
+  \caption{GCC vs. ICC}
   \label{fig:perf_gcc_vs_icc}
 \end{figure}
 
-
-\mypar{Performance}
+\mypar{Performance} The performance and runtime plots for the main four code
+versions (which all make use off all four rotations) are shown in figure
+\ref{fig:perf} and \ref{fig:runtime}. The improved vectorized implementation has
+a performance roughly eight times as high as the baseline and about twice the
+performance of the scalar optimized version. Also the runtime, which became
+infeasible for the baseline with large images, is halved for the vectorized
+implementation compared to the scalar optimized version. The plots also
+illustrate that the first straightforward SIMD implementation only improved
+performance and runtime marginally.
 
 \begin{figure}[!ht]
   \includegraphics[page=1, width=.45\textwidth]{performance}
-  \caption{Performance}
+  \caption{Performance Plot}
+  \label{fig:perf}
 \end{figure}
+
+
+\begin{figure}[!ht]
+  \includegraphics[page=1, width=.45\textwidth]{runtime}
+  \caption{Runtime Plot}
+  \label{fig:runtime}
+\end{figure}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

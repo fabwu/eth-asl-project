@@ -15,7 +15,7 @@
 % set pdf attributes
 \usepackage[pdftex,
 pdftitle={Fractal Image Compression},
-pdfauthor={Fabian Wuethrich, Jonas Hansen, Pascal Huber},
+pdfauthor={Jonas Hansen, Pascal Huber, Fabian Wuethrich},
 pdfkeywords={ETH, Fastcode, ASL, Fractal Image Compression}
 ]{hyperref}
 
@@ -49,3 +49,8 @@ pdfkeywords={ETH, Fastcode, ASL, Fractal Image Compression}
     citecolor={blue!50!black},
     urlcolor={blue!50!black}
 }
+
+% When referencing an image and clicking on the link, jump to the top of the
+% image and not to the caption below the image.
+\usepackage{hyperref}
+\usepackage[all]{hypcap}
