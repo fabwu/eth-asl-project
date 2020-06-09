@@ -1,10 +1,11 @@
-\section{Background on the Algorithm/Application}\label{sec:background}
+\section{Background}\label{sec:background}
 To introduce the algorithm, we first touch a glimpse of the underlying theory, then show how one can apply
-it to compress images and then finally show practical considerations for the implementation. \\
-Many parts of this chapter uses notations from Fisher \cite{fisher2012}.
+it to compress images and then finally show practical considerations for the implementation.
+For this chapter we use the notation from Fisher \cite{fisher2012}.
+
 \mypar{Iterated function systems (IFS)}
-Fractal image compression builds on the theory of iterated function systems (IFS). For completeness,
-we provide a short introduction to this richt topic.
+Fractal image compression builds on the theory of iterated function systems. For completeness,
+we provide a short introduction to this rich topic.
 \begin{definition}[Contractivity of functions]
     A function $f$ on a metric space $X$ with metric $d$ is contractive, when there exists some $0 \leq k < 1$
     such that for all $x,y \in X: d(f(x), f(y)) \leq k \cdot d(x,y)$.
@@ -13,10 +14,10 @@ As an informal example, when $f$ is a contractive function on $\R$, then mapping
 i.e. their distance gets smaller.
 \begin{definition}[Iterated function system]
     An iterated function system (IFS) is a set of $n$ functions $$\{f_i:X \to X | i=1,...,n\}$$
-    where each $f_i$ is contractive and $X$ is a metric space with metric function $d$.
+    where each $f_i$ is contractive and $X$ is a metric space with the metric $d$.
 \end{definition}
 \begin{definition}[Hutchinson operator]
-    The Hutchinson operater for an IFS is the function
+    The Hutchinson operator for an IFS is the function
     \begin{align*}
         F \colon 2^X &\to 2^X\\
         x &\mapsto \bigcup_{i=1}^n f_i(x)
@@ -36,7 +37,7 @@ the essential theoretical part how fractal image compression works.
     \end{enumerate}
 \end{theorem}
 Note that in the theorem above, we require that $X$ is a compact set, which holds for fractal image compression.
-\\
+
 \mypar{From IFS to image compression}
 The key idea in fractal image compression is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in this context called transformations) on the image.
 From theorem \ref{theorem-fixpoint}, we then know that some unique attractor $A$ exists. If the transformations $\boldsymbol{W}$ are chosen in a way such that the attractor $A$ is the original image,
@@ -62,23 +63,24 @@ $$
 w_i(D_i) = \bigcup_{(x,y,z) \in f \cap (D_i \times I)} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
 $$
 where $a_i, b_i, c_i, d_i, e_i, f_i$ map \textit{location} (which can involve rotations) and $s_i, o_i$ correspond to contrast and brightness adjustments.
-In order that $w_i$ is contractive, it is necessary that $D_i$ is larger than $R_i$ (in terms of region sizes) and that $0 \leq s_i < 1$.
-\\
-We now can define a metric to compare two images (or two blocks). Usually, the root mean square error (RMS) metric is used:
+To ensure that $w_i$ is contractive, $D_i$ has to be larger than $R_i$ (in terms of region sizes) and $0 \leq s_i < 1$.
+
+Now we define a metric to compare two images (or two blocks). Usually, the root mean square error (RMS) metric is used:
 $$
 d_{RMS}(f,g) = \sqrt{\int_{I^2} (f(x,y)-g(x,y))dxdy}
 $$
 For a range block $R_i$ and domain block $D_i$ we now seek the transformation $w_i$, such that $d_{RMS}(w_i(D_i), f \cap (R_i \times I))$ is minimal, i.e.
-$$
+\begin{equation} \label{eq:min-problem}
     w_i = \argmin_{w} \left( d_{RMS}(w(D_i), f \cap (R_i \times I)) \right)
-$$
+\end{equation}
 Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and $o_i$ in order to minimize the error.\\
 The set of all transformations is a partitioned iterated function system (PIFS). The only difference to an IFS is that the transformations are restricted
 to \textit{blocks} (partitions) of the image. However, the underlying theory still holds \cite{fisher2012}.
 
 \mypar{Practical implementation} \label{par-practical-implementation}
 In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
-The minimization problem described before can be solved using least squares regression, as done in \cite{github-python}.
+\notefabian{Ist unser Bild nicht 0...255?}
+The minimization problem in equation \ref{eq:min-problem} can be solved using least squares regression, as done in \cite{github-python}.
 Fisher uses an analytical solution in \cite{fisher2012} to compute the adjustments directly. Let $b_1, ..., b_n$ be the $n$ pixel values of the range block $R_i$
 and $a_i,...,a_n$ be the $n$ pixel values of the downsampled and rotated domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
 $$
@@ -98,20 +100,23 @@ as efficient as possible.
 There are many ways to partition an image into range and domain blocks. We require that the range blocks cover the full image and do not overlap, otherwise the
 decompressed image would have uncovered regions. The domain blocks represent the search space for self-similarity and may overlap.
 Increasing the domain block pool $\boldsymbol{D}$ may lead to better transformations but can increase the compression performance significantly.
-A simple approach is exhaustive block mapping, where each range block is compared with each domain block.\\
-Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), the only requirement is that domain blocks are larger than the range blocks to satisfy the
-contractivity requirement. The most basic version is to choose range blocks of size $s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$, for some
-integer constant $k$.\\
-In practice, quadtree partitioning is considedered a reasonable reference point for more advanced partitioning schemes \cite{fisher2012}.
-It dynamicaly adapts range and domain block sizes by a predefined RMS error threshold $\epsilon$.
+
+A simple approach is exhaustive block mapping, where each range block is compared with each domain block. Blocks can be of various sizes and shapes 
+(quadratic, rectangular, etc.), but domain blocks must be larger than range blocks to satisfy the contractivity requirement. For example the code in \cite{github-python}, 
+uses quadratic range blocks of size $s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$ for some integer constant $k > 1$.
+
+In practice, quadtree partitioning is considered a reasonable reference point for more advanced partitioning schemes \cite{fisher2012}.
+It dynamically adapts range and domain block sizes by a predefined error threshold $\epsilon$.
 We start with some initial (quadratic) range blocks of size $s \times s$, and domain blocks of size $2s \times 2s$.
 When there is a range block for which all domain blocks exceed the threshold $\epsilon$, we partition
 the range block into 4 smaller blocks of size $s/2 \times s/2$ and try to cover them again with domain blocks of size $s \times s$.
-This scheme has the effect that (potentially larger) homogenuous regions of the image are covered with few transformations while image
+This scheme has the effect that (potentially larger) homogeneous regions of the image are covered with few transformations while image
 regions with details are covered with transformations which map smaller blocks.
 Usually, one defines also a maximum depth of the quadtree as described in \cite{fisher2012}.
 
-\mypar{Cost analysis} We provide a pessimistic upper bound on the cost for our
+\mypar{Cost analysis} 
+
+We provide a pessimistic upper bound on the cost for our
 algorithm where we assume that no transformation will yield an error below
 the threshold and thus the only termination criteria is the maximum quadtree
 depth. In practice, the cost will be (much) lower assuming a reasonable error
