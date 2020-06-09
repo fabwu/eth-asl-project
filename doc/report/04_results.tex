@@ -8,16 +8,18 @@ GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
 4-way associative L2 cache and 4$\times$2 MB 16-way associative L3 cache
 \cite{intel-opt-manual}.
 
+For all our benchmarks, we chose our quadtree parameters to be $M=8$ and $\epsilon=300$.
+\notejonas{Im Code ist M=7 aber dort beginne wir bei 0 zu zählen oder?}
+\notejonas{Ich habe den Hinweis mit der schlechten Bildquali weggelassen. 
+Irgendwie ist das ja eigentlich gar nicht wichtig? Aber bin mir auch nicht so sicher}
+
 We chose to benchmark our algorithm with a challenging image depicting a lioness
 with its cub (\cite{lions}). While some parts of the image, for example the
 background, are not quite as hard, their faces to contain a lot of little lines,
 dots and other details. As a result, relatively small range blocks are needed to
 achieve a reasonable output. Figure \ref{fig:lions} shows the output of the
-vectorized code with all four rotations and with error threshold 100 and 3
-decompression iterations. For the benchmarks, an error threshold of 300 was used
-which means that the quality of the compression is slightly worse but the
-running time is shorter.
-
+vectorized code with all four rotations and with $\epsilon=100$ and 3
+decompression iterations.
 \begin{figure}[H]
   \centering
   \includegraphics[page=1, width=.45\textwidth]{lion_512_51_e100}
