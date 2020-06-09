@@ -2,21 +2,20 @@ library(ggplot2)
 library(svglite)
 
 executables = c(
-    ## "40_ilp_norot_90_270"
-    "51_simd_improved_rot"
+  ## "40_ilp_norot_90_270"
+  "51_simd_improved_rot"
 )
 
 flags = c(
 
-  # changing main flags (with 40/41) -> Ofast/O3 wins
+  # changing main flags (with 51) -> Ofast/O3 wins
+  "gcc",
   "gcc_O1",
   "gcc_O2",
   "gcc_O3",
   "gcc_Ofast"
 
-  # icc vs gcc (with 40) -> gcc wins
-  ## "gcc_O3",
-  ## "icc_O3",
+  # icc vs gcc (with both)
   ## "icc_Ofast",
   ## "gcc_Ofast"
 
@@ -24,27 +23,6 @@ flags = c(
   ## "gcc_O3_unroll",
   ## "gcc_O3"
 )
-
-## one
-    ## "0_baseline",
-    ## "25_ilp",
-    ## "35_simd"
-
-## two
-   ## "0_baseline",
-    ## "31_simd_precomp_rotations_no_bac_simd",
-    ## "40_ilp_norot_90_270",
-    ## "41_simd_norot_90_270"
-
-
-## "35_simd",
-## "31_simd_precomp_rotations_no_bac_simd",
-## "40_ilp_norot_90_270",
-## "41_simd_norot_90_270"
-
-## 31=better-memory-access
-## 40=ILP_without_90/270
-## 41=SIMD_without_90/270
 
 image_sizes = c(
     64,
@@ -63,6 +41,7 @@ for (exe in executables) {
 
     ## read files
     files = c(
+      paste("data/", flag, "-", exe, "/lion_64.csv", sep=""),
       paste("data/", flag, "-", exe, "/lion_128.csv", sep=""),
       paste("data/", flag, "-", exe, "/lion_256.csv", sep=""),
       paste("data/", flag, "-", exe, "/lion_512.csv", sep=""),
@@ -70,6 +49,7 @@ for (exe in executables) {
       paste("data/", flag, "-", exe, "/lion_2048.csv", sep=""),
       paste("data/", flag, "-", exe, "/lion_4096.csv", sep="")
     )
+
 
     for(i in 1:7){
       if(file.exists(files[i])){
