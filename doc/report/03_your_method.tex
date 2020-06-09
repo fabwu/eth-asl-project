@@ -70,16 +70,6 @@ In order to see if our baseline achieves a reasonable performance, we compared i
 a popular C\texttt{++} implementation from GitHub \cite{github-cpp}. We used the same infrastructure to benchmark
 the C\texttt{++} code and our baseline performed slightly better (see !!!ADD LINE TO PERFORMANCEPLOT!!!).
 
-\mypar{Scope} For our implementation only square grayscale images with a power
-of two width and height were considered. The reason for the restriction on the
-size is that it simplifies \textit{Quadtree Partitioning}. If the width of a
-range block is a power of two and no suitable transformation is found for it,
-then the four new range blocks created by dividing the original range block into
-4 equal parts will also have a power of two width. Colored images can be
-compressed and decompressed in the same manner as grayscale images.
-
-\notepascal{are we sure about the color stuff?}
-
 \mypar{Roofline} We used the roofline model \cite{applying-roofline} to see whether the algorithm is memory or
 compute bound. The peak performance $\pi$ was determined by counting the dispatch
 ports specified in the manual \cite{intel-opt-manual}. We distinguish between scalar and vectorized peak
