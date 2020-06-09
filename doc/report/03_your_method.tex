@@ -6,17 +6,16 @@ increase performance.
 
 \mypar{Scope}
 In our project, we focus on grayscale of size $S \times S$, where $S$ is a power of two.
-We use quadtree partitioning with maximum depth $7$, error threshold $\epsilon = 300$ and ensure
-that the range blocks do not get smaller than $4 \times 4$ pixels which simplifies vectorization.
+Quadtree partitioning with a parameterizable maximum depth $M$ and error threshold $\epsilon$ is used. 
+To simplify vectorization, we also ensure that the range blocks do not get smaller than $4 \times 4$ pixels.
 Furthermore, exhaustive block mapping to search for suitable transformations is used.
-Our focus is solely on compression, which is the main challenge in fractal image compression.
-
+Our focus is solely on compression, which is the performance bottleneck in fractal image compression.
 
 \mypar{Basic implementation}
 The baseline is written from scratch in C.
 
 Algorithm \ref{alg:baseline} illustrates the compression of the algorithm, whose inputs are the image (row-wise array of doubles) of size $S \times S$,
-the max quadtree depth $m$ and the error threshold $\epsilon$.\\
+the max quadtree depth $M$ and the error threshold $\epsilon$.\\
 The function \texttt{partition(image,s)} partitions the image into contiguous non-overlapping blocks of size $s \times s$.
 The function \texttt{quad($R_i$,s)} takes a range block of size $s \times s$ and partitions it into 4 smaller range blocks.
 The function \texttt{compute(image,$R_i$,$D_i$)} computes a transformation with its resulting RMS according to section \ref{sec:background}. 
@@ -29,7 +28,7 @@ and returns the best of the four possible transformations.
 \begin{algorithmic}[1]
   \State $\boldsymbol{T} \gets \{\}$
   \State $\boldsymbol{R} \gets $ \Call{partition}{\texttt{img}, $S/2$}
-    \For{$c=1..m$}
+    \For{$c=1..M$}
         \State $\boldsymbol{D} \gets $ \Call{partition}{\texttt{img}, $S/2^{c-1}$}
         \For{$R_i \in \boldsymbol{R}$}
             \State $err_i \gets \infty, T_i \gets \NULL$
