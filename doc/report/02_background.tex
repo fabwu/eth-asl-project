@@ -1,23 +1,32 @@
 \section{Background}\label{sec:background}
 
-To introduce the algorithm, we first present the underlying mathematical theory
-and show how it can be applied to compress images. Practical considerations for
-the implementation are also covered at the end of this section. Throughout this
-chapter we use the notation from Fisher \cite{fisher2012}.
+To introduce the algorithm, we first present the essential parts of the
+underlying mathematical theory, show how it can be used to compress images and
+what practical considerations must be made for the implementation as shown by
+Fischer \cite{fisher2012}.
 
-\mypar{Iterated function systems (IFS)}
-Fractal image compression builds on the theory of iterated function systems. For completeness,
-we provide a short introduction to this rich topic.
+Practical considerations for the implementation and a cost analysis can be found
+at the end of this section. Throughout this chapter we use the notation from
+Fisher \cite{fisher2012}.
+
+\mypar{Iterated function systems (IFS)} Fractal image compression builds on the
+theory of iterated function systems. For completeness, we provide a short
+introduction to this rich topic.
+
 \begin{definition}[Contractivity of functions]
     A function $f$ on a metric space $X$ with metric $d$ is contractive, when there exists some $0 \leq k < 1$
     such that for all $x,y \in X: d(f(x), f(y)) \leq k \cdot d(x,y)$.
 \end{definition}
-As an informal example, when $f$ is a contractive function on $\R$, then mapping two numbers brings them \textit{closer} together,
-i.e. their distance gets smaller.
+
+As an informal example, when $f$ is a contractive function on $\R$, then mapping
+two numbers brings them \textit{closer} together, i.e. their distance gets
+smaller.
+
 \begin{definition}[Iterated function system]
     An iterated function system (IFS) is a set of $n$ functions $$\{f_i:X \to X | i=1,...,n\}$$
     where each $f_i$ is contractive and $X$ is a metric space with the metric $d$.
 \end{definition}
+
 \begin{definition}[Hutchinson operator]
     The Hutchinson operator for an IFS is the function
     \begin{align*}
@@ -25,12 +34,18 @@ i.e. their distance gets smaller.
         x &\mapsto \bigcup_{i=1}^n f_i(x)
     \end{align*}
 \end{definition}
-With $F^{\circ n}(x)$, we denote the iterative application of $F$ $n$ times on its input $x$, e.g. $F^{\circ 2}(x) = F(F(x))$.
+
+With $F^{\circ n}(x)$, we denote the iterative application of $F$ $n$ times on
+its input $x$, e.g. $F^{\circ 2}(x) = F(F(x))$.
+
 \begin{definition}[Attractor of an IFS]
     Let $A \in X$. When $F(A)=A$, then $A$ is called attractor.
 \end{definition}
-The following theorem about attractors has been proved by Hutchinson in \cite{hutchinson1981fractals} and is
-the essential theoretical part how fractal image compression works.
+
+The following theorem about attractors has been proved by Hutchinson in
+\cite{hutchinson1981fractals} and is the essential theoretical part how fractal
+image compression works.
+
 \begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
     For an IFS on a set $X$ it holds that:
     \begin{enumerate}
@@ -38,22 +53,41 @@ the essential theoretical part how fractal image compression works.
         \item For any nonempty set $S_0 \subset X$ it holds that $A = \lim_{n \to \infty} F^{\circ n}(S_0)$
     \end{enumerate}
 \end{theorem}
-Note that in the theorem above, we require that $X$ is a compact set, which holds for fractal image compression.
 
-\mypar{From IFS to image compression}
-The key idea in fractal image compression is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in this context called transformations) on the image.
-From theorem \ref{theorem-fixpoint}, we then know that some unique attractor $A$ exists. If the transformations $\boldsymbol{W}$ are chosen in a way such that the attractor $A$ is the original image,
-one only needs to store the transformations. For decompression, one can iteratively apply all transformations on any initial starting image, which then converges to the original image to be compressed.\\
-A transformation $w_i$ is defined on a contiguous source region (called domain block) and a contiguous target region (range block) of the image.
-The transformation maps the pixels of the domain block to the pixels of the range block and then applies a brightness and saturation adjustment.\\
-A high-level algorithmic approach for compression is then:
+Note that in the theorem above, we require that $X$ is a compact set, which
+holds for fractal image compression.
+
+\mypar{From IFS to image compression} The key idea in fractal image compression
+is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in
+this context called transformations) on the image. From theorem
+\ref{theorem-fixpoint}, we then know that some unique attractor $A$ exists. If
+the transformations $\boldsymbol{W}$ are chosen in a way such that the attractor
+$A$ is the original image, one only needs to store the transformations. For
+decompression, one can iteratively apply all transformations on any initial
+starting image, which then converges to the original image to be compressed.
+
+A transformation $w_i$ is defined on a contiguous source region (called domain
+block) and a contiguous target region (range block) of the image. The
+transformation maps the pixels of the domain block to the pixels of the range
+block and then applies a brightness and saturation adjustment.
+
+The transformations can then be computed with the following steps.
+
 \begin{enumerate}
-    \item Partition the image into range blocks $\boldsymbol{R}$ and domain blocks $\boldsymbol{D}$.
-    \item For each range block $R_i \in \boldsymbol{R}$, find a transformation $w_i$ with domain block $D_i \in \boldsymbol{D}$
-            such that $w_i(D_i)$ approximates the pixel values of block $R_i$ best.
+  \item Partition the image into range blocks $\boldsymbol{R}$ and domain blocks
+    $\boldsymbol{D}$.
+  \item For each range block $R_i \in \boldsymbol{R}$, find a transformation
+    $w_i$ with domain block $D_i \in \boldsymbol{D}$ such that $w_i(D_i)$
+    approximates the pixel values of block $R_i$ best.
 \end{enumerate}
-\mypar{Computing transformations}
-A grayscale image can be interpreted as a function
+
+Finding the best transformation by comparing all domain/range block pairs is
+called exhaustive block mapping. More elaborate versions like archetype
+classification restrict possible domain block candidates for a given range block
+in order to speed up compression \cite{jacobs1992image}.
+
+\mypar{Transformations} A grayscale image can be interpreted as a function
+
 \begin{align*}
     f \colon I^2 &\to I\\
     (x,y) &\mapsto z = f(x,y)
@@ -79,7 +113,7 @@ Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and $o_
 The set of all transformations is a partitioned iterated function system (PIFS). The only difference to an IFS is that the transformations are restricted
 to \textit{blocks} (partitions) of the image. However, the underlying theory still holds \cite{fisher2012}.
 
-\mypar{Practical implementation} \label{par-practical-implementation}
+\mypar{Computing Transformations} \label{par-practical-implementation}
 In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
 \notefabian{Ist unser Bild nicht 0...255?}
 The minimization problem in equation \ref{eq:min-problem} can be solved using least squares regression, as done in \cite{github-python}.
@@ -98,32 +132,38 @@ is minimal. An analytical solution for $s,o,R$ is:
 Thus, to compute an optimal transformation $w_i$ and the error for a given range block $R_i$ and given domain block $D_i$, one needs to compute the sums above
 as efficient as possible.
 
-\mypar{Image partitioning}
-There are many ways to partition an image into range and domain blocks. We require that the range blocks cover the full image and do not overlap, otherwise the
-decompressed image would have uncovered regions. The domain blocks represent the search space for self-similarity and may overlap.
-Increasing the domain block pool $\boldsymbol{D}$ may lead to better transformations but can increase the compression performance significantly.
+\mypar{Image Partitioning} There are many ways to partition an image into range
+and domain blocks. We require that the range blocks cover the full image and do
+not overlap, otherwise the decompressed image would have uncovered regions. The
+domain blocks represent the search space for self-similarity and may overlap.
+Increasing the domain block pool $\boldsymbol{D}$ may lead to better
+transformations but can increase the compression performance significantly.
+Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), but
+domain blocks must be larger than range blocks to satisfy the contractivity
+requirement. For example the code in \cite{github-python}, uses quadratic range
+blocks of size $s \times s$ and domain blocks of size
+$k\cdot s \times k \cdot s$ for some integer constant $k > 1$.
 
-A simple approach is exhaustive block mapping, where each range block is compared with each domain block. Blocks can be of various sizes and shapes 
-(quadratic, rectangular, etc.), but domain blocks must be larger than range blocks to satisfy the contractivity requirement. For example the code in \cite{github-python}, 
-uses quadratic range blocks of size $s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$ for some integer constant $k > 1$.
+\mypar{Quadtree Parititioning} In practice, quadtree partitioning is considered
+a reasonable reference point for more advanced partitioning schemes
+\cite{fisher2012}. It dynamically adapts range and domain block sizes by a
+predefined error threshold $\epsilon$. We start with some initial (quadratic)
+range blocks of size $s \times s$, and domain blocks of size $2s \times 2s$.
+When there is a range block for which all domain blocks exceed the threshold
+$\epsilon$, we partition the range block into 4 smaller blocks of size
+$s/2 \times s/2$ and try to cover them again with domain blocks of size
+$s \times s$. This scheme has the effect that (potentially larger) homogeneous
+regions of the image are covered with few transformations while image regions
+with details are covered with transformations which map smaller blocks. Usually,
+one defines also a maximum depth of the quadtree as described in
+\cite{fisher2012}.
 
-In practice, quadtree partitioning is considered a reasonable reference point for more advanced partitioning schemes \cite{fisher2012}.
-It dynamically adapts range and domain block sizes by a predefined error threshold $\epsilon$.
-We start with some initial (quadratic) range blocks of size $s \times s$, and domain blocks of size $2s \times 2s$.
-When there is a range block for which all domain blocks exceed the threshold $\epsilon$, we partition
-the range block into 4 smaller blocks of size $s/2 \times s/2$ and try to cover them again with domain blocks of size $s \times s$.
-This scheme has the effect that (potentially larger) homogeneous regions of the image are covered with few transformations while image
-regions with details are covered with transformations which map smaller blocks.
-Usually, one defines also a maximum depth of the quadtree as described in \cite{fisher2012}.
-
-\mypar{Cost analysis} 
-
-We provide a pessimistic upper bound on the cost for our
-algorithm where we assume that no transformation will yield an error below
-the threshold and thus the only termination criteria is the maximum quadtree
-depth. In practice, the cost will be (much) lower assuming a reasonable error
-threshold $\epsilon$. As a cost metric, the number of floating point operations
-are counted.
+\mypar{Cost analysis} We provide a pessimistic upper bound on the cost for our
+algorithm where we assume that no transformation will yield an error below the
+threshold and thus the only termination criteria is the maximum quadtree depth.
+In practice, the cost will be (much) lower assuming a reasonable error threshold
+$\epsilon$. As a cost metric, the number of floating point operations are
+counted.
 
 \begin{equation} \label{eq:cost}
 C = N_{mult} + N_{div} + N_{add} + N_{sub}
@@ -136,8 +176,8 @@ quadtree depth $i \in \{1, \dots, m\}$, let $R^{(i)}$ be the set of range
 blocks, $D^{(i)}$ the set of domain blocks, $S_{R}^{(i)}$ the number of pixels
 of one range block and $S_{D}^{(i)}$ the number of pixels of one domain block.
 For a given domain block and range block in quadtree depth $i$, let $\alpha_{i}$
-denote the cost to compute four transformations $w_i^{0^}$, $w_i^{90^}$, 
-$w_i^{180^}$, $w_i^{270^}$  and their errors. Each transformation $w_i^{\gamma^}$ 
+denote the cost to compute four transformations $w_i^{0}$, $w_i^{90}$,
+$w_i^{180}$, $w_i^{270}$ and their errors. Each transformation $w_i^{\gamma}$
 represents a rotation of the domain block by $\gamma$ degrees.
 
 To calculate $\alpha_{i}$, we need to compute all sums for brightness,
@@ -146,8 +186,8 @@ contrast and error (equations \eqref{contrast}, \eqref{brightness} and
 rotate the domain block.
 
 Note that the sums $\sum_{i=1}^{n} a_i$,$\sum_{i=1}^{n} a_i^2$,
-$\sum_{i=1}^{n} b_i$,$\sum_{i=1}^{n} b_i^2$ are the same for all four
-rotations and $\sum_{i=1}^{n} a_i b_i$ has to be computed for each rotation.
+$\sum_{i=1}^{n} b_i$,$\sum_{i=1}^{n} b_i^2$ are the same for all four rotations
+and $\sum_{i=1}^{n} a_i b_i$ has to be computed for each rotation.
 
 Downsampling can be done in $S_{D}^{(i)}$ flops because we have to aggregate the
 average of four pixels of the domain block into one pixel which requires 4 flops
