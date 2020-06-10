@@ -52,17 +52,10 @@ and returns the best of the four possible transformations.
 As opposed to algorithms in \cite{fisher2012} and \cite{github-cpp}, this algorithm does not implement quadtree
 partitioning recursively but iteratively.
 Our optimized versions (see later) depend heavily on precomputations of domain blocks (especially downscaling).
-At every quadtree depth, the domain blocks shrink with the range blocks. More specific, at every quadtree depth $c$ we have a pool of
+At every quadtree depth, the domain blocks shrink with the range blocks. At every quadtree depth $c$ we have a pool of
 domain blocks $D^{(c)}$. In an iterative approach, we can perform precomputations on $D^{(c)}$, process all domain/range block pairs 
 and then discard the precomputations. Using a recursive approach, all precomputations of all domain block pools must be kept in memory
 to avoid recomputing the precomputations.
-
-More mathematically, assume that a domain block precomputation requires $\alpha$ bytes of memory.
-Then, for a maximum quadtree depth $m$, our iterative approach requires at most 
-$\alpha \cdot |D^{(m)}| = \alpha \cdot 2^{2m-2}$ bytes for precomputations 
-whereas the recursive approach needs at most $\sum_{i=1}^m \alpha \cdot |D^{(i)}|$ bytes.
-\notejonas{Braucht es den letzten part? Genauer werden? Ist das jetzt immer Faktor 2 grösser?}
-
 
 In order to see if our baseline achieves a reasonable performance, we compared it with
 a popular C\texttt{++} implementation from GitHub \cite{github-cpp}. We used the same infrastructure to benchmark
@@ -148,8 +141,6 @@ of pixels $a_1, a_2, a_3, a_4$, then the access pattern of the 180 degree rotate
 The fusion of these three implicit rotations into one loop allowed us to compute traversal indices more efficiently.
 We furthermore exploited instruction level parallelism (ILP) to calculate the aforementioned computations more efficiently
 by factoring out the nested mathematical expressions into single line multiplications, additions and FMAs.
-These changes increased not only performance, but also decreased the runtime significantly.
-\notejonas{Letzter Satz ins nächste Kapitel???}
 
 Finally, we did some experiments with different traversal methods for the domain/range blocks. Like blocked matrix-matrix-multiplication,
 we traversed blocks which are closer together in the image to exploit better temporal locality.

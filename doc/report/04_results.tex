@@ -21,11 +21,6 @@ The PSNR of the compressed image depends on the maximum depth of the quadtree an
 threshold. We picked a maximum depth of $m=7$ and an error threshold of $\epsilon=300$ for
 all our experiments. These parameters produced good quality in a reasonable amount of time.
 
-\notejonas{Im Code ist M=7 aber dort beginne wir bei 0 zu zählen oder?}
-\notefabian{Wir zählen von MIN\_QUADTREE\_DEPTH=1 bis $<=$ MAX\_QUADTREE\_DEPTH=7 also m=7?}
-\notejonas{Ich habe den Hinweis mit der schlechten Bildquali weggelassen.
-Irgendwie ist das ja eigentlich gar nicht wichtig? Aber bin mir auch nicht so sicher}
-
 We chose to benchmark our algorithm with a challenging image depicting a lioness
 with its cub \cite{lions}. While some parts of the image, for example the
 background, are not quite as hard, their faces to contain a lot of little lines,
@@ -107,12 +102,12 @@ performance and runtime marginally.
     \caption{Runtime}
     \label{fig:runtime}
   \end{subfigure}
-  \caption{Comparisson of Major Implementations}
+  \caption{Comparison of Major Implementations}
 \end{figure}
 
 The following image shows the performance when the 90 and 270 degree rotations
 are removed from both the optimized scalar version and the first straightforward
-SIMD version (which did not perform well as shown in figure \ref{fig:per}). The
+SIMD version (which did not perform well as shown in figure \ref{fig:perf}). The
 performance increased drastically for the vectorized implementation.
 
 \begin{figure}[!ht]

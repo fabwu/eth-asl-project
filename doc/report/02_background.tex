@@ -115,7 +115,7 @@ to \textit{blocks} (partitions) of the image. However, the underlying theory sti
 
 \mypar{Computing Transformations} \label{par-practical-implementation}
 In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
-\notefabian{Ist unser Bild nicht 0...255?}
+
 The minimization problem in equation \ref{eq:min-problem} can be solved using least squares regression, as done in \cite{github-python}.
 Fisher uses an analytical solution in \cite{fisher2012} to compute the adjustments directly. Let $b_1, ..., b_n$ be the $n$ pixel values of the range block $R_i$
 and $a_i,...,a_n$ be the $n$ pixel values of the downsampled and rotated domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
@@ -166,11 +166,11 @@ multiplication, division, addition and subtraction. The cost metric is define as
 C = N_{mult} + N_{div} + N_{add} + N_{sub}
 \end{equation}
 
-The cost of our algorithm does not only depend on the size but also on the content
-of an image. To classify our version of fractal image compression, we provide a 
-pessimistic upper bound on the cost for our algorithm. We assume that no transformation 
+The cost of the algorithm does not only depend on the size but also on the content
+of an image. To obtain a rough estimate of the runtime, we provide a 
+pessimistic upper bound on the cost of the algorithm. We assume that no transformation 
 will yield an error below the threshold and thus the only termination criteria is the 
-maximum quadtree depth. In practice, the cost will be (much) lower assuming a reasonable 
+maximum quadtree depth. In practice, the cost is (much) lower assuming a reasonable 
 error threshold $\epsilon$.
 
 Let $m$ be the maximum quadtree depth and let $s$ be the width of the square
@@ -216,9 +216,6 @@ C &\leq \sum_{i=1}^m |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
 We see that to cost of the algorithm is exponential in the quadtree depth $m$
 and polynomial in image width $s$. For the roofline plot and the other benchmarks, 
 we determined the cost empirically by instrumenting the code.
-% TODO: cost -> running time / time complexity?
-% i.e. it's time complexity is $\mathcal{O}(S^24^{M} - 4^{2M+1})$.
-
 % TODO: but is in chapter 3 or even 4
 % Our experiments showed that this upper bound is way
 % too pessimistic and the exponentiality in $M$ is practically not a problem
