@@ -131,10 +131,10 @@ are counted.
 C = N_{mult} + N_{div} + N_{add} + N_{sub}
 \end{equation}
 
-Let $M$ be the maximum quadtree depth an let $S$ be the width of the square
-input image and assume that we start quadtree with range blocks of size
-$\frac{S}{2}\times\frac{S}{2}$ and one domain block of size $S\times S$. For
-quadtree depth $i \in \{1,\cdots, M\}$, let $R^{(i)}$ be the set of range
+Let $m$ be the maximum quadtree depth and let $s$ be the width of the square
+input image. We assume that we start quadtree with range blocks of size
+$\frac{s}{2}\times\frac{s}{2}$ and one domain block of size $s \times s$. For
+quadtree depth $i \in \{1, \dots, m\}$, let $R^{(i)}$ be the set of range
 blocks, $D^{(i)}$ the set of domain blocks, $S_{R}^{(i)}$ the number of pixels
 of one range block and $S_{D}^{(i)}$ the number of pixels of one domain block.
 For a given domain block and range block in quadtree depth $i$, let $\alpha_{i}$
@@ -142,37 +142,37 @@ denote the cost to compute the transformations and their errors for all four
 rotations.
 \notejonas{welche 4 rotations, wurde noch nie erwähnt!}
 
-To calcuate $\alpha_{i}$, we need to compute all the sums for brightness,
+To calculate $\alpha_{i}$, we need to compute all sums for brightness,
 contrast and error (equations \eqref{contrast}, \eqref{brightness} and
 \eqref{error}) and apply the formulas. In addition, we need to downscale and
 rotate the domain block.
 
-Note that the sums $\sum_{i=1}^{n_i} a_i$,$\sum_{i=1}^{n_i} a_i^2$,
-$\sum_{i=1}^{n_i} b_i$,$\sum_{i=1}^{n_i} b_i^2$ are the same for all four
-rotations and $\sum_{i=1}^{n_i} a_i b_i$ has to be computed for each rotation.
+Note that the sums $\sum_{i=1}^{n} a_i$,$\sum_{i=1}^{n} a_i^2$,
+$\sum_{i=1}^{n} b_i$,$\sum_{i=1}^{n} b_i^2$ are the same for all four
+rotations and $\sum_{i=1}^{n} a_i b_i$ has to be computed for each rotation.
 
 Downsampling can be done in $S_{D}^{(i)}$ flops because we have to aggregate the
 average of four pixels of the domain block into one pixel which requires 4 flops
 for every square of four pixels.
 
-\begin{align}
+\begin{align*}
   \alpha_i &= S_{D}^{(i)} + 4 \cdot (2\cdot S_{R}^{(i)}-1) + (6\cdot S_{R}^{(i)}-4) +  26\\
            &= S_{D}^{(i)} + 14\cdot S_{R}^{(i)} + 18 \\
            &= 18\cdot S_{R}^{(i)} + 18 \\
          % &= 4 \cdot \frac{S^2}{2^{2i}} + 14 \cdot \frac{S^2}{2^{2i}} - 8 \\
-           &= 18 \cdot \frac{S^2}{2^{2i}} + 18
-\end{align}
+           &= 18 \cdot \frac{s^2}{2^{2i}} + 18
+\end{align*}
 
-In total, we thus get the following upper bound on the cost:
+Thus, we get the following upper bound on the cost:
 
-\begin{align}
-C &= \sum_{i=1}^M |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
-  &= \sum_{i=1}^M 2^{2i} \cdot 2^{2i-2} \cdot (18 \cdot \frac{S^2}{2^{2i}} + 18) \\
-  &= \frac{6}{5}\cdot (4^{M}-1)\cdot (4^{M+1} + 5\cdot S^{2} + 4)
-\end{align}
+\begin{align*}
+C &= \sum_{i=1}^m |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
+  &= \sum_{i=1}^m 2^{2i} \cdot 2^{2i-2} \cdot (18 \cdot \frac{s^2}{2^{2i}} + 18) \\
+  &= \frac{6}{5}\cdot (4^{m}-1)\cdot (4^{m+1} + 5\cdot s^{2} + 4)
+\end{align*}
 
-We see that to cost of the algorithm is exponential in the quadtree depth $M$
-and polynomial in image width $S$.
+We see that to cost of the algorithm is exponential in the quadtree depth $m$
+and polynomial in image width $s$.
 
 % TODO: cost -> running time / time complexity?
 % i.e. it's time complexity is $\mathcal{O}(S^24^{M} - 4^{2M+1})$.
