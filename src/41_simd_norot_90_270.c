@@ -207,9 +207,7 @@ static struct queue *compress(const struct image_t *image, const int error_thres
     __m256d v_fours = _mm256_set1_pd(4.0);
 
     __m256d v_deg_0 = _mm256_set1_pd(0);
-    __m256d v_deg_90 = _mm256_set1_pd(90);
     __m256d v_deg_180 = _mm256_set1_pd(180);
-    __m256d v_deg_270 = _mm256_set1_pd(270);
     // END constant vectors
 
     for (int current_quadtree_depth = MIN_QUADTREE_DEPTH; current_quadtree_depth <= MAX_QUADTREE_DEPTH;

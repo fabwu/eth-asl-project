@@ -80,16 +80,9 @@ void Image::Load()
 	size /= 3;
 	img.channels = 3;
 
-//	for (img.width = 1; img.width*img.width < size; img.width++);
-// image size is not recognized correctly 
-// set it here manually
-//    img.width = 64;
-//    img.width = 128;
-//    img.width = 256;
-//    img.width = 512;
-    img.width = 1024;
-//    img.width = 2048;
+	for (img.width = 1; img.width*img.width < size; img.width++);
 
+    img.width -= 1;
     img.height = img.width;
 	size = img.width * img.height * img.channels;
 

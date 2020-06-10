@@ -2,8 +2,8 @@ library(ggplot2)
 library(svglite)
 
 executables = c(
-  ## "40_ilp_norot_90_270"
-  "51_simd_improved_rot"
+  "25_ilp"
+  ## "51_simd_improved_rot"
 )
 
 flags = c(
@@ -96,7 +96,7 @@ performance_plot = baseplot +
     geom_line(aes(y=performance), lwd=2) +
     geom_point(aes(y=performance), lwd=4) +
     ggtitle("i7-8650U @ 1.9 GHz") +
-    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,6))
+    scale_y_continuous(name=("[flops/cycle]"), limits=c(0,3))
 
     ## geom_label(aes(x=1800, y=2.4, label = "-O3"),
     ##            label.size = NA,

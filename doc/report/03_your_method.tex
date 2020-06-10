@@ -5,20 +5,19 @@ implementation, analyzes its bottlenecks and outlines the steps which were follo
 increase performance.
 
 \mypar{Scope}
-In our project, we focus on grayscale of size $S \times S$, where $S$ is a power of two.
-Quadtree partitioning with a parameterizable maximum depth $M$ and error threshold $\epsilon$ is used. 
+In our project, we focus on grayscale of size $s \times s$, where $s$ is a power of two.
+The quadtree partitioning has the maximum depth $m$ and the error threshold $\epsilon$ as parameters. 
 To simplify vectorization, we also ensure that the range blocks do not get smaller than $4 \times 4$ pixels.
 Furthermore, exhaustive block mapping to search for suitable transformations is used.
 Our focus is solely on compression, which is the performance bottleneck in fractal image compression.
 
-\mypar{Basic implementation}
-The baseline is written from scratch in C.
+\mypar{Baseline implementation}
+The baseline is written from scratch in C. Algorithm~\ref{alg:baseline} illustrates the compression of the algorithm, 
+whose inputs are the image (row-wise array of doubles) of size $s \times s$, the max quadtree depth $m$ and the error threshold $\epsilon$.
 
-Algorithm \ref{alg:baseline} illustrates the compression of the algorithm, whose inputs are the image (row-wise array of doubles) of size $S \times S$,
-the max quadtree depth $M$ and the error threshold $\epsilon$.\\
 The function \texttt{partition(image,s)} partitions the image into contiguous non-overlapping blocks of size $s \times s$.
 The function \texttt{quad($R_i$,s)} takes a range block of size $s \times s$ and partitions it into 4 smaller range blocks.
-The function \texttt{compute(image,$R_i$,$D_i$)} computes a transformation with its resulting RMS according to section \ref{sec:background}. 
+The function \texttt{compute(image,$R_i$,$D_i$)} computes a transformation with its resulting RMS according to section~\ref{sec:background}. 
 This function also downscales the domain block to the size of the range block, rotates it three times (90, 180 and 270 degrees) 
 and returns the best of the four possible transformations.
 \begin{algorithm}
@@ -27,9 +26,9 @@ and returns the best of the four possible transformations.
 \hspace*{\algorithmicindent} \textbf{Output:} $\boldsymbol{T}$ (set of computed transformations)
 \begin{algorithmic}[1]
   \State $\boldsymbol{T} \gets \{\}$
-  \State $\boldsymbol{R} \gets $ \Call{partition}{\texttt{img}, $S/2$}
-    \For{$c=1..M$}
-        \State $\boldsymbol{D} \gets $ \Call{partition}{\texttt{img}, $S/2^{c-1}$}
+  \State $\boldsymbol{R} \gets $ \Call{partition}{\texttt{img}, $s/2$}
+    \For{$c=1..m$}
+        \State $\boldsymbol{D} \gets $ \Call{partition}{\texttt{img}, $s/2^{c-1}$}
         \For{$R_i \in \boldsymbol{R}$}
             \State $err_i \gets \infty, T_i \gets \NULL$
             \For{$D_i \in \boldsymbol{D}$}
@@ -42,7 +41,7 @@ and returns the best of the four possible transformations.
         \EndFor
         \State $\boldsymbol{R} \gets \boldsymbol{R} \backslash  R_i$
         \If{$err_i > \epsilon$}
-          \State $\boldsymbol{R} \gets \boldsymbol{R} \cup  \Call{quad}{R_i, S/2^c}$
+          \State $\boldsymbol{R} \gets \boldsymbol{R} \cup  \Call{quad}{R_i, s/2^c}$
         \Else
           \State $\boldsymbol{T} \gets \boldsymbol{T} \cup \{T_i\}$
         \EndIf
@@ -50,7 +49,7 @@ and returns the best of the four possible transformations.
 \end{algorithmic}
 \end{algorithm}
 
-As opposed to algorithms in \cite{fisher2012}i and \cite{github-cpp}, this algorithm does not implement quadtreee
+As opposed to algorithms in \cite{fisher2012} and \cite{github-cpp}, this algorithm does not implement quadtree
 partitioning recursively but iteratively.
 Our optimized versions (see later) depend heavily on precomputations of domain blocks (especially downscaling).
 At every quadtree depth, the domain blocks shrink with the range blocks. More specific, at every quadtree depth $c$ we have a pool of
@@ -59,9 +58,9 @@ and then discard the precomputations. Using a recursive approach, all precomputa
 to avoid recomputing the precomputations.
 
 More mathematically, assume that a domain block precomputation requires $\alpha$ bytes of memory.
-Then, for a maximum quadtree depth $M$, our iterative approach requires at most 
-$alpha \cdot |D^{(M)}| = \alpha \cdot 2^{2M-2}$ bytes for precomputations 
-whereas the recursive approach needs at most $\sum_{i=1}^M \alpha \cdot |D^{(i)}|$ bytes.
+Then, for a maximum quadtree depth $m$, our iterative approach requires at most 
+$\alpha \cdot |D^{(m)}| = \alpha \cdot 2^{2m-2}$ bytes for precomputations 
+whereas the recursive approach needs at most $\sum_{i=1}^m \alpha \cdot |D^{(i)}|$ bytes.
 \notejonas{Braucht es den letzten part? Genauer werden? Ist das jetzt immer Faktor 2 grösser?}
 
 
@@ -78,13 +77,14 @@ performance and the bandwidth with the Empirical Roofline Tool \cite{ert}, which
 For the program model, we need to measure the work $W$, the runtime $T$ and the data move movement $Q$ of
 the algorithm. Due to the dynamic nature of quadtree, the model does not only depend on the image size 
 but also on the content of the image itself. Therefore, we define the three 
-quantities as $W=W(S, img)$, $T=T(S, img)$ and $Q=Q(S, img)$, where $S$ and $img$ are define as in 
-\ref{alg:baseline}. We measured $W$ by instrumenting the code according to the cost metric \ref{eq:cost}.
+quantities as $W=W(s, img)$, $T=T(s, img)$ and $Q=Q(s, img)$, where $s$ and $img$ are define as in algorithm~\ref{alg:baseline}. 
+We measured $W$ by instrumenting the code according to the cost metric in equation~\eqref{eq:cost}.
 For measuring $T$, we used the \texttt{RDTSC} instruction available on all x86 architecture and disabled
 Turbo Boost to guarantee an integer runtime. The measurement of $Q$ is the most challenging and requires
 performance counters which are not supported by our hardware. A correct, yet too pessimistic lower bound for $Q$
-is $Q \geq 8 \cdot S^2$ because we have to load the image once from memory. One of our group members
-developed a tool to simulate a program's memory accesses throughout the course, supporting multi-level caches \cite{github-cache}.\\
+is $Q \geq 8 \cdot s^2$ because we have to load the image once from memory. One of our group members
+developed a tool to simulate a program's memory accesses throughout the course, supporting multi-level caches \cite{github-cache}.
+
 We simulated our scalar-optimized code with this tool for the hardware we run our benchmarks on, 
 which should give us a tighter lower bound for $Q$. 
 This simulation is still too pessimistic for the non-optimized code but more accurate for our scalar-optimized and vectorized code. 

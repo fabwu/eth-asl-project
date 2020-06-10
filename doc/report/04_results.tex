@@ -35,30 +35,36 @@ performance using different compiler flags for the \textit{GNU Compiler
 version 19.1.1.217. For all tests \texttt{-march=native} was set.
 
 For both the scalar and the vectorized versions the flag \texttt{-O1} increased
-the performance significantly. While \texttt{-O2}, \textsc{-O3} did come with
-small improvements for the scalar version (figure \ref{fig:perf_scal}), they did
-not make measurable difference for the vectorized version (figure
-\ref{fig:perf_vec}). \texttt{-Ofast} was not able increase performance at all
-for neither versions.
+the performance significantly. While \texttt{-O2} did improve the scalar
+implementation (figure \ref{fig:perf_scal}), it did not make a difference for
+the vectorized version (figure \ref{fig:perf_vec}). Neither \textsc{-O3} nor
+\texttt{-Ofast} were able increase performance for both code versions.
 
 \begin{figure}[H]
-  \includegraphics[page=1, width=.45\textwidth]{performance_scalar_opts}
-  \caption{Optimization Flags - Scalar Version}
-  \label{fig:perf_scal}
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \includegraphics[page=1, width=\linewidth]{performance_scalar_opts}
+    \caption{Scalar Version}
+    \label{fig:perf_scal}
+  \end{subfigure}
+  \begin{subfigure}[b]{\linewidth}
+    \centering
+    \includegraphics[page=1, width=\linewidth]{performance_vectorized_opts}
+    \caption{Vectorized Version}
+    \label{fig:perf_vec}
+  \end{subfigure}
+  \caption{Optimization Flags}
 \end{figure}
 
-\begin{figure}[H]
-  \includegraphics[page=1, width=.45\textwidth]{performance_vectorized_opts}
-  \caption{Optimization Flags - Vectorized Version}
-  \label{fig:perf_vec}
-\end{figure}
+\notepascal{-O2 is hidden behind -O3 in (a) :/}
 
 Intel's compiler was not able to outperform gcc but at least for the vectorized
 version it managed to keep up for the larger images as shown in figure
 \ref{fig:perf_gcc_vs_icc}.
 
 \begin{figure}[H]
-  \includegraphics[page=1, width=.45\textwidth]{performance_gcc_vs_icc}
+  \centering
+  \includegraphics[page=1, width=\linewidth]{performance_gcc_vs_icc}
   \caption{GCC vs. ICC}
   \label{fig:perf_gcc_vs_icc}
 \end{figure}
@@ -73,17 +79,32 @@ implementation compared to the scalar optimized version. The plots also
 illustrate that the first straightforward SIMD implementation only improved
 performance and runtime marginally.
 
-\begin{figure}[!ht]
-  \includegraphics[page=1, width=.45\textwidth]{performance}
-  \caption{Performance Plot}
-  \label{fig:perf}
+\begin{figure}[H]
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \includegraphics[page=1, width=\linewidth]{performance}
+    \caption{Performance}
+    \label{fig:perf}
+  \end{subfigure}
+  \begin{subfigure}[t]{\linewidth}
+    \centering
+    \includegraphics[page=1, width=\linewidth]{runtime}
+    \caption{Runtime}
+    \label{fig:runtime}
+  \end{subfigure}
+  \caption{Comparisson of Major Implementations}
 \end{figure}
 
+The following image shows the performance when the 90 and 270 degree rotations
+are removed from both the optimized scalar version and the first straightforward
+SIMD version (which did not perform well as shown in figure \ref{fig:per}). The
+performance increased drastically for the vectorized implementation.
 
 \begin{figure}[!ht]
-  \includegraphics[page=1, width=.45\textwidth]{runtime}
-  \caption{Runtime Plot}
-  \label{fig:runtime}
+  \centering
+  \includegraphics[page=1, width=.45\textwidth]{performance_40_41}
+  \caption{Performance Plot without 90/270 degree rotations}
+  \label{fig:perf_40_41}
 \end{figure}
 
 

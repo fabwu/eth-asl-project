@@ -256,10 +256,10 @@ static struct queue *compress(const struct image_t *image, const int error_thres
             __m256d v_range_sum_sqr = _mm256_set1_pd(range_sum_squared);
 
             __m256d v_best_err = _mm256_set1_pd(DBL_MAX);
-            __m256d v_best_contrast;
-            __m256d v_best_bright;
-            __m256d v_best_idx;
-            __m256d v_best_angle;
+            __m256d v_best_contrast = _mm256_setzero_pd();
+            __m256d v_best_bright = _mm256_setzero_pd();
+            __m256d v_best_idx = _mm256_setzero_pd();
+            __m256d v_best_angle = _mm256_setzero_pd();
             __m256d v_idx_db = _mm256_set_pd(3, 2, 1, 0);
 
             for (size_t idx_db = 0; idx_db < domain_blocks_length; idx_db += 4) {
