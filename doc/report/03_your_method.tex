@@ -173,7 +173,7 @@ be measured in the version with SIMD with only a minimal loss in the image
 quality.
 
 To solve the performance issue with the 90 and 270 degrees rotations the task
-was to avoid expensive gather instructions (e.g. ``\_mm256\_i64gather\_pd'').
+was to avoid expensive gather instructions (e.g. \verb|_mm256_i64gather_pd|).
 With smarter precomputations including a better memory layout which included
 rotating the range blocks instead of the domain blocks we were able to increase
 the performance for the code version with all four rotations. This solution also
@@ -181,16 +181,8 @@ outperformed the previous version where the costly rotations were deleted by an
 order of magnitude.
 
 In addition, an important objective was to avoid using other costly instructions
-like permutations or blends across lanes (e.g. ``\_mm256\_permute4x64'',
-``\_mm256\_blendv\_pd'').
+like permutations or blends across lanes (\verb|_mm256_permute4x64|,
+\verb|_mm256_blendv_pd|).
 
 As a result we were able to significantly increase the performance of the image
 compression.
-
-
-
-\mypar{Block Rotations}
-\notepascal{are we still doing this?}
-\notejonas{info jonas: habe dazu schon was in scalar optimizations geschrieben}
-\mypar{Strided Access}
-\notepascal{are we still doing this?}

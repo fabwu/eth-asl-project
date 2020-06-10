@@ -1,33 +1,45 @@
-\section{Experimental Results}\label{sec:exp}
+\section{Results}\label{sec:exp}
 
-summary of section\\
+In the first part of this section we describe the benchmark infrastructure and the
+images we used for the measurements. Then we analyze how different compilers and flags  
+affect the performance of our code. At the end we discuss each optimization and compare
+them in different plots.
 
 \mypar{Experimental setup} All benchmarks and tests were conducted on an Intel
 i7-8650U processor with \textit{Intel Turbo Boost} disabled and running at 1.9
 GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
 4-way associative L2 cache and 4$\times$2 MB 16-way associative L3 cache
-\cite{intel-opt-manual}.
+\cite{intel-opt-manual}. 
 
-For all our benchmarks, we chose our quadtree parameters to be $M=8$ and $\epsilon=300$.
+We used the peak signal-to-noise ratio (PSNR) to ensure that our baseline implementation
+compresses the image correctly. This metric is widely used to compare the original image with
+a compressed version. Typical values for the PSNR in lossy image compression range from 25 to 
+50 dB (higher is better). The same metric was used to verify that the optimizations 
+produced the same result as the baseline.
+
+The PSNR of the compressed image depends on the maximum depth of the quadtree and the error
+threshold. We picked a maximum depth of $m=7$ and an error threshold of $\epsilon=300$ for
+all our experiments. These parameters produced good quality in a reasonable amount of time.
+
 \notejonas{Im Code ist M=7 aber dort beginne wir bei 0 zu zählen oder?}
+\notefabian{Wir zählen von MIN\_QUADTREE\_DEPTH=1 bis $<=$ MAX\_QUADTREE\_DEPTH=7 also m=7?}
 \notejonas{Ich habe den Hinweis mit der schlechten Bildquali weggelassen.
 Irgendwie ist das ja eigentlich gar nicht wichtig? Aber bin mir auch nicht so sicher}
 
 We chose to benchmark our algorithm with a challenging image depicting a lioness
-with its cub (\cite{lions}). While some parts of the image, for example the
+with its cub \cite{lions}. While some parts of the image, for example the
 background, are not quite as hard, their faces to contain a lot of little lines,
 dots and other details. As a result, relatively small range blocks are needed to
 achieve a reasonable output. Figure \ref{fig:lions} shows the output of the
 vectorized code with all four rotations and with $\epsilon=100$ and 3
 decompression iterations.
+
 \begin{figure}[H]
   \centering
   \includegraphics[page=1, width=.45\textwidth]{lion_512_51_e100}
   \caption{Decompressed Image}
   \label{fig:lions}
 \end{figure}
-
-\notepascal{should we talk about the PSNR and number of iterations more?}
 
 \mypar{Compiler Flags} Several benchmarks were conducted comparing the achieved
 performance using different compiler flags for the \textit{GNU Compiler
@@ -68,6 +80,9 @@ version it managed to keep up for the larger images as shown in figure
   \caption{GCC vs. ICC}
   \label{fig:perf_gcc_vs_icc}
 \end{figure}
+
+We used gcc with \verb|-O3 -NDEBUG -march=native| for all benchmarks because the
+Intel compiler or different flags didn't improve performance significantly.
 
 \mypar{Performance} The performance and runtime plots for the main four code
 versions (which all make use off all four rotations) are shown in figure
