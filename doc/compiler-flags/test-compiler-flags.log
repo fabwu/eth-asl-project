@@ -2546,3 +2546,7 @@ Scanning dependencies of target 51_simd_improved_rot
 	Warmup: No
 	Repetitions: 2
 [1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc-51_simd_improved_rot/lion_4096.csv'
+	cycles (median): 3.00649e+12
+	flops: 2.11367e+12
+	perf [flops/cycle(median)]: 0.703037

@@ -4,16 +4,16 @@ REPETITIONS=2
 images=("lion_64" "lion_128" "lion_256" "lion_512" "lion_1024" "lion_2048" "lion_4096")
 
 # test images
-# images=("lion_64" "lion_128" "lion_256" "lion_512")
+# images=("lion_64")
 
 dir=$(dirname "$(readlink -f "$0")")
 cd "$dir/../../" || exit 1
 rm -rf ${dir}/../../build
 
 runbenchmarks40(){
-      cmake --build build --target 40_ilp_norot_90_270
+      cmake --build build --target 25_ilp
       name="$1"
-      exe="40_ilp_norot_90_270"
+      exe="25_ilp"
       for img in ${images[@]}
       do
             echo "--------------------------------"
@@ -60,7 +60,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
 runbenchmarks40 "gcc_Ofast"
-runbenchmarks41 "gcc_Ofast"
+# runbenchmarks41 "gcc_Ofast"
 
 
 echo "----------------------------"
@@ -78,7 +78,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_UNROLL_LOOPS=YES \
       -B build/
 runbenchmarks40 "gcc_O3_unroll"
-runbenchmarks41 "gcc_O3_unroll"
+# runbenchmarks41 "gcc_O3_unroll"
 
 
 echo "----------------------------"
@@ -96,7 +96,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
 runbenchmarks40 "gcc_O3"
-runbenchmarks41 "gcc_O3"
+# runbenchmarks41 "gcc_O3"
 
 
 echo "----------------------------"
@@ -138,8 +138,8 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_FMA=YES \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
-runbenchmarks41 "icc_Ofast"
 runbenchmarks40 "icc_Ofast"
+# runbenchmarks41 "icc_Ofast"
 
 
 echo "----------------------------"
@@ -157,7 +157,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
 runbenchmarks40 "icc_O3"
-runbenchmarks41 "icc_O3"
+# runbenchmarks41 "icc_O3"
 
 
 ###############################################
@@ -179,7 +179,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
 runbenchmarks40 "gcc_O2"
-runbenchmarks41 "gcc_O2"
+# runbenchmarks41 "gcc_O2"
 
 echo "----------------------------"
 echo "  gcc_O1"
@@ -196,7 +196,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
 runbenchmarks40 "gcc_O1"
-runbenchmarks41 "gcc_O1"
+# runbenchmarks41 "gcc_O1"
 
 echo "----------------------------"
 echo "  gcc"
@@ -212,4 +212,4 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DOPT_UNROLL_LOOPS=NO \
       -B build/
 runbenchmarks40 "gcc"
-runbenchmarks41 "gcc"
+# runbenchmarks41 "gcc"
