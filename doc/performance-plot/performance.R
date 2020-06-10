@@ -6,6 +6,7 @@ executables = c(
     ## "25_ilp",
     ## "35_simd"
     "0_baseline",
+    "1_ref_impl",
     ## "31_simd_precomp_rotations_no_bac_simd",
     "35_simd",
     "40_ilp_norot_90_270",
