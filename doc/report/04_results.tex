@@ -6,14 +6,14 @@ affect the performance of our code. At the end we discuss each optimization and 
 them in different plots.
 
 \mypar{Experimental setup} All benchmarks and tests were conducted on an Intel
-i7-8650U processor with \textit{Intel Turbo Boost} disabled and running at 1.9
+i7-8650U processor with \textit{Intel Turbo Boost} disabled, running at 1.9
 GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
 4-way associative L2 cache and 4$\times$2 MB 16-way associative L3 cache
 \cite{intel-opt-manual}. 
 
 We used the peak signal-to-noise ratio (PSNR) to ensure that our baseline implementation
-compresses the image correctly. This metric is widely used to compare the original image with
-a compressed version. Typical values for the PSNR in lossy image compression range from 25 to 
+compresses the image correctly. This metric is widely used to compare an image with its
+compressed version. Typical values for the PSNR range from 25 to 
 50 dB (higher is better). The same metric was used to verify that the optimizations 
 produced the same result as the baseline.
 
@@ -22,12 +22,11 @@ threshold. We picked a maximum depth of $m=7$ and an error threshold of $\epsilo
 all our experiments. These parameters produced good quality in a reasonable amount of time.
 
 We chose to benchmark our algorithm with a challenging image depicting a lioness
-with its cub \cite{lions}. While some parts of the image, for example the
-background, are not quite as hard, their faces to contain a lot of little lines,
-dots and other details. As a result, relatively small range blocks are needed to
-achieve a reasonable output. Figure \ref{fig:lions} shows the output of the
-vectorized code with all four rotations and with $\epsilon=100$ and 3
-decompression iterations.
+with its cub \cite{lions}.
+While some parts of the image, for example the
+background, are easy to compress, other parts such as the fur contains lots of details,
+which are harder to compress. Figure \ref{fig:lions} shows the output of the
+vectorized code with $\epsilon=100$ and 3 decompression iterations.
 
 \begin{figure}
   \centering
@@ -42,7 +41,7 @@ performance using different compiler flags for the \textit{GNU Compiler
 version 19.1.1.217. For all tests \texttt{-march=native} was set.
 
 For both the scalar and the vectorized versions the flag \texttt{-O1} increased
-the performance significantly. While \texttt{-O2} did improve the scalar
+performance significantly. While \texttt{-O2} did improve the scalar
 implementation (figure \ref{fig:perf_scal}), it did not make a difference for
 the vectorized version (figure \ref{fig:perf_vec}). Neither \textsc{-O3} nor
 \texttt{-Ofast} were able increase performance for both code versions.
@@ -78,15 +77,17 @@ version it managed to keep up for the larger images as shown in figure
 
 We used gcc with \verb|-O3 -NDEBUG -march=native| for all benchmarks because the
 Intel compiler or different flags didn't improve performance significantly.
+\notejonas{Was heisst das? Einfach nur für die Performance Benchmarks?}
 
 \mypar{Performance} The plot in figure \ref{fig:perf} shows the performance of all
 experiments.
 
 In our first experiment we compared the baseline with a popular C\texttt{++} 
-implementation from GitHub \cite{github-cpp}. This comparison should ensures that the code
-we want to optimize achieves a reasonable performance. The two lines at the bottom of the plot
+implementation from GitHub \cite{github-cpp}. This comparison ensures that our baseline
+achieves a reasonable performance. The two lines at the bottom of the plot
 show that our baseline performed slightly better than the C\texttt{++} code. The values for large
 images are not shown in the plot because the measurements took too much time.
+\notejonas{Plot fehlt noch?}
 
 \begin{figure}
   \begin{subfigure}[t]{\linewidth}
@@ -107,16 +108,15 @@ images are not shown in the plot because the measurements took too much time.
 The next line shows the performance of the scalar optimized code. Several precomputations, a better
 memory layout and ILP made this version 3x faster than the baseline. The optimizations become even 
 more apparent when we compare the runtime as in figure \ref{fig:runtime}. The plot shows that the runtime
-decreased by several order of magnitude and we were finally able to compress larger images in a reasonable 
+decreased by several orders of magnitude and we were finally able to compress larger images in a reasonable 
 amount of time.
 
 %\notefabian{Warum haben wir nur 50\% scalar peak performance?}
 
-As described in section \ref{sec:yourmethod} the initial attempt in vectorizing the code did not improve
-performance as we expected. One can clearly see that in the performance plot, where the line of the vectorized
-code is just slightly above the scalar optimized code. We suspected that the gathering instructions, which are
-necessary for the rotations, are responsible for the poor performance. To verify this assumption, we removed the
-column wise access to the image i.e 90/270 degree rotations from the scalar optimized and the vectorized version.
+As described in section \ref{sec:yourmethod} the initial attempt in vectorizing the code did not lead
+to expected performance improvements. In fact, it performed just slightly better than the scalar optimized code.
+We suspected that the gathering instructions, which are necessary for the rotations, are responsible for poor performance. 
+To verify this assumption, we removed the column wise access to the image i.e 90/270 degree rotations from the scalar optimized and the vectorized version.
 The result of this experiment is shown in figure \ref{fig:perf_40_41} and one can clearly see how the vectorized
 code outperforms the scalar optimized version.
 
