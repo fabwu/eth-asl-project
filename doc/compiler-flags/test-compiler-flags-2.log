@@ -1503,3 +1503,7 @@ Scanning dependencies of target 25_ilp
 	Warmup: No
 	Repetitions: 2
 [1mBENCHMARK phase[0m
+	Created csv file '/home/pascal/git/asl-code/doc/compiler-flags/data/gcc-25_ilp/lion_4096.csv'
+	cycles (median): 8.74745e+12
+	flops: 2.10747e+12
+	perf [flops/cycle(median)]: 0.240923

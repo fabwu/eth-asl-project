@@ -1,7 +1,7 @@
 \section{Results}\label{sec:exp}
 
 In the first part of this section we describe the benchmark infrastructure and the
-images we used for the measurements. Then we analyze how different compilers and flags  
+images we used for the measurements. Then we analyze how different compilers and flags
 affect the performance of our code. At the end we discuss each optimization and compare
 them in different plots.
 
@@ -9,12 +9,12 @@ them in different plots.
 i7-8650U processor with \textit{Intel Turbo Boost} disabled, running at 1.9
 GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
 4-way associative L2 cache and 4$\times$2 MB 16-way associative L3 cache
-\cite{intel-opt-manual}. 
+\cite{intel-opt-manual}.
 
 We used the peak signal-to-noise ratio (PSNR) to ensure that our baseline implementation
 compresses the image correctly. This metric is widely used to compare an image with its
-compressed version. Typical values for the PSNR range from 25 to 
-50 dB (higher is better). The same metric was used to verify that the optimizations 
+compressed version. Typical values for the PSNR range from 25 to
+50 dB (higher is better). The same metric was used to verify that the optimizations
 produced the same result as the baseline.
 
 The PSNR of the compressed image depends on the maximum depth of the quadtree and the error
@@ -46,21 +46,37 @@ implementation (figure \ref{fig:perf_scal}), it did not make a difference for
 the vectorized version (figure \ref{fig:perf_vec}). Neither \textsc{-O3} nor
 \texttt{-Ofast} were able increase performance for both code versions.
 
-\begin{figure}
-  \begin{subfigure}[t]{\linewidth}
-    \centering
-    \includegraphics[page=1, width=\linewidth]{performance_scalar_opts}
-    \caption{Scalar Version}
-    \label{fig:perf_scal}
-  \end{subfigure}
-  \begin{subfigure}[b]{\linewidth}
+\begin{figure}[h]
+  \centering
+  \includegraphics[page=1, width=\linewidth]{performance_scalar_opts}
+  \caption{Performance of the four major GCC optimization flags for the scalar implementation}
+  \label{fig:perf_scal}
+\end{figure}
+
+\begin{figure}[h]
     \centering
     \includegraphics[page=1, width=\linewidth]{performance_vectorized_opts}
-    \caption{Vectorized Version}
+    \caption{Performance of the four major GCC optimization flags for the vectorized implementation}
     \label{fig:perf_vec}
-  \end{subfigure}
-  \caption{Optimization Flags}
-\end{figure}
+  \end{figure}
+%   \caption{Optimization Flags}
+% \end{figure}
+
+% \begin{figure}[H]
+%   \begin{subfigure}[t]{\linewidth}
+%     \centering
+%     \includegraphics[page=1, width=\linewidth]{performance_scalar_opts}
+%     \caption{Performance of the four major GCC optimization flags for the scalar implementation}
+%     \label{fig:perf_scal}
+%   \end{subfigure}
+%   \begin{subfigure}[b]{\linewidth}
+%     \centering
+%     \includegraphics[page=1, width=\linewidth]{performance_vectorized_opts}
+%     \caption{Vectorized Version}
+%     \label{fig:perf_vec}
+%   \end{subfigure}
+%   \caption{Optimization Flags}
+% \end{figure}
 
 %\notepascal{-O2 is hidden behind -O3 in (a) :/}
 
@@ -68,7 +84,7 @@ Intel's compiler was not able to outperform gcc but at least for the vectorized
 version it managed to keep up for the larger images as shown in figure
 \ref{fig:perf_gcc_vs_icc}.
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics[page=1, width=\linewidth]{performance_gcc_vs_icc}
   \caption{GCC vs. ICC}
@@ -82,54 +98,53 @@ Intel compiler or different flags didn't improve performance significantly.
 \mypar{Performance} The plot in figure \ref{fig:perf} shows the performance of all
 experiments.
 
-In our first experiment we compared the baseline with a popular C\texttt{++} 
+In our first experiment we compared the baseline with a popular C\texttt{++}
 implementation from GitHub \cite{github-cpp}. This comparison ensures that our baseline
 achieves a reasonable performance. The two lines at the bottom of the plot
 show that our baseline performed slightly better than the C\texttt{++} code. The values for large
 images are not shown in the plot because the measurements took too much time.
 \notejonas{Plot fehlt noch?}
+\notepascal{ist bei den Major implementations drin}
 
-\begin{figure}
-  \begin{subfigure}[t]{\linewidth}
-    \centering
-    \includegraphics[page=1, width=\linewidth]{performance}
-    \caption{Performance}
-    \label{fig:perf}
-  \end{subfigure}
-  \begin{subfigure}[t]{\linewidth}
-    \centering
-    \includegraphics[page=1, width=\linewidth]{runtime}
-    \caption{Runtime}
-    \label{fig:runtime}
-  \end{subfigure}
-  \caption{Comparison of Major Implementations}
+\begin{figure}[h]
+  \centering
+  \includegraphics[page=1, width=\linewidth]{performance_major_versions}
+  \caption{Performance}
+  \label{fig:perf}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[page=1, width=\linewidth]{runtime_major_versions}
+  \caption{Runtime}
+  \label{fig:runtime}
 \end{figure}
 
 The next line shows the performance of the scalar optimized code. Several precomputations, a better
-memory layout and ILP made this version 3x faster than the baseline. The optimizations become even 
+memory layout and ILP made this version 3x faster than the baseline. The optimizations become even
 more apparent when we compare the runtime as in figure \ref{fig:runtime}. The plot shows that the runtime
-decreased by several orders of magnitude and we were finally able to compress larger images in a reasonable 
+decreased by several orders of magnitude and we were finally able to compress larger images in a reasonable
 amount of time.
 
 %\notefabian{Warum haben wir nur 50\% scalar peak performance?}
 
 As described in section \ref{sec:yourmethod} the initial attempt in vectorizing the code did not lead
 to expected performance improvements. In fact, it performed just slightly better than the scalar optimized code.
-We suspected that the gathering instructions, which are necessary for the rotations, are responsible for poor performance. 
+We suspected that the gathering instructions, which are necessary for the rotations, are responsible for poor performance.
 To verify this assumption, we removed the column wise access to the image i.e 90/270 degree rotations from the scalar optimized and the vectorized version.
 The result of this experiment is shown in figure \ref{fig:perf_40_41} and one can clearly see how the vectorized
 code outperforms the scalar optimized version.
 
-\begin{figure}
+\begin{figure}[h]
   \centering
-  \includegraphics[page=1, width=.45\textwidth]{performance_40_41}
+  \includegraphics[page=1, width=\linewidth]{performance_norot}
   \caption{Performance Plot without 90/270 degree rotations}
   \label{fig:perf_40_41}
 \end{figure}
 
-After this experiment we improved the column wise access by rotating the range 
-block instead of the domain block for the 90/270 degree rotations. The improved 
-vectorized implementation has a performance roughly eight times as high as the 
-baseline and about twice the performance of the scalar optimized version. The 
-runtime was also reduced especially for large images.
 
+After this experiment we improved the column wise access by rotating the range
+block instead of the domain block for the 90/270 degree rotations. The improved
+vectorized implementation has a performance roughly eight times as high as the
+baseline and about twice the performance of the scalar optimized version. The
+runtime was also reduced especially for large images.
