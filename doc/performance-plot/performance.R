@@ -1,6 +1,6 @@
 library(ggplot2)
-library(ggthemes)
 library(svglite)
+library(ggthemes)
 library(latex2exp)
 
 executables = c(
@@ -147,7 +147,7 @@ runtime_plot = baseplot +
     geom_point(aes(y=cycles), lwd=4) +
   ggtitle(
     label = "Major Implementations",
-    subtitle="Runtime [flops] vs. input size") +
+    subtitle="Runtime [cycles] vs. input size") +
   coord_cartesian(ylim = c(0, 2e+12)) +
   annotate("text", label = TeX("\\textbf{SIMD}"), parse = TRUE,
            x=3700, y=.4e12, color="#C77CFF", size=7, hjust=0, family="mono") +
