@@ -121,7 +121,7 @@ In practice an image consists of pixels, where each pixel has a grayscale value 
 
 The minimization problem in equation \ref{eq:min-problem} can be solved using least squares regression, as done in \cite{github-python}.
 Fisher uses an analytical solution in \cite{fisher2012} to compute the adjustments directly. Let $b_1, ..., b_n$ be the $n$ pixel values of the range block $R_i$
-and $a_i,...,a_n$ be the $n$ pixel values of the downsampled and rotated domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
+and $a_1,...,a_n$ be the $n$ pixel values of the downsampled and rotated domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
 $$
 R = \sum_{i=1}^n (s \cdot a_i + o - b_i)^2
 $$
