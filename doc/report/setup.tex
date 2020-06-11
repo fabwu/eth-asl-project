@@ -3,6 +3,9 @@
 \usepackage{amsmath}
 \usepackage{spconf,amssymb,graphicx}
 
+\usepackage{ifthen}
+\usepackage{xifthen}
+
 % Definitions
 \newcommand{\R}[0]{\mathbb{R}}
 \newcommand{\C}[0]{\mathbb{C}}
@@ -14,8 +17,8 @@
 
 % set pdf attributes
 \usepackage[pdftex,
-pdftitle={Fractal Image Compression},
-pdfauthor={Jonas Hansen, Pascal Huber, Fabian Wuethrich},
+pdftitle={Performance Optimized Fractal Image Compression using Quadtree},
+pdfauthor={Jonas Hansen, Pascal Huber, Fabian Wuethrich}
 pdfkeywords={ETH, Fastcode, ASL, Fractal Image Compression}
 ]{hyperref}
 
@@ -24,9 +27,22 @@ pdfkeywords={ETH, Fastcode, ASL, Fractal Image Compression}
 
 % Inline notes with one color per person
 \usepackage{todonotes}
-\newcommand{\notefabian}[1]{\todo[inline,color=green!20]{\textbf{F:} #1}}
-\newcommand{\notejonas}[1]{\todo[inline,color=blue!20]{\textbf{J:} #1}}
-\newcommand{\notepascal}[1]{\todo[inline,color=red!20]{\textbf{P:} #1}}
+
+\newcommand{\notepascal}[1]{
+  \ifthenelse{\boolean{shownotes}}{
+    \todo[inline,color=red!20]{\textbf{P:} #1}
+  }{}
+}
+\newcommand{\notefabian}[1]{
+  \ifthenelse{\boolean{shownotes}}{
+    \todo[inline,color=green!20]{\textbf{F:} #1}
+  }{}
+}
+\newcommand{\notejonas}[1]{
+  \ifthenelse{\boolean{shownotes}}{
+    \todo[inline,color=blue!20]{\textbf{J:} #1}
+  }{}
+}
 
 % Algorithm stuff
 \usepackage{algorithm}

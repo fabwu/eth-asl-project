@@ -1,18 +1,16 @@
 \section{Introduction}\label{sec:intro}
+
 Human perception relies heavily upon visual information, particularly images.
 This medium is very powerful in gaining and conveying \textit{ideas}, memories,
-and emotions. No one would doubt the saying
-\begin{quote}
-A picture is worth a thousand words.
-\end{quote}
-With the advent of social media and new image classification algorithms based on
-neural networks, the ability to share and store images efficiently is crucial.
+and emotions. No one would doubt the saying ``A picture is worth a thousand
+words''. Especially with the widespread use of the internet and the advent of
+social media the ability to share and store images efficiently is crucial.
 
 A practical way to store images without occupying too much space is to use lossy
 image compression which decreases the image quality in places where a
 high-quality image is not perceivable or where an image of lower quality is not
 disruptive. JPEG, whose basic building block is the discrete cosine transform,
-is undoubtedly the most widely used lossy compression scheme. With good
+is undoubtedly the most widely used lossy compression scheme. With a good
 compression quality and fast compression times, JPEG hits a sweet spot for many
 practical applications.
 
@@ -24,10 +22,9 @@ Contrary to JPEG, the underlying theoretical construct of a fractal compression
 scheme is that of an iterated function system (IFS). This approach yields great
 compression results in terms of compression size and quality \cite{fisher2012}.
 However, it is computationally expensive to encode images because the algorithm
-involves an exhaustive search over different regions of the image (section
-\ref{sec:background}) with many numerical computations to find self-similarity.
-Optimizing these computations is therefore crucial for an efficient
-implementation of the algorithm.
+involves an exhaustive search over different regions of the image with many
+numerical computations to find self-similarity. Optimizing these computations is
+therefore crucial for an efficient implementation of the algorithm.
 
 \mypar{Related work} The most widely known practical fractal compression scheme
 was developed and patented by Michael Barnsley and Alan Sloan in 1987. They
@@ -41,9 +38,11 @@ published a book in 1995 with a detailed description of various fractal schemes
 and an elaborate list of optimizations \cite{fisher2012}.
 
 \mypar{Contribution} Based on the explanations of Fisher in \cite{fisher2012}
-and an open-source implementation in Python \cite{github-python} and C++
+and an open-source implementation written in Python \cite{github-python} and C++
 \cite{github-cpp}, we implemented our own fractal image compression scheme with
 quadtree partitioning and exhaustive self-similarity search.
 
 In our work, we did not focus on algorithmic optimizations, but optimized the
 computations of the given algorithm.
+
+\notepascal{sit der letzte Satz notwendig?}

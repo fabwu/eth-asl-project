@@ -4,12 +4,13 @@ This section defines the scope of our implementation, describes our initial base
 implementation, analyzes its bottlenecks and outlines the steps which were followed to
 increase performance.
 
-\mypar{Scope}
-In our project, we focus on grayscale of size $s \times s$, where $s$ is a power of two.
-The quadtree partitioning has the maximum depth $m$ and the error threshold $\epsilon$ as parameters.
-To simplify vectorization, we also ensure that the range blocks do not get smaller than $4 \times 4$ pixels.
-Furthermore, exhaustive block mapping to search for suitable transformations is used.
-Our focus is solely on compression, which is the performance bottleneck in fractal image compression.
+\mypar{Scope} In our project, we focus on grayscale images of size $s \times s$,
+where $s$ is a power of two. The quadtree partitioning has the maximum depth $m$
+and the error threshold $\epsilon$ as parameters. To simplify vectorization, we
+also ensure that the range blocks do not get smaller than $4 \times 4$ pixels.
+Furthermore, exhaustive block mapping to search for suitable transformations is
+used. Our focus is solely on compression, which is the performance bottleneck in
+fractal image compression.
 
 \mypar{Baseline implementation}
 The baseline is written from scratch in C. Algorithm~\ref{alg:baseline} illustrates the compression of the algorithm,
@@ -57,22 +58,30 @@ domain blocks $D^{(c)}$. In an iterative approach, we can perform precomputation
 and then discard the precomputations. Using a recursive approach, all precomputations of all domain block pools must be kept in memory
 to avoid recomputing the precomputations.
 
-\mypar{Roofline} We used the roofline model \cite{applying-roofline} to see whether the algorithm is memory or
-compute bound. The peak performance $\pi$ was determined by counting the dispatch
-ports specified in the manual \cite{intel-opt-manual}. We distinguish between scalar and vectorized peak
-performance. The bandwidth $\beta$ was measured with the STREAM benchmark \cite{stream}. We verified both the peak
-performance and the bandwidth with the Empirical Roofline Tool \cite{ert}, which confirmed the values.
+\mypar{Roofline} We used the roofline model \cite{applying-roofline} to see
+whether the algorithm is memory or compute bound. The peak performance $\pi$ was
+determined by counting the dispatch ports specified in Intel's
+\texttt{Optimization Reference Manual} \cite{intel-opt-manual}. We distinguish
+between scalar and vectorized peak performance. The bandwidth $\beta$ was
+measured with the STREAM benchmark \cite{stream}. We verified both the peak
+performance and the bandwidth with the Empirical Roofline Tool \cite{ert}, which
+confirmed the values.
 
-For the program model, we need to measure the work $W$, the runtime $T$ and the data move movement $Q$ of
-the algorithm. Due to the dynamic nature of quadtree, the model does not only depend on the image size
-but also on the content of the image itself. Therefore, we define the three
-quantities as $W=W(s, img)$, $T=T(s, img)$ and $Q=Q(s, img)$, where $s$ and $img$ are define as in algorithm~\ref{alg:baseline}.
-We measured $W$ by instrumenting the code according to the cost metric in equation~\eqref{eq:cost}.
-For measuring $T$, we used the \texttt{RDTSC} instruction available on all x86 architecture and disabled
-Turbo Boost to guarantee an integer runtime. The measurement of $Q$ is the most challenging and requires
-performance counters which are not supported by our hardware. A correct, yet too pessimistic lower bound for $Q$
-is $Q \geq 8 \cdot s^2$ because we have to load the image once from memory. One of our group members
-developed a tool to simulate a program's memory accesses throughout the course, supporting multi-level caches \cite{github-cache}.
+For the program model, we need to measure the work $W$, the runtime $T$ and the
+data move movement $Q$ of the algorithm. Due to the dynamic nature of quadtree,
+the model does not only depend on the image size but also on the content of the
+image itself. Therefore, we define the three quantities as $W=W(s, img)$,
+$T=T(s, img)$ and $Q=Q(s, img)$, where $s$ and $img$ are defined as in
+algorithm~\ref{alg:baseline}. We measured $W$ by instrumenting the code
+according to the cost metric in equation~\eqref{eq:cost}. For measuring $T$, we
+used the \texttt{RDTSC} instruction available on all x86 architecture and
+disabled Turbo Boost to guarantee an integer runtime. The measurement of $Q$ is
+the most challenging and requires performance counters which are not supported
+by our hardware. A correct, yet too pessimistic lower bound for $Q$ is
+$Q \geq 8 \cdot s^2$ because we have to load the image (at least) once from
+memory. One of our group members developed a tool to simulate a program's memory
+accesses throughout the course, supporting multi-level caches
+\cite{github-cache}.
 
 We simulated our scalar-optimized code with this tool for the hardware we run our benchmarks on,
 which should give us a tighter lower bound for $Q$.
@@ -135,15 +144,17 @@ The fusion of these three implicit rotations into one loop allowed us to compute
 We furthermore exploited instruction level parallelism (ILP) to calculate the aforementioned computations more efficiently
 by factoring out the nested mathematical expressions into single line multiplications, additions and FMAs.
 
-Finally, we did some experiments with different traversal methods for the domain/range blocks. Like blocked matrix-matrix-multiplication,
-we traversed blocks which are closer together in the image to exploit better temporal locality.
-With the insights from the roofline analysis, we abandoned any further experiments in that direction, because no big performance
-gains can be expected.
+Finally, we did some experiments with different traversal methods for the
+domain/range blocks. Like blocked matrix-matrix-multiplication, we traversed
+blocks which are closer together in the image to exploit better temporal
+locality. With the insights from the roofline analysis, we abandoned any further
+experiments in that direction, because no big performance gains could be
+observed.
 
-\mypar{SIMD vectorization} Two different strategies to implement SIMD with AVX2 intrinsics 
+\mypar{SIMD vectorization} Two different strategies to implement SIMD with AVX2 intrinsics
 were followed. One approach was to perform the computations of brightness,
 contrast and the corresponding error for all four rotations for each
-domain/range block pair at once. Another approach was to compute 
+domain/range block pair at once. Another approach was to compute
 those values for four different domain blocks at a time in
 addition to processing four pixels at once when computing the sums in equations
 \ref{contrast}, \ref{brightness} and \ref{error}.
@@ -155,7 +166,7 @@ gather instructions (e.g. \verb|_mm256_i64gather_pd|). Their performance drawbac
 so significant that we couldn't achieve any performance speedup compared to the scalar
 optimized code.
 
-We proceeded by not considering 90 and 270 degree rotations for our transformations. 
+We proceeded by not considering 90 and 270 degree rotations for our transformations.
 This led to the speedup we originally expected when implementing SIMD instructions.
 One implication of this change was that image compression quality gets worse. However we found that quality
 was still practically good because the algorithm then simply advances to further quadtree
@@ -164,8 +175,8 @@ depths when quality requirements can not be satisfied.
 A second attempt wihtout removing any rotations was to withdraw from the idea of always implicitly rotating domain blocks.
 Instead, we rotate the range block once by 90 degrees explicitly while traversing the domain blocks
 in a manner such that we can represent all four rotations.
-Rotating the range block by 90 degrees instead of the domain block is due to the fact that the amount of range blocks 
-in deeper quadtree levels tend to get smaller than the amount of domain blocks (see algorithm \ref{alg:baseline}), 
+Rotating the range block by 90 degrees instead of the domain block is due to the fact that the amount of range blocks
+in deeper quadtree levels tend to get smaller than the amount of domain blocks (see algorithm \ref{alg:baseline}),
 leading to less memory copying.
 The change had the effect that compression quality remained the same without extensive use of costly
 gather instructions.

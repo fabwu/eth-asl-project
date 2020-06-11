@@ -3,11 +3,9 @@
 To introduce the algorithm, we first present the essential parts of the
 underlying mathematical theory, show how it can be used to compress images and
 what practical considerations must be made for the implementation as shown by
-Fischer \cite{fisher2012}.
-
-Practical considerations for the implementation and a cost analysis can be found
-at the end of this section. Throughout this chapter we use the notation from
-Fisher \cite{fisher2012}.
+Fischer \cite{fisher2012}. A cost analysis can be found at the end of this
+section. Throughout this chapter we use the notation from Fisher
+\cite{fisher2012}.
 
 \mypar{Iterated function systems (IFS)} Fractal image compression builds on the
 theory of iterated function systems. For completeness, we provide a short
@@ -49,6 +47,8 @@ The following theorem about attractors has been proved by Hutchinson in
 \cite{hutchinson1981fractals} and is the essential theoretical part how fractal
 image compression works.
 
+\notepascal{Hat Hutchinson wirklich den banachschen fixpunksatz bewiesen?}
+
 \begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
   For an IFS on a set $X$ it holds that:
 
@@ -61,6 +61,9 @@ image compression works.
 
 Note that in the theorem above, we require that $X$ is a compact set, which
 holds for fractal image compression.
+
+\notepascal{Wenn wir das voraussetzen sollte das nicht auch im Theorem stehen?
+  ``...For an IFS on a compact set X...''}
 
 \mypar{From IFS to image compression} The key idea in fractal image compression
 is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in
@@ -116,9 +119,14 @@ transformation $w_i$:
 \begin{align}
   w_i = \argmin_{w} \left( d_{RMS}(w(D_i), f \cap (R_i \times I)) \right)\label{eq:min-problem}
 \end{align}
-Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and $o_i$ in order to minimize the error.\\
-The set of all transformations is a partitioned iterated function system (PIFS). The only difference to an IFS is that the transformations are restricted
-to \textit{blocks} (partitions) of the image. However, the underlying theory still holds \cite{fisher2012}.
+
+Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and
+$o_i$ in order to minimize the error.
+
+The set of all transformations is a partitioned iterated function system (PIFS).
+The only difference to an IFS is that the transformations are restricted to
+\textit{blocks} (partitions) of the image. However, the underlying theory still
+holds \cite{fisher2012}.
 
 \mypar{Computing Transformations}\label{par-practical-implementation}
 In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
@@ -136,8 +144,9 @@ is minimal. An analytical solution for $s,o,R$ is:
     R &= \frac{1}{n} \left[ \sum_{i=1}^n b_i^2 + s \left( s \sum_{i=1}^n a_i^2 - 2 \sum_{i=1}^n a_i b_i + 2o \sum_{i=1}^n a_i \right) \right. \notag\\
     &\text{\hspace{1cm}} \left. + o \left(no - 2 \sum_{i=1}^n b_i \right)  \right]\label{error}
 \end{align}
-Thus, to compute an optimal transformation $w_i$ and the error for a given range block $R_i$ and given domain block $D_i$, one needs to compute the sums above
-as efficient as possible.
+Thus, to compute an optimal transformation $w_i$ and the error for a given range
+block $R_i$ and given domain block $D_i$, one needs to compute the sums above as
+efficiently as possible.
 
 \mypar{Image Partitioning} There are many ways to partition an image into range
 and domain blocks. We require that the range blocks cover the full image and do
@@ -201,13 +210,14 @@ Downscaling one domain block can be done in $4\cdot n_{i}$ flops because we have
 to aggregate the average of four pixels of the domain block into one pixel which
 requires 4 flops for every square of four pixels.
 
-The sum $\sum_{j=1}^{n_{i}} a_j b_j$ has to be computed for each rotation
-which requires $2\cdot n_{i}-1$ flops per rotations. The results of the
-remaining sums ($\sum_{j=1}^{n_{i}} a_j$, $\sum_{j=1}^{n_{i}} a_j^2$,
+The sum $\sum_{j=1}^{n_{i}} a_j b_j$ has to be computed for each rotation which
+requires $2\cdot n_{i}-1$ flops per rotations. The results of the remaining sums
+($\sum_{j=1}^{n_{i}} a_j$, $\sum_{j=1}^{n_{i}} a_j^2$,
 $\sum_{j=1}^{n_{i}} b_j$,$\sum_{j=1}^{n_{i}} b_j^2$) are identical for all four
 rotations and and require a total of $6\cdot n_{i}-4$ floating point operations.
 Applying the formulas for brightness, contrast and the error involves $26$ flops
-using the precomputed sums.
+using the precomputed sums. We therefore get the following cost for
+$\alpha_{i}$:
 
 \begin{align*}
   \alpha_i &= 4\cdot n_{i} + 4 \cdot (2\cdot n_{i}-1) + (6\cdot n_{i}-4) +  26\\
