@@ -42,12 +42,19 @@
 %
 \maketitle
 %
+%
+
+% space efficient align
+\setlength{\abovedisplayskip}{1ex}
+\setlength{\belowdisplayskip}{1ex}
+% \setlength{\abovedisplayshortskip}{0pt}
+% \setlength{\belowdisplayshortskip}{0pt}
 
 \begin{abstract}
     Fractal image compression provides is a lossy image compression scheme,
     which yields good compression ratios and quality at the cost of high encoding times.\\
     In our work, we started with our own implementation of a fractal compression scheme using quadtree partitioning
-    and exhaustive search for self-similarity in the image. 
+    and exhaustive search for self-similarity in the image.
     We then applied various optimizations to the given computations, such as ILP, precomputation and vectorization using AVX2 intrinsics.\\
     Our optimized version without SIMD led to a 3x speedup, whereas we observed a speedup of up to 8x with vectorization.
     \notejonas{speedups anpassen}

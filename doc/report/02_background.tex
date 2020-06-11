@@ -23,8 +23,11 @@ two numbers brings them \textit{closer} together, i.e. their distance gets
 smaller.
 
 \begin{definition}[Iterated function system]
-    An iterated function system (IFS) is a set of $n$ functions $$\{f_i:X \to X | i=1,...,n\}$$
-    where each $f_i$ is contractive and $X$ is a metric space with the metric $d$.
+  An iterated function system (IFS) is a set of $n$ functions
+  \begin{align*}
+    \{f_i:X \to X | i=1,...,n\}
+  \end{align*}
+  where each $f_i$ is contractive and $X$ is a metric space with the metric $d$.
 \end{definition}
 
 \begin{definition}[Hutchinson operator]
@@ -89,7 +92,6 @@ classification restrict possible domain block candidates for a given range block
 in order to speed up compression \cite{jacobs1992image}.
 
 \mypar{Transformations} A grayscale image can be interpreted as a function
-
 \begin{align*}
     f \colon I^2 &\to I\\
     (x,y) &\mapsto z = f(x,y)
@@ -98,40 +100,42 @@ in order to speed up compression \cite{jacobs1992image}.
 where $I$ is the interval $[0,1]$. Specifically, an image is a set of three-tuples $(x,y,z) \in I^3$, where $x,y$ are positions and $z$ is the grayscale value.
 The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$.
 A transformation $w_i$ from the image of a domain block $D_i$ to the image of a range block $R_i$ can then be described as a linear affine transformation
-$$
+\begin{align*}
 w_i(D_i) = \bigcup_{(x,y,z) \in f \cap (D_i \times I)} \begin{pmatrix} a_i & b_i & 0 \\ c_i & d_i & 0 \\ 0 & 0 & s_i \end{pmatrix} \begin{pmatrix} x\\y\\z \end{pmatrix} + \begin{pmatrix} e_i\\f_i\\o_i \end{pmatrix}
-$$
+\end{align*}
+
 where $a_i, b_i, c_i, d_i, e_i, f_i$ map \textit{location} (which can involve rotations) and $s_i, o_i$ correspond to contrast and brightness adjustments.
 To ensure that $w_i$ is contractive, $D_i$ has to be larger than $R_i$ (in terms of region sizes) and $0 \leq s_i < 1$.
 
 Now we define a metric to compare two images (or two blocks). Usually, the root mean square error (RMS) metric is used:
-$$
+\begin{align*}
 d_{RMS}(f,g) = \sqrt{\int_{I^2} (f(x,y)-g(x,y))dxdy}
-$$
-For a range block $R_i$ and domain block $D_i$ we now seek the transformation $w_i$, such that $d_{RMS}(w_i(D_i), f \cap (R_i \times I))$ is minimal, i.e.
-\begin{equation} \label{eq:min-problem}
-    w_i = \argmin_{w} \left( d_{RMS}(w(D_i), f \cap (R_i \times I)) \right)
-\end{equation}
+\end{align*}
+For a range block $R_i$ and domain block $D_i$ we now seek the best
+transformation $w_i$:
+\begin{align}
+  w_i = \argmin_{w} \left( d_{RMS}(w(D_i), f \cap (R_i \times I)) \right)\label{eq:min-problem}
+\end{align}
 Calculating $w_i$ is a minimization problem, because we may choose $s_i$ and $o_i$ in order to minimize the error.\\
 The set of all transformations is a partitioned iterated function system (PIFS). The only difference to an IFS is that the transformations are restricted
 to \textit{blocks} (partitions) of the image. However, the underlying theory still holds \cite{fisher2012}.
 
-\mypar{Computing Transformations} \label{par-practical-implementation}
+\mypar{Computing Transformations}\label{par-practical-implementation}
 In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
 
-The minimization problem in equation \ref{eq:min-problem} can be solved using least squares regression, as done in \cite{github-python}.
+The minimization problem in equation~\eqref{eq:min-problem} can be solved using least squares regression, as done in \cite{github-python}.
 Fisher uses an analytical solution in \cite{fisher2012} to compute the adjustments directly. Let $b_1, ..., b_n$ be the $n$ pixel values of the range block $R_i$
 and $a_1,...,a_n$ be the $n$ pixel values of the downsampled and rotated domain block. We then seek $s$ (saturation) and $o$ (brightness) such that
-$$
-R = \sum_{i=1}^n (s \cdot a_i + o - b_i)^2
-$$
+\begin{align*}
+  R = \sum_{i=1}^n (s \cdot a_i + o - b_i)^2
+\end{align*}
 is minimal. An analytical solution for $s,o,R$ is:
 \begin{align}
     s &= \frac{n \sum_{i=1}^n a_i b_i - \sum_{i=1}^n a_i \sum_{i=1}^n b_i}{n \sum_{i=1}^n a_i^2 - \left(\sum_{i=1}^n a_i \right)^2} \label{contrast}\\
     o &= \frac{1}{n} \left( \sum_{i=1}^n b_i - s \sum_{i=1}^n a_i \right) \label{brightness}\\
     R &= \frac{1}{n} \left[ \sum_{i=1}^n b_i^2 + s \left( s \sum_{i=1}^n a_i^2 - 2 \sum_{i=1}^n a_i b_i + 2o \sum_{i=1}^n a_i \right) \right. \notag\\
     &\text{\hspace{1cm}} \left. + o \left(no - 2 \sum_{i=1}^n b_i \right)  \right]\label{error}
-    \end{align}
+\end{align}
 Thus, to compute an optimal transformation $w_i$ and the error for a given range block $R_i$ and given domain block $D_i$, one needs to compute the sums above
 as efficient as possible.
 
@@ -161,13 +165,13 @@ with details are covered with transformations which map smaller blocks. Usually,
 one defines also a maximum depth of the quadtree as described in
 \cite{fisher2012}.
 
-\mypar{Cost analysis} In this course we focus on floating point operations and ignore all
-integer calculations (e.g. index computation). We count only floating point
-multiplications, divisions, additions and subtractions because no special mathematical functions are used. 
-The cost metric is define as
-\begin{equation} \label{eq:cost}
-C = N_{mult} + N_{div} + N_{add} + N_{sub}
-\end{equation}
+\mypar{Cost analysis} In this course we focus on floating point operations and
+ignore all integer calculations (e.g. index computation). We count only floating
+point multiplications, divisions, additions and subtractions because no special
+mathematical functions are used. The cost metric is define as
+\begin{align}
+  C = N_{mult} + N_{div} + N_{add} + N_{sub} \label{eq:cost}
+\end{align}
 
 The cost of the algorithm does not only depend on the size but also on the content
 of an image. To obtain a rough estimate of the runtime, we provide a
@@ -182,7 +186,7 @@ $\frac{s}{2}\times\frac{s}{2}$ and one domain block of size $s \times s$. For
 quadtree depth $i \in \{1, \dots, m\}$, let $R^{(i)}$ be the set of range
 blocks, $D^{(i)}$ the set of domain blocks, and $n_{i}$ the number of pixels of
 one range block. Note that the number of pixels of a domain block is then always
-$4\cdot n_{i}$ due to quadtree partitioning and $n_i=\frac{s^2}{|R^{(i)}|} = \frac{s^2}{2^{2i}}$. 
+$4\cdot n_{i}$ due to quadtree partitioning and $n_i=\frac{s^2}{|R^{(i)}|} = \frac{s^2}{2^{2i}}$.
 For a given domain block and range block in quadtree depth $i$,
 let $\alpha_{i}$ denote the cost to compute four transformations $w_i^{0}$,
 $w_i^{90}$, $w_i^{180}$, $w_i^{270}$ and their errors. Each transformation
