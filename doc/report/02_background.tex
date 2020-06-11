@@ -159,9 +159,9 @@ one defines also a maximum depth of the quadtree as described in
 \cite{fisher2012}.
 
 \mypar{Cost analysis} In this course we focus on floating point operations and ignore all
-integer calculations (e.g. index computation). The algorithm consists of simple arithmetic
-expressions and no special mathematical functions are used. Thus, we count floating point
-multiplication, division, addition and subtraction. The cost metric is define as
+integer calculations (e.g. index computation). We count only floating point
+multiplications, divisions, additions and subtractions because no special mathematical functions are used. 
+The cost metric is define as
 \begin{equation} \label{eq:cost}
 C = N_{mult} + N_{div} + N_{add} + N_{sub}
 \end{equation}
@@ -178,8 +178,9 @@ input image. We assume that we start quadtree with range blocks of size
 $\frac{s}{2}\times\frac{s}{2}$ and one domain block of size $s \times s$. For
 quadtree depth $i \in \{1, \dots, m\}$, let $R^{(i)}$ be the set of range
 blocks, $D^{(i)}$ the set of domain blocks, and $n_{i}$ the number of pixels of
-one range block. Note that the number of pixels of a range block is always
-$4\cdot n_{i}$. For a given domain block and range block in quadtree depth $i$,
+one range block. Note that the number of pixels of a domain block is then always
+$4\cdot n_{i}$ due to quadtree partitioning and $n_i=\frac{s^2}{|R^{(i)}|} = \frac{s^2}{2^{2i}}$. 
+For a given domain block and range block in quadtree depth $i$,
 let $\alpha_{i}$ denote the cost to compute four transformations $w_i^{0}$,
 $w_i^{90}$, $w_i^{180}$, $w_i^{270}$ and their errors. Each transformation
 $w_i^{\gamma}$ represents a rotation of the domain block by $\gamma$ degrees.
@@ -189,11 +190,11 @@ contrast and error (equations \eqref{contrast}, \eqref{brightness} and
 \eqref{error}) and apply the formulas. In addition, we need to downscale and
 rotate the domain block.
 
-Downscaling the domain block can be done in $4\cdot n_{i}$ flops because we have
+Downscaling one domain block can be done in $4\cdot n_{i}$ flops because we have
 to aggregate the average of four pixels of the domain block into one pixel which
 requires 4 flops for every square of four pixels.
 
-Note that $\sum_{j=1}^{n_{i}} a_j b_j$ has to be computed for each rotation
+The sum $\sum_{j=1}^{n_{i}} a_j b_j$ has to be computed for each rotation
 which requires $2\cdot n_{i}-1$ flops per rotations. The results of the
 remaining sums ($\sum_{j=1}^{n_{i}} a_j$, $\sum_{j=1}^{n_{i}} a_j^2$,
 $\sum_{j=1}^{n_{i}} b_j$,$\sum_{j=1}^{n_{i}} b_j^2$) are identical for all four
