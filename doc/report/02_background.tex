@@ -158,50 +158,52 @@ with details are covered with transformations which map smaller blocks. Usually,
 one defines also a maximum depth of the quadtree as described in
 \cite{fisher2012}.
 
-\mypar{Cost analysis} In this course we focus on floating point operations and ignore all 
-integer calculations (e.g. index computation). The algorithm consists of simple arithmetic 
-expressions and no special mathematical functions are used. Thus, we count floating point 
+\mypar{Cost analysis} In this course we focus on floating point operations and ignore all
+integer calculations (e.g. index computation). The algorithm consists of simple arithmetic
+expressions and no special mathematical functions are used. Thus, we count floating point
 multiplication, division, addition and subtraction. The cost metric is define as
 \begin{equation} \label{eq:cost}
 C = N_{mult} + N_{div} + N_{add} + N_{sub}
 \end{equation}
 
 The cost of the algorithm does not only depend on the size but also on the content
-of an image. To obtain a rough estimate of the runtime, we provide a 
-pessimistic upper bound on the cost of the algorithm. We assume that no transformation 
-will yield an error below the threshold and thus the only termination criteria is the 
-maximum quadtree depth. In practice, the cost is (much) lower assuming a reasonable 
+of an image. To obtain a rough estimate of the runtime, we provide a
+pessimistic upper bound on the cost of the algorithm. We assume that no transformation
+will yield an error below the threshold and thus the only termination criteria is the
+maximum quadtree depth. In practice, the cost is (much) lower assuming a reasonable
 error threshold $\epsilon$.
 
 Let $m$ be the maximum quadtree depth and let $s$ be the width of the square
 input image. We assume that we start quadtree with range blocks of size
 $\frac{s}{2}\times\frac{s}{2}$ and one domain block of size $s \times s$. For
 quadtree depth $i \in \{1, \dots, m\}$, let $R^{(i)}$ be the set of range
-blocks, $D^{(i)}$ the set of domain blocks, $S_{R}^{(i)}$ the number of pixels
-of one range block and $S_{D}^{(i)}$ the number of pixels of one domain block.
-For a given domain block and range block in quadtree depth $i$, let $\alpha_{i}$
-denote the cost to compute four transformations $w_i^{0}$, $w_i^{90}$,
-$w_i^{180}$, $w_i^{270}$ and their errors. Each transformation $w_i^{\gamma}$
-represents a rotation of the domain block by $\gamma$ degrees.
+blocks, $D^{(i)}$ the set of domain blocks, and $n_{i}$ the number of pixels of
+one range block. Note that the number of pixels of a range block is always
+$4\cdot n_{i}$. For a given domain block and range block in quadtree depth $i$,
+let $\alpha_{i}$ denote the cost to compute four transformations $w_i^{0}$,
+$w_i^{90}$, $w_i^{180}$, $w_i^{270}$ and their errors. Each transformation
+$w_i^{\gamma}$ represents a rotation of the domain block by $\gamma$ degrees.
 
 To calculate $\alpha_{i}$, we need to compute all sums for brightness,
 contrast and error (equations \eqref{contrast}, \eqref{brightness} and
 \eqref{error}) and apply the formulas. In addition, we need to downscale and
 rotate the domain block.
 
-Note that the sums $\sum_{i=1}^{n} a_i$,$\sum_{i=1}^{n} a_i^2$,
-$\sum_{i=1}^{n} b_i$,$\sum_{i=1}^{n} b_i^2$ are the same for all four rotations
-and $\sum_{i=1}^{n} a_i b_i$ has to be computed for each rotation.
+Downscaling the domain block can be done in $4\cdot n_{i}$ flops because we have
+to aggregate the average of four pixels of the domain block into one pixel which
+requires 4 flops for every square of four pixels.
 
-Downsampling can be done in $S_{D}^{(i)}$ flops because we have to aggregate the
-average of four pixels of the domain block into one pixel which requires 4 flops
-for every square of four pixels.
+Note that $\sum_{j=1}^{n_{i}} a_j b_j$ has to be computed for each rotation
+which requires $2\cdot n_{i}-1$ flops per rotations. The results of the
+remaining sums ($\sum_{j=1}^{n_{i}} a_j$, $\sum_{j=1}^{n_{i}} a_j^2$,
+$\sum_{j=1}^{n_{i}} b_j$,$\sum_{j=1}^{n_{i}} b_j^2$) are identical for all four
+rotations and and require a total of $6\cdot n_{i}-4$ floating point operations.
+Applying the formulas for brightness, contrast and the error involves $26$ flops
+using the precomputed sums.
 
 \begin{align*}
-  \alpha_i &= S_{D}^{(i)} + 4 \cdot (2\cdot S_{R}^{(i)}-1) + (6\cdot S_{R}^{(i)}-4) +  26\\
-           &= S_{D}^{(i)} + 14\cdot S_{R}^{(i)} + 18 \\
-           &= 18\cdot S_{R}^{(i)} + 18 \\
-         % &= 4 \cdot \frac{S^2}{2^{2i}} + 14 \cdot \frac{S^2}{2^{2i}} - 8 \\
+  \alpha_i &= 4\cdot n_{i} + 4 \cdot (2\cdot n_{i}-1) + (6\cdot n_{i}-4) +  26\\
+           &= 18\cdot n_{i} + 18 \\
            &= 18 \cdot \frac{s^2}{2^{2i}} + 18
 \end{align*}
 
@@ -214,10 +216,10 @@ C &\leq \sum_{i=1}^m |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
 \end{align*}
 
 We see that to cost of the algorithm is exponential in the quadtree depth $m$
-and polynomial in image width $s$. For the roofline plot and the other benchmarks, 
+and polynomial in image width $s$. For the roofline plot and the other benchmarks,
 we determined the cost empirically by instrumenting the code.
+
 % TODO: but is in chapter 3 or even 4
 % Our experiments showed that this upper bound is way
 % too pessimistic and the exponentiality in $M$ is practically not a problem
 % given a reasonable $S,M,\epsilon$.
-
