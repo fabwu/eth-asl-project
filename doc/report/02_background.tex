@@ -47,11 +47,13 @@ The following theorem about attractors has been proved by Hutchinson in
 image compression works.
 
 \begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
-    For an IFS on a set $X$ it holds that:
-    \begin{enumerate}
-        \item There always exists a unique attractor $A \in X$
-        \item For any nonempty set $S_0 \subset X$ it holds that $A = \lim_{n \to \infty} F^{\circ n}(S_0)$
-    \end{enumerate}
+  For an IFS on a set $X$ it holds that:
+
+  \begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
+    \item There always exists a unique attractor $A \in X$
+    \item For any nonempty set $S_0 \subset X$ it holds that
+      $A = \lim_{n \to \infty} F^{\circ n}(S_0)$
+  \end{enumerate}
 \end{theorem}
 
 Note that in the theorem above, we require that $X$ is a compact set, which
@@ -73,7 +75,7 @@ block and then applies a brightness and saturation adjustment.
 
 The transformations can then be computed with the following steps.
 
-\begin{enumerate}
+\begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
   \item Partition the image into range blocks $\boldsymbol{R}$ and domain blocks
     $\boldsymbol{D}$.
   \item For each range block $R_i \in \boldsymbol{R}$, find a transformation
@@ -92,6 +94,7 @@ in order to speed up compression \cite{jacobs1992image}.
     f \colon I^2 &\to I\\
     (x,y) &\mapsto z = f(x,y)
 \end{align*}
+
 where $I$ is the interval $[0,1]$. Specifically, an image is a set of three-tuples $(x,y,z) \in I^3$, where $x,y$ are positions and $z$ is the grayscale value.
 The image of a range (or domain) block $R_i$ is then defined by $f \cap (R_i \times I)$.
 A transformation $w_i$ from the image of a domain block $D_i$ to the image of a range block $R_i$ can then be described as a linear affine transformation
