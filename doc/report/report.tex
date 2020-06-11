@@ -51,14 +51,21 @@
 % \setlength{\belowdisplayshortskip}{0pt}
 
 \begin{abstract}
-    Fractal image compression provides is a lossy image compression scheme,
-    which yields good compression ratios and quality at the cost of high encoding times.\\
-    In our work, we started with our own implementation of a fractal compression scheme using quadtree partitioning
-    and exhaustive search for self-similarity in the image.
-    We then applied various optimizations to the given computations, such as ILP, precomputation and vectorization using AVX2 intrinsics.\\
-    Our optimized version without SIMD led to a 3x speedup, whereas we observed a speedup of up to 8x with vectorization.
-    \notejonas{speedups anpassen}
-    \notejonas{mehr details was wir gemacht haben}
+    Fractal image compression is a lossy image compression scheme,
+    which yields good compression ratios and quality at the cost of high encoding times. 
+    In this work, we started with our own implementation of a fractal compression scheme using the popular
+    quadtree partitioning and exhaustive search for self-similarity in the image.
+
+    We analyzed our baseline implementation with the roofline model and used profiling to identify various 
+    performance bottlenecks. With these insights we precomputed several values and removed complex
+    data structures to improve performance. In addition, we optimized the code for instruction level 
+    parallelism and used FMA instructions for an optimal pipeline utilization. Then we vectorized the code 
+    using AVX2 intrinsics and changed the memory layout to avoid expensive gathering instructions. 
+
+    Our optimized version without SIMD led to a 4x speedup whereas we observed a speedup of up to 8x 
+    with vectorization. Additionally, we improved the runtime of the encoding part significantly. For an
+    image of the size $2048 \times 2048$ pixels the compression time was reduced from 2 hours to 
+    2.5 minutes. 
 \end{abstract}
 
 \input{01_introduction.tex}

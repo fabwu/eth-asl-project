@@ -140,16 +140,40 @@ we traversed blocks which are closer together in the image to exploit better tem
 With the insights from the roofline analysis, we abandoned any further experiments in that direction, because no big performance
 gains can be expected.
 
-\mypar{Vector Optimizations} Two different strategies to implement SIMD were
-followed. A first approach was to perform the computations of brightness,
+\mypar{SIMD vectorization} Two different strategies to implement SIMD with AVX2 intrinsics 
+were followed. One approach was to perform the computations of brightness,
 contrast and the corresponding error for all four rotations for each
-domain-range block pair at once. It was found that a smarter way of using SIMD
-is to compute those values for four different domain blocks at a time in
+domain/range block pair at once. Another approach was to compute 
+those values for four different domain blocks at a time in
 addition to processing four pixels at once when computing the sums in equations
 \ref{contrast}, \ref{brightness} and \ref{error}.
 
+\notejonas{NEU Start}
+A main challenge in implementing vectorization was due to the fact of the implicit
+domain block rotation by 90 and 270 degrees. Processing them resulted in expensive
+gather instructions (e.g. \verb|_mm256_i64gather_pd|). Their performance drawback was
+so significant that we couldn't achieve any performance speedup compared to the scalar
+optimized code.
+
+We proceeded by not considering 90 and 270 degree rotations for our transformations. 
+This led to the speedup we originally expected when implementing SIMD instructions.
+One implication of this change was that image compression quality gets worse. However we found that quality
+was still practically good because the algorithm then simply advances to further quadtree
+depths when quality requirements can not be satisfied.
+
+A second attempt wihtout removing any rotations was to withdraw from the idea of always implicitly rotating domain blocks.
+Instead, we rotate the range block once by 90 degrees explicitly while traversing the domain blocks
+in a manner such that we can represent all four rotations.
+Rotating the range block by 90 degrees instead of the domain block is due to the fact that the amount of range blocks 
+in deeper quadtree levels tend to get smaller than the amount of domain blocks (see algorithm \ref{alg:baseline}), 
+leading to less memory copying.
+The change had the effect that compression quality remained the same without extensive use of costly
+gather instructions.
+\notejonas{NEU Ende}
+
+\notejonas{ALT Start}
 Sadly only adding SIMD instructions did not lead to a better performance in our
-case. The main reason for that result could be found in the 90 and 270 degree
+case. The main reason for that result was found in the 90 and 270 degree
 rotations which were highly inefficient because of memory locations of the
 needed pixels. By simply removing these two rotations in both the code version
 with and without SIMD instructions, a significant increase in performance could
@@ -163,10 +187,8 @@ rotating the range blocks instead of the domain blocks we were able to increase
 the performance for the code version with all four rotations. This solution also
 outperformed the previous version where the costly rotations were deleted by an
 order of magnitude.
+\notejonas{ALT Ende}
 
-In addition, an important objective was to avoid using other costly instructions
-like permutations or blends across lanes (\verb|_mm256_permute4x64|,
+Another important step was to decrease the amount of other costly instructions
+such as permutations or blends across lanes (\verb|_mm256_permute4x64|,
 \verb|_mm256_blendv_pd|).
-
-As a result we were able to significantly increase the performance of the image
-compression.
