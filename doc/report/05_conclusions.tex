@@ -1,11 +1,25 @@
 \section{Conclusions}
 
-Here you need to briefly summarize what you did and why this is
-important. {\em Do not take the abstract} and put it in the past
-tense. Remember, now the reader has (hopefully) read the paper, so it
-is a very different situation from the abstract. Try to highlight
-important results and say the things you really want to get across
-(e.g., the results show that we are within 2x of the optimal performance ...
-Even though we only considered the DFT, our optimization
-techniques should be also applicable ....) You can also formulate next
-steps if you want. Be brief.
+With scalar optimizations, our implementation gains a performance speedup
+of roughly 4x, whereas the vectorized implementaiton has a performance speedup
+of roughly 8x compared with our reasonable straightforward implementation. It is important
+to mention that the runtime could be decreased significantly and tangibly. Compressing
+an image with $2048 \times 2048$ pixels took about 2 hours with the baseline implementation,
+whereas the vectorized implementation needed 2.5 minutes.
+
+With our best implementation which performs at 4 flops/cycle, we are still 4 times 
+below the theoretical peak performance of 16 flops/cycle. Because the algorithm
+in this form is not memory bound, we acknowledge that further performance improvements
+can be expected.
+
+Another challenge is to implement the optimizations for non-squared images whose
+width and height are not powers of two, because most images in practice do not 
+conform to these simplyfying assumptions.
+
+To furthermore boost performance one would also need to apply algorithmic changes. 
+Using exhaustive block mapping with a rather large
+domain block pool (e.g. with four rotations) is a significant performance
+bottleneck which does not necessarily lead to significant better compression results.
+
+We consider our optimizations to be applicable in all of these more advanced
+and mature fractal image compression schemes.
