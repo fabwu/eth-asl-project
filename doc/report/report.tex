@@ -61,7 +61,7 @@
   and exhaustive search for self-similarity in the image.
 
   The baseline implementation was analyzed using the roofline model and
-  profiling to identify the bottlenecks. With these insights we implemented
+  profiling to identify bottlenecks. With these insights we implemented
   precomputations and removed complex data structures to improve performance. In
   addition, we optimized the code for instruction level parallelism and used FMA
   instructions for a better pipeline utilization. Then we vectorized the code
