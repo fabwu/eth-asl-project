@@ -57,13 +57,13 @@
 \begin{abstract}
   Fractal image compression is a lossy image compression method, which yields
   good compression ratios and quality at the cost of high encoding times. We
-  implemented fractal image compression from scratch using quadtree partitioning
-  and exhaustive search for self-similarity in the image.
+  implemented the algorithm from scratch using quadtree partitioning and
+  exhaustive search for self-similarity in the image.
 
   This baseline implementation was analyzed using the roofline model and
   profiling to identify bottlenecks. With these insights we implemented
   precomputations and removed complex data structures to improve performance. In
-  addition, we optimized the code for instruction level parallelism 
+  addition, we optimized the code for instruction level parallelism
   for a better pipeline utilization. Then we vectorized the code
   using AVX2 intrinsics and changed the memory layout to avoid expensive
   gathering instructions. At last, different compiler flags for GCC and ICC were

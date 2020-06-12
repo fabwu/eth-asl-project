@@ -16,9 +16,9 @@ practical applications.
 
 Fractal image compression is another method for lossy image compression. The
 main idea is to compress an image by exposing self-similarity which can be
-observed in many places in nature (e.g. fir cones or romanesco broccoli). 
+observed in many places in nature (e.g. fir cones or romanesco broccoli).
 Contrary to JPEG, the underlying theoretical construct of a fractal compression
-scheme is that of an iterated function system (IFS). 
+scheme is that of an iterated function system (IFS).
 
 This approach yields great
 compression results in terms of compression size and quality \cite{fisher2012}.
@@ -41,5 +41,6 @@ and an elaborate list of optimizations \cite{fisher2012}.
 \mypar{Contribution} Based on the explanations of Fisher in \cite{fisher2012}
 and an open-source implementation written in Python \cite{github-python} and C++
 \cite{github-cpp}, we implemented our own fractal image compression scheme with
-quadtree partitioning and exhaustive self-similarity search.
-
+quadtree partitioning and exhaustive self-similarity search. We proceeded with
+improving the runtime of the compression using several performance optimizations
+and vector intrinsics.

@@ -1,0 +1,70 @@
+\message{ !name(report.tex)}% IEEE standard conference template; to be used with:
+%   spconf.sty  - LaTeX style file, and
+%   IEEEbib.bst - IEEE bibliography style file.
+% --------------------------------------------------------------------------
+
+\documentclass[letterpaper]{article}
+
+% custom setup
+\input{setup.tex}
+
+% set to true or false to enable or disable notes
+\newboolean{shownotes}
+\setboolean{shownotes}{true}
+
+% Title.
+% ------
+\title{Performance Optimized Fractal Image Compression using Quadtree}
+%
+% Single address.
+% ---------------
+\name{Jonas Hansen, Pascal Huber, Fabian Wüthrich\thanks{Thanks to Janis Peyer for his contributions}}
+\address{Department of Computer Science\\ ETH Zurich, Switzerland}
+
+% For example:
+% ------------
+%\address{School\\
+%		 Department\\
+%		 Address}
+%
+% Two addresses (uncomment and modify for two-address case).
+% ----------------------------------------------------------
+%\twoauthors
+%  {A. Author-one, B. Author-two\sthanks{Thanks to XYZ agency for funding.}}
+%		 {School A-B\\
+%		 Department A-B\\
+%		 Address A-B}
+%  {C. Author-three, D. Author-four\sthanks{The fourth author performed the work
+%		 while at ...}}
+%		 {School C-D\\
+%		 Department C-D\\
+%		 Address C-D}
+%
+
+\begin{document}
+
+\message{ !name(05_conclusions.tex) !offset(-46) }
+\section{Conclusions}
+
+With scalar optimizations, our implementation gains a performance speedup
+of roughly 4x, whereas the vectorized implementation has a performance speedup
+of roughly 8x compared with our straightforward implementation. It is important
+to mention that the runtime was decreased significantly and tangibly. Compressing
+an image with $2048 \times 2048$ pixels with the baseline implementation takes
+about 2 hours, whereas the vectorized implementation needs 2.5 minutes.
+
+Our fastest implementation with a performance of 4~flops/cycle is still 4 times
+below the theoretical peak performance of 16 flops/cycle. As the algorithm in
+this form is not memory bound, further performance improvements can be expected.
+
+To furthermore boost performance one would also need to apply algorithmic changes.
+Using exhaustive block mapping with a rather large
+domain block pool (e.g. with four rotations) is a significant performance
+bottleneck which does not necessarily lead to better compression results.
+
+We consider our optimizations to be applicable in all of these more advanced
+and mature fractal image compression schemes.
+
+\message{ !name(report.tex) !offset(26) }
+
+\end{document}

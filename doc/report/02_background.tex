@@ -2,17 +2,15 @@
 
 To introduce the algorithm, we first present the essential parts of the
 underlying mathematical theory, show how it can be used to compress images and
-what practical considerations must be made for the implementation as shown by
-Fischer \cite{fisher2012}. A cost analysis can be found at the end of this
-section. Throughout this chapter, we use the notation from Fisher
-\cite{fisher2012}.
-\notejonas{Angepasst, bitte reviewen}
+what practical considerations must be made for the implementation. A cost
+analysis can be found at the end of this section. Throughout this chapter, we
+use the notation and results from Fisher \cite{fisher2012}.
 
 \mypar{Iterated function systems (IFS)} Fractal image compression builds on the
 theory of iterated function systems. For completeness, we provide a short
 introduction to this rich topic.
 
-\begin{definition}[Contractivity of functions]
+\begin{definition}[Contractivity of Functions]
     A function $f$ on a metric space $X$ with metric $d$ is contractive, when there exists some $0 \leq k < 1$
     such that for all $x,y \in X: d(f(x), f(y)) \leq k \cdot d(x,y)$.
 \end{definition}
@@ -21,15 +19,15 @@ As an informal example, when $f$ is a contractive function on $\R$, then mapping
 two numbers brings them \textit{closer} together, i.e. their distance gets
 smaller.
 
-\begin{definition}[Iterated function system]
+\begin{definition}[Iterated Function System]
   An iterated function system (IFS) is a set of $n$ functions
   \begin{align*}
     \{f_i:X \to X | i=1,...,n\}
   \end{align*}
-  where each $f_i$ is contractive and $X$ is a metric space with metric $d$.
+  where each $f_i$ is contractive and $X$ is a metric space.
 \end{definition}
 
-\begin{definition}[Hutchinson operator]
+\begin{definition}[Hutchinson Operator]
     The Hutchinson operator for an IFS is the function
     \begin{align*}
         F \colon 2^X &\to 2^X\\
@@ -47,7 +45,7 @@ its input $x$, e.g. $F^{\circ 2}(x) = F(F(x))$.
 Hutchinson used the following theorem in his work \cite{hutchinson1981fractals}
 to build up the essential theoretical parts of how fractal image compression works.
 
-\begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
+\begin{theorem}[Contractive Mapping Fixed-Point Theorem]\label{theorem-fixpoint}
   For an IFS on a compact set $X$ it holds that:
 
   \begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
@@ -60,11 +58,11 @@ to build up the essential theoretical parts of how fractal image compression wor
 \mypar{From IFS to image compression} The key idea in fractal image compression
 is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in
 this context called transformations) on the image. From theorem
-\ref{theorem-fixpoint}, we then know that some unique attractor $A$ exists. If
-the transformations $\boldsymbol{W}$ are chosen in a way such that the attractor
-$A$ is the image to be compressed, one only needs to store the transformations. For
+\ref{theorem-fixpoint}, we know that some unique attractor $A$ exists. If the
+transformations $\boldsymbol{W}$ are chosen in a way such that the attractor $A$
+is the image to be compressed, one only needs to store the transformations. For
 decompression, one can iteratively apply all transformations on any initial
-starting image, which then converges to the original image to be compressed.
+starting image, which then converges towards the original image.
 
 A transformation $w_i$ is defined on a contiguous source region (called domain
 block) and a contiguous target region (range block) of the image. The
@@ -136,21 +134,19 @@ is minimal. An analytical solution for $s,o,R$ is:
     R &= \frac{1}{n} \left[ \sum_{i=1}^n b_i^2 + s \left( s \sum_{i=1}^n a_i^2 - 2 \sum_{i=1}^n a_i b_i + 2o \sum_{i=1}^n a_i \right) \right. \notag\\
     &\text{\hspace{1cm}} \left. + o \left(no - 2 \sum_{i=1}^n b_i \right)  \right]\label{error}
 \end{align}
-Thus, to compute an optimal transformation $w_i$ and the error for a given range
-block $R_i$ and given domain block $D_i$, one needs to compute the sums above as
-efficiently as possible.
+Computing these values is the core numerical challenge of the algorithm.
 
 \mypar{Image Partitioning} There are many ways to partition an image into range
 and domain blocks. We require that the range blocks cover the full image and do
 not overlap, otherwise the decompressed image would have uncovered regions. The
 domain blocks represent the search space for self-similarity and may overlap.
-Increasing the domain block pool $\boldsymbol{D}$ may lead to better
-transformations but can increase the compression performance significantly.
-Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), but
-domain blocks must be larger than range blocks to satisfy the contractivity
-requirement. For example, the code in \cite{github-python}, uses quadratic range
-blocks of size $s \times s$ and domain blocks of size
-$k\cdot s \times k \cdot s$ for some integer constant $k > 1$.
+Increasing the domain block pool $\boldsymbol{D}$ may lead to superior
+transformations but can increase the compression time significantly. Blocks can
+be of various sizes and shapes (quadratic, rectangular, etc.), but domain blocks
+must be larger than range blocks to satisfy the contractivity requirement. For
+example, the code in \cite{github-python}, uses quadratic range blocks of size
+$s \times s$ and domain blocks of size $k\cdot s \times k \cdot s$ for some
+integer constant $k > 1$.
 
 \mypar{Quadtree Partitioning} In practice, quadtree partitioning is considered
 a reasonable reference point for more advanced partitioning schemes
@@ -193,10 +189,9 @@ let $\alpha_{i}$ denote the cost to compute four transformations $w_i^{0}$,
 $w_i^{90}$, $w_i^{180}$, $w_i^{270}$ and their errors. Each transformation
 $w_i^{\gamma}$ represents a rotation of the domain block by $\gamma$ degrees.
 
-To calculate $\alpha_{i}$, we need to compute all sums for brightness,
-contrast and error (equations \eqref{contrast}, \eqref{brightness} and
-\eqref{error}) and apply the formulas. Besides, we need to downscale and
-rotate the domain block.
+To calculate $\alpha_{i}$, we need to compute all sums for brightness
+\eqref{brightness}, contrast \eqref{contrast} and error \eqref{error} and apply
+the formulas. Besides, we need to downscale and rotate the domain block.
 
 Downscaling one domain block can be done in $4\cdot n_{i}$ flops because we have
 to aggregate the average of four pixels of the domain block into one pixel which
@@ -223,4 +218,3 @@ C &\leq \sum_{i=1}^m |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
 We see that the cost of the algorithm is exponential in the quadtree depth $m$
 and polynomial in image width $s$. For the roofline plot and the other benchmarks,
 we determined the cost empirically by instrumenting the code.
-

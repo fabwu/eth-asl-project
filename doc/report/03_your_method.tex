@@ -5,12 +5,14 @@ implementation, analyzes its bottlenecks and outlines the steps which were follo
 increase performance.
 
 \mypar{Scope} In our project, we focus on grayscale images of size $s \times s$,
-where $s$ is a power of two. The quadtree partitioning has the maximum depth $m$
-and the error threshold $\epsilon$ as parameters. To simplify vectorization, we
+where $s$ is a power of two. To simplify vectorization, we
 also ensure that the range blocks do not get smaller than $4 \times 4$ pixels.
 Furthermore, exhaustive block mapping to search for suitable transformations is
 used. Our focus is solely on compression, which is the performance bottleneck in
 fractal image compression.
+
+% The quadtree partitioning has the maximum depth $m$
+% and the error threshold $\epsilon$ as parameters.
 
 \mypar{Baseline implementation}
 The baseline is written from scratch in C. Algorithm~\ref{alg:baseline} illustrates the compression of the algorithm,
@@ -22,20 +24,20 @@ The function \texttt{compute(image,$R_i$,$D_i$)} computes a transformation with 
 This function also downscales the domain block to the size of the range block, rotates it three times (90, 180 and 270 degrees)
 and returns the best of the four possible transformations.
 \begin{algorithm}
-\caption{Compression using iterative quadtree partitioning}\label{alg:baseline}
-\hspace*{\algorithmicindent} \textbf{Input:} \texttt{img}, $\epsilon$, $m$ \\
-\hspace*{\algorithmicindent} \textbf{Output:} $\boldsymbol{T}$ (set of computed transformations)
+\caption{Compression of an $s\times s$ image with iterative quadtree partitioning}\label{alg:baseline}
+\hspace*{\algorithmicindent} \textbf{Input:} \texttt{image}, $\epsilon$, $m$ \\
+\hspace*{\algorithmicindent} \textbf{Output:} $\boldsymbol{W}$ (set of computed transformations)
 \begin{algorithmic}[1]
-  \State $\boldsymbol{T} \gets \{\}$
-  \State $\boldsymbol{R} \gets $ \Call{partition}{\texttt{img}, $s/2$}
+  \State $\boldsymbol{W} \gets \{\}$
+  \State $\boldsymbol{R} \gets $ \Call{partition}{\texttt{image}, $s/2$}
     \For{$c=1..m$}
-        \State $\boldsymbol{D} \gets $ \Call{partition}{\texttt{img}, $s/2^{c-1}$}
+        \State $\boldsymbol{D} \gets $ \Call{partition}{\texttt{image}, $s/2^{c-1}$}
         \For{$R_i \in \boldsymbol{R}$}
-            \State $err_i \gets \infty, T_i \gets \NULL$
+            \State $err_i \gets \infty, w_i \gets \NULL$
             \For{$D_i \in \boldsymbol{D}$}
-              \State $T_x, err_x \gets $ \Call{compute}{\texttt{img}, $D_i$, $R_i$}
+              \State $w_x, err_x \gets $ \Call{compute}{\texttt{image}, $D_i$, $R_i$}
               \If{$err_x < err_i$}
-                \State $T_i \gets T_x$
+                \State $w_i \gets w_x$
                 \State $err_i \gets err_x$
               \EndIf
             \EndFor
@@ -44,44 +46,46 @@ and returns the best of the four possible transformations.
         \If{$err_i > \epsilon$}
           \State $\boldsymbol{R} \gets \boldsymbol{R} \cup  \Call{quad}{R_i, s/2^c}$
         \Else
-          \State $\boldsymbol{T} \gets \boldsymbol{T} \cup \{T_i\}$
+          \State $\boldsymbol{W} \gets \boldsymbol{W} \cup \{w_i\}$
         \EndIf
     \EndFor
 \end{algorithmic}
 \end{algorithm}
 
-As opposed to algorithms in \cite{fisher2012} and \cite{github-cpp}, this algorithm does not implement quadtree
-partitioning recursively but iteratively.
-Our optimized versions (see later) depend heavily on precomputations of domain blocks (especially downscaling).
-At every quadtree depth, the domain blocks shrink with the range blocks. At every quadtree depth $c$ we have a pool of
-domain blocks $D^{(c)}$. In an iterative approach, we can perform precomputations on $D^{(c)}$, process all domain/range block pairs
-and then discard the precomputations. Using a recursive approach, all precomputations of all domain block pools must be kept in memory
-to avoid recomputing the precomputations.
+As opposed to algorithms in~\cite{fisher2012} and~\cite{github-cpp}, this
+algorithm does not implement quadtree partitioning recursively but iteratively.
+Our optimized versions (see later) depend heavily on precomputations of domain
+blocks (especially downscaling). At every new quadtree depth $c$, we build a new
+domain block pool $D^{(c)}$ whose domain block sizes are adapted to the new
+range block sizes. In an iterative approach, we can perform
+precomputations on $D^{(c)}$, process all domain/range block pairs and then
+discard the precomputations. Using a recursive approach, all precomputations of
+all domain block pools must be kept in memory to avoid recomputing the
+precomputations.
 
-\mypar{Roofline} We used the roofline model \cite{applying-roofline} to see
+\mypar{Roofline} We used the roofline model~\cite{applying-roofline} to see
 whether the algorithm is memory or compute bound. The peak performance $\pi$ was
 determined by counting the dispatch ports specified in Intel's
-\texttt{Optimization Reference Manual} \cite{intel-opt-manual}. We distinguish
+\textit{Optimization Reference Manual}~\cite{intel-opt-manual}. We distinguish
 between scalar and vectorized peak performance. The bandwidth $\beta$ was
-measured with the STREAM benchmark \cite{stream}. We verified both the peak
-performance and the bandwidth with the Empirical Roofline Tool \cite{ert}, which
-confirmed the values.
+measured with the \textit{STREAM} benchmark~\cite{stream}. We verified both the
+peak performance and the bandwidth with the \textit{Empirical Roofline
+  Tool}~\cite{ert}, which confirmed the values.
 
 For the program model, we need to measure the work $W$, the runtime $T$ and the
 data move movement $Q$ of the algorithm. Due to the dynamic nature of quadtree,
 the model does not only depend on the image size but also on the content of the
-image itself. Therefore, we define the three quantities as $W=W(s, img)$,
-$T=T(s, img)$ and $Q=Q(s, img)$, where $s$ and $img$ are defined as in
+image itself. Therefore, we define the three quantities as $W=W(s, image)$,
+$T=T(s, image)$ and $Q=Q(s, image)$, where $s$ and $image$ are defined as in
 algorithm~\ref{alg:baseline}. We measured $W$ by instrumenting the code
 according to the cost metric in equation~\eqref{eq:cost}. For measuring $T$, we
 used the \texttt{RDTSC} instruction available on all x86 architecture and
 disabled Turbo Boost to guarantee an integer runtime. The measurement of $Q$ is
 the most challenging and requires performance counters which are not supported
-by our hardware. A correct, yet too pessimistic lower bound for $Q$ is
+by our hardware. A correct, yet too pessimistic lower bound for the bandwidth is
 $Q \geq 8 \cdot s^2$ because we have to load the image (at least) once from
 memory. One of our group members developed a tool to simulate a program's memory
-accesses throughout the course, supporting multi-level caches
-\cite{github-cache}.
+accesses throughout the course, supporting multi-level caches~\cite{github-cache}.
 
 We simulated our scalar-optimized code with this tool for the hardware we run our benchmarks on,
 which should give us a tighter lower bound for $Q$.
@@ -104,16 +108,18 @@ the performance bottlenecks of the code.
   \label{fig:roofline}
 \end{figure}
 
-\mypar{Hotspots} A major performance blocker is the exhaustive search for block matches.
-In our project, we focus solely on performance,
-whereas using a better search strategy as mentioned in section \ref{sec:intro} is an algorithmic improvement
-and thus out of scope in the project.
+\mypar{Hotspots} A major performance blocker is the exhaustive search for block
+matches. In our project, we focus solely on performance, whereas using a better
+search strategy is an algorithmic improvement and thus out of scope in the
+project.
 
-When inspecting the code of the baseline, it is apparent that the majority of the work
-is done when calculating the contrast, brightness and error of each range/domain block pair
-(equations \ref{contrast}, \ref{brightness} and \ref{error}). We used \textit{Valgrind}
-\cite{valgrind} to profile the code and the profiling report confirmed our assumption. Especially, the sums
-over all pixels of a block were identified as hotspots so we started our optimizations there.
+When inspecting the code of the baseline, it is apparent that the majority of
+the work is done when calculating the contrast, brightness and error of each
+range/domain block pair (equations \ref{contrast}, \ref{brightness} and
+\ref{error}). We used \textit{Valgrind} \cite{valgrind} to profile the code and
+the profiling report confirmed our assumption. Especially, the sums over all
+pixels of a block were identified as hotspots so we started our optimizations
+there.
 
 \mypar{Scalar Optimizations} As a first optimization, we moved the calculation of the sums $\sum_{i=1}^n a_i$,
 $\sum_{i=1}^n a_i^2$, $\sum_{i=1}^n b_i$ and $\sum_{i=1}^n b_i^2$ out of the nested loop
@@ -134,15 +140,21 @@ data better in memory which improves locality.
 After the removal of the queue and several structs, we continued to inline several functions, e.g. mapping indices in blocks
 to indices in the image. The inlining revealed many small optimizations that were not immediately obvious.
 
-Another profiling of the optimized version of the code showed that the computation of $\sum_{i=1}^n a_i b_i$, which is used by the equations
-\ref{contrast} and \ref{error}, is the remaining performance bottleneck. Precomputation of this sum is not possible
-because the term depends on values from specific range and rotated domain block pixels. The baseline implementation rotated
-the domain block by creating 3 copies of it, one for each rotation (90, 180 and 270 degrees). We removed this explicit rotation
-to reduce memory reallocation and instead traversing the domain block differently. As an example, when a domain block consists
-of pixels $a_1, a_2, a_3, a_4$, then the access pattern of the 180 degree rotated version of that block is $a_4, a_3, a_2, a_1$.
-The fusion of these three implicit rotations into one loop allowed us to compute traversal indices more efficiently.
-We furthermore exploited instruction level parallelism (ILP) to calculate the aforementioned computations more efficiently
-by factoring out the nested mathematical expressions into single line multiplications, additions and FMAs.
+Another profiling of the optimized version of the code showed that the
+computation of $\sum_{i=1}^n a_i b_i$, which is used by the equations
+\eqref{contrast} and \eqref{error}, is the remaining performance bottleneck.
+Precomputation of this sum is not possible because the term depends on values
+from specific range and rotated domain block pixels. The baseline implementation
+rotated the domain block by creating 3 copies of it, one for each rotation (90,
+180 and 270 degrees). We removed this explicit rotation to reduce memory
+reallocation and instead traversing the domain block differently. As an example,
+when a domain block consists of pixels $a_1, a_2, a_3, a_4$, then the access
+pattern of the 180 degree rotated version of that block is $a_4, a_3, a_2, a_1$.
+The fusion of these three implicit rotations into one loop allowed us to compute
+traversal indices more efficiently. We furthermore exploited instruction level
+parallelism (ILP) to calculate the aforementioned computations more efficiently
+by factoring out the nested mathematical expressions into single line
+multiplications, additions and FMAs.
 
 Finally, we did some experiments with different traversal methods for the
 domain/range blocks. Like blocked matrix-matrix-multiplication, we traversed
@@ -157,7 +169,7 @@ contrast and the corresponding error for all four rotations for each
 domain/range block pair at once. Another approach was to compute
 those values for four different domain blocks at a time in
 addition to processing four pixels at once when computing the sums in equations
-\ref{contrast}, \ref{brightness} and \ref{error}.
+\eqref{contrast}, \eqref{brightness} and \eqref{error}.
 
 A main challenge in implementing vectorization was due to the fact of the implicit
 domain block rotation by 90 and 270 degrees. Processing them resulted in expensive
@@ -179,8 +191,7 @@ degrees instead of the domain block is more efficient because the number of rang
 blocks in deeper quadtree levels tend to get smaller than the number of domain
 blocks (see algorithm \ref{alg:baseline}), leading to less memory copying. The
 change had the effect that compression quality remained the same without
-extensive use of costly gather instructions. 
+extensive use of costly gather instructions.
 
 Another important step was to decrease the amount of other costly instructions
-such as permutations or blends across lanes (\verb|_mm256_permute4x64|,
-\verb|_mm256_blendv_pd|).
+such as permutations or blends across lanes (e.g. \verb|_mm256_permute4x64|).

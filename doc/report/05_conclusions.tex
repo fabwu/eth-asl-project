@@ -1,21 +1,21 @@
 \section{Conclusions}
 
-With scalar optimizations, our implementation gains a performance speedup
-of roughly 4x, whereas the vectorized implementation has a performance speedup
-of roughly 8x compared with our straightforward implementation. It is important
-to mention that the runtime was decreased significantly and tangibly. Compressing
-an image with $2048 \times 2048$ pixels with the baseline implementation takes 
-about 2 hours, whereas the vectorized implementation needs 2.5 minutes.
+With scalar optimizations, our implementation gains a performance speedup of
+roughly 4x, whereas the vectorized implementation has a performance speedup of
+roughly 8x compared with our straightforward implementation. It is important to
+mention that the runtime was decreased significantly and tangibly. As an
+example, compressing an image with $2048 \times 2048$ pixels with the baseline
+implementation takes about 2 hours, whereas the vectorized implementation needs
+2.5 minutes.
 
-Our fastest implementation with a performance of \\
-4 flops/cycle is still 4 times
-below the theoretical peak performance of 16 flops/cycle. As the algorithm
-in this form is not memory bound, further performance improvements can be expected.
+Our fastest implementation with a performance of 4 flops/cycle is still 4 times
+below the theoretical peak performance of 16 flops/cycle. As the algorithm in
+this form is not memory bound, further performance improvements can be expected.
 
-To furthermore boost performance one would also need to apply algorithmic changes. 
-Using exhaustive block mapping with a rather large
-domain block pool (e.g. with four rotations) is a significant performance
-bottleneck which does not necessarily lead to better compression results.
+To furthermore boost performance one would also need to apply algorithmic
+changes. Using exhaustive block mapping with a rather large domain block pool
+(e.g. with four rotations) is a significant performance bottleneck which does
+not necessarily lead to better compression results.
 
-We consider our optimizations to be applicable in all of these more advanced
-and mature fractal image compression schemes.
+We consider our optimizations to be applicable in more advanced and mature
+fractal image compression schemes.
