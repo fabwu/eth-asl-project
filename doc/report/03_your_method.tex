@@ -183,21 +183,21 @@ gather instructions.
 \notejonas{NEU Ende}
 
 \notejonas{ALT Start}
-Sadly only adding SIMD instructions did not lead to a better performance in our
-case. The main reason for that result was found in the 90 and 270 degree
-rotations which were highly inefficient because of memory locations of the
-needed pixels. By simply removing these two rotations in both the code version
-with and without SIMD instructions, a significant increase in performance could
-be measured in the version with SIMD with only a minimal loss in the image
-quality.
+% Sadly only adding SIMD instructions did not lead to a better performance in our
+% case. The main reason for that result was found in the 90 and 270 degree
+% rotations which were highly inefficient because of memory locations of the
+% needed pixels. By simply removing these two rotations in both the code version
+% with and without SIMD instructions, a significant increase in performance could
+% be measured in the version with SIMD with only a minimal loss in the image
+% quality.
 
-To solve the performance issue with the 90 and 270 degrees rotations the task
-was to avoid expensive gather instructions (e.g. \verb|_mm256_i64gather_pd|).
-With smarter precomputations including a better memory layout which included
-rotating the range blocks instead of the domain blocks we were able to increase
-the performance for the code version with all four rotations. This solution also
-outperformed the previous version where the costly rotations were deleted by an
-order of magnitude.
+% To solve the performance issue with the 90 and 270 degrees rotations the task
+% was to avoid expensive gather instructions (e.g. \verb|_mm256_i64gather_pd|).
+% With smarter precomputations including a better memory layout which included
+% rotating the range blocks instead of the domain blocks we were able to increase
+% the performance for the code version with all four rotations. This solution also
+% outperformed the previous version where the costly rotations were deleted by an
+% order of magnitude.
 \notejonas{ALT Ende}
 
 Another important step was to decrease the amount of other costly instructions
