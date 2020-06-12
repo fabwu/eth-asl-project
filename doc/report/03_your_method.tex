@@ -172,32 +172,32 @@ One implication of this change was that image compression quality gets worse. Ho
 was still practically good because the algorithm then simply advances to further quadtree
 depths when quality requirements can not be satisfied.
 
-A second attempt wihtout removing any rotations was to withdraw from the idea of always implicitly rotating domain blocks.
-Instead, we rotate the range block once by 90 degrees explicitly while traversing the domain blocks
-in a manner such that we can represent all four rotations.
-Rotating the range block by 90 degrees instead of the domain block is due to the fact that the amount of range blocks
-in deeper quadtree levels tend to get smaller than the amount of domain blocks (see algorithm \ref{alg:baseline}),
-leading to less memory copying.
-The change had the effect that compression quality remained the same without extensive use of costly
-gather instructions.
-\notejonas{NEU Ende}
+A second attempt without removing any rotations was to withdraw from the idea of
+always implicitly rotating domain blocks. Instead, we rotate the range block
+once by 90 degrees explicitly while traversing the domain blocks in a manner
+such that we can represent all four rotations. Rotating the range block by 90
+degrees instead of the domain block is due to the fact that the amount of range
+blocks in deeper quadtree levels tend to get smaller than the amount of domain
+blocks (see algorithm \ref{alg:baseline}), leading to less memory copying. The
+change had the effect that compression quality remained the same without
+extensive use of costly gather instructions. \notejonas{NEU Ende}
 
 \notejonas{ALT Start}
-Sadly only adding SIMD instructions did not lead to a better performance in our
-case. The main reason for that result was found in the 90 and 270 degree
-rotations which were highly inefficient because of memory locations of the
-needed pixels. By simply removing these two rotations in both the code version
-with and without SIMD instructions, a significant increase in performance could
-be measured in the version with SIMD with only a minimal loss in the image
-quality.
+% Sadly only adding SIMD instructions did not lead to a better performance in our
+% case. The main reason for that result was found in the 90 and 270 degree
+% rotations which were highly inefficient because of memory locations of the
+% needed pixels. By simply removing these two rotations in both the code version
+% with and without SIMD instructions, a significant increase in performance could
+% be measured in the version with SIMD with only a minimal loss in the image
+% quality.
 
-To solve the performance issue with the 90 and 270 degrees rotations the task
-was to avoid expensive gather instructions (e.g. \verb|_mm256_i64gather_pd|).
-With smarter precomputations including a better memory layout which included
-rotating the range blocks instead of the domain blocks we were able to increase
-the performance for the code version with all four rotations. This solution also
-outperformed the previous version where the costly rotations were deleted by an
-order of magnitude.
+% To solve the performance issue with the 90 and 270 degrees rotations the task
+% was to avoid expensive gather instructions (e.g. \verb|_mm256_i64gather_pd|).
+% With smarter precomputations including a better memory layout which included
+% rotating the range blocks instead of the domain blocks we were able to increase
+% the performance for the code version with all four rotations. This solution also
+% outperformed the previous version where the costly rotations were deleted by an
+% order of magnitude.
 \notejonas{ALT Ende}
 
 Another important step was to decrease the amount of other costly instructions
