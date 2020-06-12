@@ -56,25 +56,22 @@
 
 \begin{abstract}
   Fractal image compression is a lossy image compression method, which yields
-  good compression ratios and quality at the cost of high encoding times. In
-  this work, we started with our own implementation of a fractal compression
-  scheme using the quadtree partitioning and exhaustive search for
-  self-similarity in the image.
+  good compression ratios and quality at the cost of high encoding times. We
+  implemented fractal image compression from scratch using quadtree partitioning
+  and exhaustive search for self-similarity in the image.
 
-  We analyzed our baseline implementation with the roofline model and used
-  profiling to identify various performance bottlenecks. With these insights we
-  implemented precomputations and removed complex data structures to improve
-  performance. In addition, we optimized the code for instruction level
-  parallelism and used FMA instructions for an optimal pipeline utilization.
-  Then we vectorized the code using AVX2 intrinsics and changed the memory
-  layout to avoid expensive gathering instructions. At last, different compiler
-  flags for GCC and ICC were tested.
+  The baseline implementation was analyzed using the roofline model and
+  profiling to identify the bottlenecks. With these insights we implemented
+  precomputations and removed complex data structures to improve performance. In
+  addition, we optimized the code for instruction level parallelism and used FMA
+  instructions for a better pipeline utilization. Then we vectorized the code
+  using AVX2 intrinsics and changed the memory layout to avoid expensive
+  gathering instructions. At last, different compiler flags for GCC and ICC were
+  tested.
 
-  Our optimized version without vectorization led to a 4x speedup whereas we
-  observed a speedup of up to 8x with SIMD. Additionally, we improved the
-  runtime of the encoding part significantly. For an image of the size
-  $2048 \times 2048$ pixels the compression time was reduced from 2 hours to 2.5
-  minutes.
+  The optimized version without vectorization led to a 4x increase in
+  performance whereas a speedup of up to 8x was observed with SIMD.
+  Additionally, the runtime of the compression was reduced significantly.
 
   \notepascal{den letzten satz hätte ich etwas genereller formuliert - der
     klingt ein wenig zu gut...}
