@@ -14,7 +14,7 @@ fractal image compression.
 % The quadtree partitioning has the maximum depth $m$
 % and the error threshold $\epsilon$ as parameters.
 
-\mypar{Baseline implementation}
+\mypar{Baseline Implementation}
 The baseline is written from scratch in C. Algorithm~\ref{alg:baseline} illustrates the compression of the algorithm,
 whose inputs are the image (row-wise array of doubles) of size $s \times s$, the max quadtree depth $m$ and the error threshold $\epsilon$.
 
@@ -163,7 +163,7 @@ locality. With the insights from the roofline analysis, we abandoned any further
 experiments in that direction, because no big performance gains could be
 observed.
 
-\mypar{SIMD vectorization} Two different strategies to implement SIMD with AVX2 intrinsics
+\mypar{SIMD Vectorization} Two different strategies to implement SIMD with AVX2 intrinsics
 were followed. One approach was to perform the computations of brightness,
 contrast and the corresponding error for all four rotations for each
 domain/range block pair at once. Another approach was to compute
