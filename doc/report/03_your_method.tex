@@ -172,15 +172,15 @@ One implication of this change was that image compression quality gets worse. Ho
 was still practically good because the algorithm then simply advances to further quadtree
 depths when quality requirements can not be satisfied.
 
-A second attempt wihtout removing any rotations was to withdraw from the idea of always implicitly rotating domain blocks.
-Instead, we rotate the range block once by 90 degrees explicitly while traversing the domain blocks
-in a manner such that we can represent all four rotations.
-Rotating the range block by 90 degrees instead of the domain block is due to the fact that the amount of range blocks
-in deeper quadtree levels tend to get smaller than the amount of domain blocks (see algorithm \ref{alg:baseline}),
-leading to less memory copying.
-The change had the effect that compression quality remained the same without extensive use of costly
-gather instructions.
-\notejonas{NEU Ende}
+A second attempt without removing any rotations was to withdraw from the idea of
+always implicitly rotating domain blocks. Instead, we rotate the range block
+once by 90 degrees explicitly while traversing the domain blocks in a manner
+such that we can represent all four rotations. Rotating the range block by 90
+degrees instead of the domain block is due to the fact that the amount of range
+blocks in deeper quadtree levels tend to get smaller than the amount of domain
+blocks (see algorithm \ref{alg:baseline}), leading to less memory copying. The
+change had the effect that compression quality remained the same without
+extensive use of costly gather instructions. \notejonas{NEU Ende}
 
 \notejonas{ALT Start}
 % Sadly only adding SIMD instructions did not lead to a better performance in our
