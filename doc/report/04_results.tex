@@ -28,9 +28,9 @@ background, are easy to compress, other parts such as the fur contain lots of de
 which are harder to compress. Figure \ref{fig:lions} shows the output of the
 vectorized code with $\epsilon=100$ and 3 decompression iterations.
 
-\begin{figure}[H]
+\begin{figure}[]
   \centering
-  \includegraphics[page=1, width=.45\textwidth]{lion_512_51_e100}
+  \includegraphics[page=1, width=.8\linewidth]{lion_512_51_e100}
   \caption{Decompressed Image}\label{fig:lions}
 \end{figure}
 
@@ -94,12 +94,17 @@ amount of time.
     implementation from GitHub written in C\texttt{++}}\label{fig:perf}
 \end{figure}
 
-
 \begin{figure}[H]
   \centering
   \includegraphics[page=1, width=\linewidth]{runtime_major_versions}
   \caption{Runtime of our three major implementations and a reference
     implementation from GitHub written in C\texttt{++}}\label{fig:runtime}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[page=1, width=\linewidth]{performance_norot}
+  \caption{Performance Plot without 90/270 degree rotations}\label{fig:perf_40_41}
 \end{figure}
 
 As described in section \ref{sec:yourmethod} the initial attempt in vectorizing
@@ -111,13 +116,6 @@ column-wise access to the image i.e. 90/270 degree rotations from the scalar
 optimized and the vectorized version. The result of this experiment is shown in
 figure \ref{fig:perf_40_41} and one can clearly see how the vectorized code
 outperforms the scalar optimized version.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[page=1, width=\linewidth]{performance_norot}
-  \caption{Performance Plot without 90/270 degree rotations}\label{fig:perf_40_41}
-\end{figure}
-
 
 After this experiment, we improved the column-wise access by rotating the range
 block instead of the domain block for the 90/270 degree rotations. The improved
