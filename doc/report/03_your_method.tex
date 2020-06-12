@@ -1,4 +1,4 @@
-\section{Proposed method}\label{sec:yourmethod}
+\section{Methodology}\label{sec:yourmethod}
 
 This section defines the scope of our implementation, describes our initial baseline
 implementation, analyzes its bottlenecks and outlines the steps which were followed to
@@ -88,12 +88,12 @@ which should give us a tighter lower bound for $Q$.
 This simulation is still too pessimistic for the non-optimized code but more accurate for our scalar-optimized and vectorized code.
 Our experiments showed that for small images ($\leq 512 \times 512$), our theoretical bound holds well.
 It is no surprise that for larger images ($\geq 1024 \times 1024$) the theoretical bound is way too pessimistic
-because these images do not entirely fit into L3 cache of our hardware anymore, which leads to more traffic between main memory and cache.
+because these images do not entirely fit into the L3 cache of our hardware anymore, which leads to more traffic between main memory and cache.
 
 To place the baseline in the roofline plot, we calculated the operational
 intensity $I=\frac{W}{Q}$ and the performance $P=\frac{W}{T}$ of our
 implementation. Figure \ref{fig:roofline} shows the roofline plot for a specific
-image with different sizes. One can see that the baseline is inherently compute
+image of different sizes. One can see that the baseline is inherently compute
 bound and we have good potential for performance improvement as the baseline
 runs only at 12.5\% of scalar peak performance. Next, we use profiling to find
 the performance bottlenecks of the code.
@@ -115,7 +115,7 @@ is done when calculating the contrast, brightness and error of each range/domain
 \cite{valgrind} to profile the code and the profiling report confirmed our assumption. Especially, the sums
 over all pixels of a block were identified as hotspots so we started our optimizations there.
 
-\mypar{Scalar Optimizations} As a first optimization we moved the calculation of the sums $\sum_{i=1}^n a_i$,
+\mypar{Scalar Optimizations} As a first optimization, we moved the calculation of the sums $\sum_{i=1}^n a_i$,
 $\sum_{i=1}^n a_i^2$, $\sum_{i=1}^n b_i$ and $\sum_{i=1}^n b_i^2$ out of the nested loop
 (see algorithm \ref{alg:baseline} line 5 and 7). The values of these sums change only if the algorithm advances
 to the next quadtree depth so we can easily precompute them in each quadtree iteration and reuse them when we
@@ -132,7 +132,7 @@ These changes made the code harder to understand but eliminated pointer chasing 
 data better in memory which improves locality.
 
 After the removal of the queue and several structs, we continued to inline several functions, e.g. mapping indices in blocks
-to indices in the image. The inlining revealed many small optimizations which were not immediately obvious.
+to indices in the image. The inlining revealed many small optimizations that were not immediately obvious.
 
 Another profiling of the optimized version of the code showed that the computation of $\sum_{i=1}^n a_i b_i$, which is used by the equations
 \ref{contrast} and \ref{error}, is the remaining performance bottleneck. Precomputation of this sum is not possible
@@ -159,7 +159,6 @@ those values for four different domain blocks at a time in
 addition to processing four pixels at once when computing the sums in equations
 \ref{contrast}, \ref{brightness} and \ref{error}.
 
-\notejonas{NEU Start}
 A main challenge in implementing vectorization was due to the fact of the implicit
 domain block rotation by 90 and 270 degrees. Processing them resulted in expensive
 gather instructions (e.g. \verb|_mm256_i64gather_pd|). Their performance drawback was
@@ -168,7 +167,7 @@ optimized code.
 
 We proceeded by not considering 90 and 270 degree rotations for our transformations.
 This led to the speedup we originally expected when implementing SIMD instructions.
-One implication of this change was that image compression quality gets worse. However we found that quality
+One implication of this change was that image compression quality gets worse. However, we found that quality
 was still practically good because the algorithm then simply advances to further quadtree
 depths when quality requirements can not be satisfied.
 
@@ -176,29 +175,11 @@ A second attempt without removing any rotations was to withdraw from the idea of
 always implicitly rotating domain blocks. Instead, we rotate the range block
 once by 90 degrees explicitly while traversing the domain blocks in a manner
 such that we can represent all four rotations. Rotating the range block by 90
-degrees instead of the domain block is due to the fact that the amount of range
-blocks in deeper quadtree levels tend to get smaller than the amount of domain
+degrees instead of the domain block is more efficient because the number of range
+blocks in deeper quadtree levels tend to get smaller than the number of domain
 blocks (see algorithm \ref{alg:baseline}), leading to less memory copying. The
 change had the effect that compression quality remained the same without
-extensive use of costly gather instructions. \notejonas{NEU Ende}
-
-\notejonas{ALT Start}
-% Sadly only adding SIMD instructions did not lead to a better performance in our
-% case. The main reason for that result was found in the 90 and 270 degree
-% rotations which were highly inefficient because of memory locations of the
-% needed pixels. By simply removing these two rotations in both the code version
-% with and without SIMD instructions, a significant increase in performance could
-% be measured in the version with SIMD with only a minimal loss in the image
-% quality.
-
-% To solve the performance issue with the 90 and 270 degrees rotations the task
-% was to avoid expensive gather instructions (e.g. \verb|_mm256_i64gather_pd|).
-% With smarter precomputations including a better memory layout which included
-% rotating the range blocks instead of the domain blocks we were able to increase
-% the performance for the code version with all four rotations. This solution also
-% outperformed the previous version where the costly rotations were deleted by an
-% order of magnitude.
-\notejonas{ALT Ende}
+extensive use of costly gather instructions. 
 
 Another important step was to decrease the amount of other costly instructions
 such as permutations or blends across lanes (\verb|_mm256_permute4x64|,

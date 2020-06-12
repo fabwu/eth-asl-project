@@ -4,7 +4,7 @@ To introduce the algorithm, we first present the essential parts of the
 underlying mathematical theory, show how it can be used to compress images and
 what practical considerations must be made for the implementation as shown by
 Fischer \cite{fisher2012}. A cost analysis can be found at the end of this
-section. Throughout this chapter we use the notation from Fisher
+section. Throughout this chapter, we use the notation from Fisher
 \cite{fisher2012}.
 
 \mypar{Iterated function systems (IFS)} Fractal image compression builds on the
@@ -40,11 +40,11 @@ With $F^{\circ n}(x)$, we denote the iterative application of $F$ $n$ times on
 its input $x$, e.g. $F^{\circ 2}(x) = F(F(x))$.
 
 \begin{definition}[Attractor of an IFS]
-    Let $A \in X$. When $F(A)=A$, then $A$ is called attractor.
+    Let $A \in X$. When $F(A)=A$, then $A$ is called an attractor.
 \end{definition}
 
 Hutchinson used the following theorem in his work \cite{hutchinson1981fractals}
-to build up the essential theoretical parts how fractal image compression works.
+to build up the essential theoretical parts of how fractal image compression works.
 
 \begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
   For an IFS on a set $X$ it holds that:
@@ -89,7 +89,7 @@ The transformations can then be computed with the following steps.
 Finding the best transformation by comparing all domain/range block pairs is
 called exhaustive block mapping. More elaborate versions like archetype
 classification restrict possible domain block candidates for a given range block
-in order to speed up compression \cite{jacobs1992image}.
+to speed up compression \cite{jacobs1992image}.
 
 \mypar{Transformations} A grayscale image can be interpreted as a function
 \begin{align*}
@@ -126,7 +126,7 @@ The only difference to an IFS is that the transformations are restricted to
 holds \cite{fisher2012}.
 
 \mypar{Computing Transformations}\label{par-practical-implementation}
-In practice an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
+In practice, an image consists of pixels, where each pixel has a grayscale value between 0 and 1 and integer coordinates.
 
 The minimization problem in equation~\eqref{eq:min-problem} can be solved using least squares regression, as done in \cite{github-python}.
 Fisher uses an analytical solution in \cite{fisher2012} to compute the adjustments directly. Let $b_1, ..., b_n$ be the $n$ pixel values of the range block $R_i$
@@ -153,11 +153,11 @@ Increasing the domain block pool $\boldsymbol{D}$ may lead to better
 transformations but can increase the compression performance significantly.
 Blocks can be of various sizes and shapes (quadratic, rectangular, etc.), but
 domain blocks must be larger than range blocks to satisfy the contractivity
-requirement. For example the code in \cite{github-python}, uses quadratic range
+requirement. For example, the code in \cite{github-python}, uses quadratic range
 blocks of size $s \times s$ and domain blocks of size
 $k\cdot s \times k \cdot s$ for some integer constant $k > 1$.
 
-\mypar{Quadtree Parititioning} In practice, quadtree partitioning is considered
+\mypar{Quadtree Partitioning} In practice, quadtree partitioning is considered
 a reasonable reference point for more advanced partitioning schemes
 \cite{fisher2012}. It dynamically adapts range and domain block sizes by a
 predefined error threshold $\epsilon$. We start with some initial (quadratic)
@@ -167,14 +167,14 @@ $\epsilon$, we partition the range block into 4 smaller blocks of size
 $s/2 \times s/2$ and try to cover them again with domain blocks of size
 $s \times s$. This scheme has the effect that (potentially larger) homogeneous
 regions of the image are covered with few transformations while image regions
-with details are covered with transformations which map smaller blocks. Usually,
+with details are covered with transformations that map smaller blocks. Usually,
 one defines also a maximum depth of the quadtree as described in
 \cite{fisher2012}.
 
-\mypar{Cost analysis} In this course we focus on floating point operations and
+\mypar{Cost analysis} In this course, we focus on floating point operations and
 ignore all integer calculations (e.g. index computation). We count only floating
-point multiplications, divisions, additions and subtractions because no special
-mathematical functions are used. The cost metric is define as
+point multiplications, divisions, additions, and subtractions because no special
+mathematical functions are used. The cost metric is defined as
 \begin{align}
   C = N_{mult} + N_{div} + N_{add} + N_{sub} \label{eq:cost}
 \end{align}
@@ -190,7 +190,7 @@ Let $m$ be the maximum quadtree depth and let $s$ be the width of the square
 input image. We assume that we start quadtree with range blocks of size
 $\frac{s}{2}\times\frac{s}{2}$ and one domain block of size $s \times s$. For
 quadtree depth $i \in \{1, \dots, m\}$, let $R^{(i)}$ be the set of range
-blocks, $D^{(i)}$ the set of domain blocks, and $n_{i}$ the number of pixels of
+blocks, $D^{(i)}$ the set of domain blocks and $n_{i}$ the number of pixels of
 one range block. Note that the number of pixels of a domain block is then always
 $4\cdot n_{i}$ due to quadtree partitioning and $n_i=\frac{s^2}{|R^{(i)}|} = \frac{s^2}{2^{2i}}$.
 For a given domain block and range block in quadtree depth $i$,
@@ -200,7 +200,7 @@ $w_i^{\gamma}$ represents a rotation of the domain block by $\gamma$ degrees.
 
 To calculate $\alpha_{i}$, we need to compute all sums for brightness,
 contrast and error (equations \eqref{contrast}, \eqref{brightness} and
-\eqref{error}) and apply the formulas. In addition, we need to downscale and
+\eqref{error}) and apply the formulas. Besides, we need to downscale and
 rotate the domain block.
 
 Downscaling one domain block can be done in $4\cdot n_{i}$ flops because we have
@@ -213,28 +213,19 @@ requires $2\cdot n_{i}-1$ flops per rotations. The results of the remaining sums
 $\sum_{j=1}^{n_{i}} b_j$,$\sum_{j=1}^{n_{i}} b_j^2$) are identical for all four
 rotations and and require a total of $6\cdot n_{i}-4$ floating point operations.
 Applying the formulas for brightness, contrast and the error involves $26$ flops
-using the precomputed sums. We therefore get the following cost for
-$\alpha_{i}$:
-
+using the precomputed sums. Therefore,
 \begin{align*}
   \alpha_i &= 4\cdot n_{i} + 4 \cdot (2\cdot n_{i}-1) + (6\cdot n_{i}-4) +  26\\
            &= 18\cdot n_{i} + 18 \\
            &= 18 \cdot \frac{s^2}{2^{2i}} + 18
 \end{align*}
-
 Thus, we get the following upper bound on the cost:
-
 \begin{align*}
 C &\leq \sum_{i=1}^m |R^{(i)}| \cdot |D^{(i)}| \cdot \alpha_i \\
   &= \sum_{i=1}^m 2^{2i} \cdot 2^{2i-2} \cdot (18 \cdot \frac{s^2}{2^{2i}} + 18) \\
   &= \frac{6}{5}\cdot (4^{m}-1)\cdot (4^{m+1} + 5\cdot s^{2} + 4)
 \end{align*}
-
-We see that to cost of the algorithm is exponential in the quadtree depth $m$
+We see that the cost of the algorithm is exponential in the quadtree depth $m$
 and polynomial in image width $s$. For the roofline plot and the other benchmarks,
 we determined the cost empirically by instrumenting the code.
 
-% TODO: but is in chapter 3 or even 4
-% Our experiments showed that this upper bound is way
-% too pessimistic and the exponentiality in $M$ is practically not a problem
-% given a reasonable $S,M,\epsilon$.

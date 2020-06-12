@@ -3,22 +3,22 @@
 \mypar{Jonas} Focused on the baseline implementation and the following scalar optimizations
 (ILP, removal of structs, removal of pointer chasing and decreasing of memory reallocation).
 Helped in prototyping SIMD (especially the four-domain-blocks-a-time approach)
-and contributed to the solution which increased SIMD performance regarding 90 and 270 degree rotations. \\
-Wrote a tool to simulate cache access in order to determine tighter memory bounds in the roofline plot. \\
+and contributed to the solution which increased SIMD performance regarding 90 and 270 degree rotations.\\
+Wrote a tool to simulate cache access in order to determine tighter memory bounds in the roofline plot.\\
 Experimented with block-wise domain/range block traversal.
 
 \mypar{Pascal} Added argument processing, file I/O and some parts in the
 brightness and contrast computation of the baseline implementation. Added test
 data and prepared performance and runtime analysis. Did bottleneck analysis and
 contributed to the scalar optimizations (e.g. merging loops, more efficient
-precomputations). Contributed to the SIMD implementation (e.g. eliminiate
+precomputations). Contributed to the SIMD implementation (e.g. eliminate
 expensive instructions, scaling blocks, version without rotation). Tested
 compiler flags including ICC.
 
 \mypar{Fabian} Added rotations to baseline. Created roofline plot and compared baseline to reference
 implementation. ILP and index optimizations for $\sum_{i=1}^n a_i b_i$ calculation.
 
-Implemented parts of four-domain-blocks-a-time SIMD (tricky part was error calculcation with
+Implemented parts of four-domain-blocks-a-time SIMD (tricky part was error calculation with
 \verb|blendv| and mask) and participated in bringing the two SIMD approaches together.
 Helped increasing performance regarding 90 and 270 degree rotations.
 

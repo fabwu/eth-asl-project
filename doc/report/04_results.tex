@@ -1,8 +1,8 @@
 \section{Results}\label{sec:exp}
 
-In the first part of this section we describe the benchmark infrastructure and the
+In the first part of this section, we describe the benchmark infrastructure and the
 images we used for the measurements. Then we analyze how different compilers and flags
-affect the performance of our code. At the end we discuss each optimization and compare
+affect the performance of our code. In the end, we discuss each optimization and compare
 them in different plots.
 
 \mypar{Experimental setup} All benchmarks and tests were conducted on an Intel
@@ -12,19 +12,19 @@ GHz. The CPU has a 4$\times$32 KB 8-way associative L1 cache, a 4$\times$256 KB
 \cite{intel-opt-manual}.
 
 We used the peak signal-to-noise ratio (PSNR) to ensure that our baseline implementation
-compresses the image correctly. This metric is widely used to compare an image with its
+compresses the image correctly. This metric is widely applied to compare an image with its
 compressed version. Typical values for the PSNR range from 25 to
 50 dB (higher is better). The same metric was used to verify that the optimizations
 produced the same result as the baseline.
 
-The PSNR of the compressed image depends on the maximum depth of the quadtree and the error
-threshold. We picked a maximum depth of $m=7$ and an error threshold of $\epsilon=300$ for
-all our experiments. These parameters produced good quality in a reasonable amount of time.
+The PSNR of the compressed image depends on the maximum depth $m$ of the quadtree and the error
+threshold $\epsilon$. We set $m=7$ and $\epsilon=300$ for all our experiments. These parameters 
+produced an image of good quality in a reasonable amount of time.
 
 We chose to benchmark our algorithm with a challenging image depicting a lioness
 with its cub \cite{lions}.
 While some parts of the image, for example the
-background, are easy to compress, other parts such as the fur contains lots of details,
+background, are easy to compress, other parts such as the fur contain lots of details,
 which are harder to compress. Figure \ref{fig:lions} shows the output of the
 vectorized code with $\epsilon=100$ and 3 decompression iterations.
 
@@ -87,7 +87,7 @@ version it managed to keep up for the larger images as shown in figure
 \begin{figure}[H]
   \centering
   \includegraphics[page=1, width=\linewidth]{performance_gcc_vs_icc}
-  \caption{Performance comparisson between GCC and ICC with the best scalar and
+  \caption{Performance comparison between GCC and ICC with the best scalar and
     SIMD implementation}
   \label{fig:perf_gcc_vs_icc}
 \end{figure}
@@ -99,13 +99,11 @@ Intel compiler or different flags didn't improve performance significantly.
 \mypar{Performance} The plot in figure \ref{fig:perf} shows the performance of all
 experiments.
 
-In our first experiment we compared the baseline with a popular C\texttt{++}
+In our first experiment, we compared the baseline with a popular C\texttt{++}
 implementation from GitHub \cite{github-cpp}. This comparison ensures that our baseline
 achieves a reasonable performance. The two lines at the bottom of the plot
 show that our baseline performed slightly better than the C\texttt{++} code. The values for large
 images are not shown in the plot because the measurements took too much time.
-\notejonas{Plot fehlt noch?}
-\notepascal{ist bei den Major implementations drin}
 
 \begin{figure}[H]
   \centering
@@ -128,12 +126,12 @@ more apparent when we compare the runtime as in figure \ref{fig:runtime}. The pl
 decreased by several orders of magnitude and we were finally able to compress larger images in a reasonable
 amount of time.
 
-%\notefabian{Warum haben wir nur 50\% scalar peak performance?}
+\notefabian{Warum haben wir nur 50\% scalar peak performance?}
 
 As described in section \ref{sec:yourmethod} the initial attempt in vectorizing the code did not lead
-to expected performance improvements. In fact, it performed just slightly better than the scalar optimized code.
+to the expected performance improvements. In fact, it performed just slightly better than the scalar optimized code.
 We suspected that the gathering instructions, which are necessary for the rotations, are responsible for poor performance.
-To verify this assumption, we removed the column wise access to the image i.e 90/270 degree rotations from the scalar optimized and the vectorized version.
+To verify this assumption, we removed the column-wise access to the image i.e 90/270 degree rotations from the scalar optimized and the vectorized version.
 The result of this experiment is shown in figure \ref{fig:perf_40_41} and one can clearly see how the vectorized
 code outperforms the scalar optimized version.
 
@@ -145,7 +143,7 @@ code outperforms the scalar optimized version.
 \end{figure}
 
 
-After this experiment we improved the column wise access by rotating the range
+After this experiment, we improved the column-wise access by rotating the range
 block instead of the domain block for the 90/270 degree rotations. The improved
 vectorized implementation has a performance roughly eight times as high as the
 baseline and about twice the performance of the scalar optimized version. The
