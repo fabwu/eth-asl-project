@@ -6,6 +6,7 @@ what practical considerations must be made for the implementation as shown by
 Fischer \cite{fisher2012}. A cost analysis can be found at the end of this
 section. Throughout this chapter, we use the notation from Fisher
 \cite{fisher2012}.
+\notejonas{Angepasst, bitte reviewen}
 
 \mypar{Iterated function systems (IFS)} Fractal image compression builds on the
 theory of iterated function systems. For completeness, we provide a short
@@ -25,7 +26,7 @@ smaller.
   \begin{align*}
     \{f_i:X \to X | i=1,...,n\}
   \end{align*}
-  where each $f_i$ is contractive and $X$ is a metric space with the metric $d$.
+  where each $f_i$ is contractive and $X$ is a metric space with metric $d$.
 \end{definition}
 
 \begin{definition}[Hutchinson operator]
@@ -47,7 +48,7 @@ Hutchinson used the following theorem in his work \cite{hutchinson1981fractals}
 to build up the essential theoretical parts of how fractal image compression works.
 
 \begin{theorem}[Contractive mapping fixed-point theorem]\label{theorem-fixpoint}
-  For an IFS on a set $X$ it holds that:
+  For an IFS on a compact set $X$ it holds that:
 
   \begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
     \item There always exists a unique attractor $A \in X$
@@ -56,18 +57,12 @@ to build up the essential theoretical parts of how fractal image compression wor
   \end{enumerate}
 \end{theorem}
 
-Note that in the theorem above, we require that $X$ is a compact set, which
-holds for fractal image compression.
-
-\notepascal{Wenn wir das voraussetzen sollte das nicht auch im Theorem stehen?
-  ``...For an IFS on a compact set X...''}
-
 \mypar{From IFS to image compression} The key idea in fractal image compression
 is that one computes a set of contractive functions $w_i \in \boldsymbol{W}$ (in
 this context called transformations) on the image. From theorem
 \ref{theorem-fixpoint}, we then know that some unique attractor $A$ exists. If
 the transformations $\boldsymbol{W}$ are chosen in a way such that the attractor
-$A$ is the original image, one only needs to store the transformations. For
+$A$ is the image to be compressed, one only needs to store the transformations. For
 decompression, one can iteratively apply all transformations on any initial
 starting image, which then converges to the original image to be compressed.
 
