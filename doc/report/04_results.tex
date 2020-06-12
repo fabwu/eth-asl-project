@@ -59,26 +59,6 @@ the vectorized version (figure \ref{fig:perf_vec}). Neither \texttt{-O3} nor
     \caption{Performance of the four major GCC optimization flags for the vectorized implementation}
     \label{fig:perf_vec}
   \end{figure}
-%   \caption{Optimization Flags}
-% \end{figure}
-
-% \begin{figure}[H]
-%   \begin{subfigure}[t]{\linewidth}
-%     \centering
-%     \includegraphics[page=1, width=\linewidth]{performance_scalar_opts}
-%     \caption{Performance of the four major GCC optimization flags for the scalar implementation}
-%     \label{fig:perf_scal}
-%   \end{subfigure}
-%   \begin{subfigure}[b]{\linewidth}
-%     \centering
-%     \includegraphics[page=1, width=\linewidth]{performance_vectorized_opts}
-%     \caption{Vectorized Version}
-%     \label{fig:perf_vec}
-%   \end{subfigure}
-%   \caption{Optimization Flags}
-% \end{figure}
-
-%\notepascal{-O2 is hidden behind -O3 in (a) :/}
 
 Intel's compiler was not able to outperform gcc but at least for the vectorized
 version it managed to keep up for the larger images as shown in figure
