@@ -31,8 +31,7 @@ vectorized code with $\epsilon=100$ and 3 decompression iterations.
 \begin{figure}[H]
   \centering
   \includegraphics[page=1, width=.45\textwidth]{lion_512_51_e100}
-  \caption{Decompressed Image}
-  \label{fig:lions}
+  \caption{Decompressed Image}\label{fig:lions}
 \end{figure}
 
 \mypar{Compiler Flags} Several benchmarks were conducted comparing the achieved
@@ -49,16 +48,15 @@ the vectorized version (figure \ref{fig:perf_vec}). Neither \texttt{-O3} nor
 \begin{figure}[H]
   \centering
   \includegraphics[page=1, width=\linewidth]{performance_scalar_opts}
-  \caption{Performance of the four major GCC optimization flags for the scalar implementation}
-  \label{fig:perf_scal}
+  \caption{Performance of the four major GCC optimization flags for the scalar
+    implementation}\label{fig:perf_scal}
 \end{figure}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[page=1, width=\linewidth]{performance_vectorized_opts}
-    \caption{Performance of the four major GCC optimization flags for the vectorized implementation}
-    \label{fig:perf_vec}
-  \end{figure}
+  \centering
+  \includegraphics[page=1, width=\linewidth]{performance_vectorized_opts}
+  \caption{Performance of the four major GCC optimization flags for the vectorized implementation}\label{fig:perf_vec}
+\end{figure}
 
 Intel's compiler was not able to outperform gcc but at least for the vectorized
 version it managed to keep up for the larger images as shown in figure
@@ -68,8 +66,7 @@ version it managed to keep up for the larger images as shown in figure
   \centering
   \includegraphics[page=1, width=\linewidth]{performance_gcc_vs_icc}
   \caption{Performance comparison between GCC and ICC with the best scalar and
-    SIMD implementation}
-  \label{fig:perf_gcc_vs_icc}
+    SIMD implementation}\label{fig:perf_gcc_vs_icc}
 \end{figure}
 
 Because the Intel compiler with various compiler flags did not lead to
@@ -94,8 +91,7 @@ amount of time.
   \centering
   \includegraphics[page=1, width=\linewidth]{performance_major_versions}
   \caption{Performance of our three major implementations and a reference
-    implementation from GitHub written in C\texttt{++}}
-  \label{fig:perf}
+    implementation from GitHub written in C\texttt{++}}\label{fig:perf}
 \end{figure}
 
 
@@ -103,8 +99,7 @@ amount of time.
   \centering
   \includegraphics[page=1, width=\linewidth]{runtime_major_versions}
   \caption{Runtime of our three major implementations and a reference
-    implementation from GitHub written in C\texttt{++}}
-  \label{fig:runtime}
+    implementation from GitHub written in C\texttt{++}}\label{fig:runtime}
 \end{figure}
 
 As described in section \ref{sec:yourmethod} the initial attempt in vectorizing
@@ -120,8 +115,7 @@ outperforms the scalar optimized version.
 \begin{figure}[H]
   \centering
   \includegraphics[page=1, width=\linewidth]{performance_norot}
-  \caption{Performance Plot without 90/270 degree rotations}
-  \label{fig:perf_40_41}
+  \caption{Performance Plot without 90/270 degree rotations}\label{fig:perf_40_41}
 \end{figure}
 
 
